@@ -1,0 +1,38 @@
+
+extends layout
+
+block content
+	#login-container.content.container
+		h1 Welcome!
+		form( method="post")#login-form.content-block
+			p.subheading Please Access To Your Account
+			div
+				label Username 
+				input(type="text", name="user", id='user-tf').span4.required
+			div
+				label Password
+				input(type="password", name="pass", id='pass-tf').span4.required
+			button(type="submit")#btn-login.btn.btn-primary
+				i.icon-lock.icon-white
+				| Sign in
+			#remember-me 
+				label.checkbox(for="chk-remember") Remember Me
+				input#chk-remember(type="checkbox", checked='checked')
+			div.clear-fix
+			//hr
+		div#btm-links
+			a(href='#')#forgot-password Forgot your password or user? Click here
+			//a(href='/signup')#create-account Create An Account
+
+	include modals/modal
+	//include modals/lost-password
+
+block scripts
+	//script(src='/vendor/jquery.min.js')
+	script(src='/vendor/jquery.form.js')
+	//script(src='/vendor/bootstrap-modal.js')
+	//script(src='/vendor/bootstrap-transition.js')
+	script(src='/js/views/login.js')
+	//script(src='/js/controllers/loginController.js')
+	//script(src='/js/form-validators/loginValidator.js')
+	//script(src='/js/form-validators/emailValidator.js')

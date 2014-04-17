@@ -1,0 +1,29 @@
+{
+	"name": "PIAMAD",
+	"version": "0.0.1",
+	"description": "Proyecto Fin de Carrera [TODO]",
+	"author": {
+		"name": "Siro González",
+		"email": "xiromoreira@gmail.com"
+	},
+	"website":{
+		"url": ""
+	},
+	"repository": {
+		"type": "git",
+		"url": "git://github.com/[TODO]"
+	},
+	"private": true,
+	"dependencies": {
+		"express": "3.5.1",
+		"stylus": "0.43.0",
+		"jade": "1.3.0",
+		"mongodb": "1.4.0",
+		"moment" : "1.7.2",
+		"emailjs": "0.3.3"
+	},
+	"engines": {
+		"node": "0.8.14",
+		"npm":  "1.1.65"
+	}
+}

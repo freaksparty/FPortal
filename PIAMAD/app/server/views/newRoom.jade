@@ -1,0 +1,35 @@
+
+// preset form values if we receive a roomdata object //
+- room = typeof(udata) != 'undefined' ? udata : { }
+// store the roomId on the client side in a hidden input field //
+input(type='hidden', value= room._id)#roomId
+
+#account-form-container
+	form( method="post")#account-form.form-horizontal.well.span6
+		h1
+		p#sub1.subheading Please fill the following room information.
+		hr
+		fieldset
+			#name-cg.control-group
+				label.control-label(for='name-tf') Room name
+				.controls
+					input#name-tf.input-xlarge(type='text', name='name', value= room.name)
+			hr
+			.form-actions
+				button(type='button')#room-form-btn1.btn Cancel
+				button(type='submit')#room-form-btn2.btn Create!
+
+// display form errors in a custom modal window //
+
+	include modals/form-errors
+	include modals/alert
+	include modals/confirm
+
+block scripts
+	script(src='/vendor/jquery.min.js')
+	script(src='/vendor/jquery.form.js')
+	script(src='/vendor/bootstrap-modal.js')
+	script(src='/vendor/bootstrap-transition.js')
+	//script(src='/js/views/home.js')
+	//script(src='/js/controllers/homeController.js')
+	script(src='/js/form-validators/newRoomValidator.js')

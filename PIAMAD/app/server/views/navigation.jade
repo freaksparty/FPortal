@@ -1,0 +1,16 @@
+block sessionvars
+div.navbar
+	if(authUser.role === 'Admin')
+		ul.navoption
+			a(href='/admin') Admin Panel
+	ul.navoption
+		a(href='/roomList') Room List
+	ul.navoption
+		a(href='/newRoom') Add Room
+	ul.navuser
+		a(href='/user?userId='+authUser._id).link
+			i.icon-user.icon-white
+			=authUser.name
+		a(href='/logout')#btn-logout.btn.btn-primary
+				i.icon-lock.icon-white
+				| Sign Out
