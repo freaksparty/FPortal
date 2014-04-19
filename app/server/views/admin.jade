@@ -1,0 +1,64 @@
+extends layout
+
+block sessionvars
+	- var authUser = sessionUser
+	- var pageTitle = title
+	
+block content
+	include navigation
+	div.container
+		h3 Users Admin
+		div.content-block
+			form(method="post")#add-room-form.left
+				button(type='submit').btn#btn-addroom
+					i.icon-plus.icon-black
+					| Add Room
+				select#add-room-to(name='add-room-to')
+					option
+					each user in userList
+						if((user.role === 'Medic') && (!user.room))
+							option(value=user._id)=user.user
+			form(method="post")#remove-room-form.right
+				button(type='submit').btn#btn-remove-room
+					i.icon-remove.icon-black
+					| Remove Room
+				select#remove-room-to(name='remove-room-to')
+					option
+					each user in userList
+						if((user.role === 'Medic') && (user.room))
+							option(value=user._id)=user.user
+		div.content-block
+			a(href='/user')#btn-adduser.btn.float-right
+				i.icon-plus.icon-black
+				| Add User
+			table.table.table-bordered.table-striped#table1
+				thead
+					tr
+						//(style='width:40px')
+						th User
+						th Name
+						th Role
+						th Room
+						th Creation Date
+	
+						//th Sala
+				tbody
+					each user in userList
+						tr
+							td
+								a(href='/user?userId=#{user._id}')
+									span=user.user
+							td=user.name
+							td=user.role
+							td(id='td-room-'+user._id)
+								if(user.role === 'Medic')
+									if(user.room)
+										|Active
+									else
+										|No
+							td=moment(user.creation).format('DD MM YYYY')
+	include modals/modal
+
+block scripts
+	script(src='/vendor/jquery.form.js')
+	script(src='/js/views/admin.js')

@@ -37,6 +37,8 @@ function hideModal() {
 	$('#modal').fadeOut();
 }
 function modalError(text){
+	$('#modal .cancel').click(hideModal).text('OK');
+	$('#modal #modalSubmit').hide();
 	$('#modal p').text(text);
 	$('#modal-background').slideDown();
 	$('#modal').fadeIn();

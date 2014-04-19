@@ -1,4 +1,4 @@
-#[PIAMAD]
+# PIAMAD
 
 ####:
 
@@ -15,7 +15,7 @@ TODO Product description
 * [Moment.js](http://momentjs.com/) - Lightweight Date Library
 * [Licode] (http://lynckia.com/licode) - Open Source WebRTC Communications Platform
 
-PIAMAD was started as fork of [Node-login] (http://node-login.braitsch.io/) so it have some code derived from.
+PIAMAD was started as fork of [Node-login] (http://node-login.braitsch.io/) so it have some legacy code.
 
 ####Installation & Setup
 

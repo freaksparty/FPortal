@@ -123,7 +123,6 @@ exports.updateUser = function(newData, callback)
 							o.user	= newData.user;
 						o.name		= newData.name;
 						o.email		= newData.email;
-						o.country	= newData.country;
 						if (newData.pass === ''){
 							users.save(o, {safe: true}, function(err) {
 								if (err) callback(err);
@@ -142,8 +141,7 @@ exports.updateUser = function(newData, callback)
 				}
 			});			
 		}			
-	});
-	
+	});	
 };
 
 exports.updatePassword = function(email, newPass, callback)
@@ -161,35 +159,66 @@ exports.updatePassword = function(email, newPass, callback)
 }
 
 /* Rooms management methods */
-exports.addRoom = function(medicId, callback, errorCallback) {
-	var assignRoom = function(user) {
+exports.addRoom = function(medicId, callback) {
+	medicId = ObjectId(medicId);
+	assignRoom = function(user) {
 		N.API.createRoom(
 			user._id, 
 			function(licodeRoom) {
-				user.room = licodeRoom._id;
-				user.password = '';
-				updateUser(user, callback);
+				users.update({_id:user._id},{$set: {room:licodeRoom._id}}, function(e, count){
+					if(e){
+						console.log('[Error] account-manager.addRoom().assignRoom(): updating user.room, mongo says:', e);
+						callback('Updating user: '+e);
+					} else
+						callback(null);
+				});
 			},
 			function(e){
 				console.log('[Error] account-manager.addRoom().assignRoom(): Nuve says: ', e);
-				errorCallback('Error creating room');
+				callback('Error creating room');
 			});
 	};
 	
 	users.findOne({_id:medicId}, function(e, medic){
 		if (e) {
-			errorCallback('User not found');
+			callback('User not found');
 			console.log('[Warning] account.manager.addRoom(): record not found, mongo says: ', e);
 		} else if(medic.role != 'Medic') {
-			errorCallback('User is not medic: only medics can have a room');
+			callback('User is not medic: only medics can have a room');
 		} else if(medic.room !== undefined) {
 			N.API.getRoom(medic.room, function() {
-				errorCallback('Medic already have a room');
+				callback('Medic already have a room');
 			}, function() {
 				assignRoom(medic);
 			});			
 		} else {
 			assignRoom(medic);
+		}
+	});
+};
+exports.removeRoom = function(medicId, callback) {
+	medicId = ObjectId(medicId);
+	users.findOne({_id:medicId}, function(e, medic){
+		if (e) {
+			callback('User not found');
+			console.log('[Warning] account.manager.removeRoom(): record not found, mongo says: ', e);
+		} else if(medic.room == null) {
+			callback('The medic has no room to delete');
+		} else {
+			N.API.deleteRoom(medic.room,
+				function() {
+					users.update({_id:medic._id},{$unset: {room:''}}, function(e, count){
+						if(e){
+							console.log('[Error] account-manager.removeRoom(): unsetting user.room, mongo says:', e);
+							callback('Updating user: '+e);
+						} else
+							callback(null);
+					});
+				},
+				function(e) {						
+						console.log('[Error] account-manager.removeRoom(): unsetting user.room, nuve says:', e);
+						callback('Error removing room' + e);
+				});
 		}
 	});
 };
@@ -239,7 +268,8 @@ exports.listUsers = function(callback, size, skip)
 			"user":true,
 			"name":true,
 			"email":true,
-			'role':true
+			'role':true,
+			'room':true
 	};
 	users.find({},fields, options).toArray(callback);
 };

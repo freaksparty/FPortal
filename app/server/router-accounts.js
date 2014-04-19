@@ -72,6 +72,30 @@ module.exports = function(app) {
 			});
 		}
 	});
+	
+	app.post('/admin', function(req,res) {
+		if ((req.session.user == null) || (req.session.user.role != 'Admin')){
+			res.send('Permission denied', 403);
+		} else {
+			if(req.param('add-room-to')){
+				AM.addRoom(req.param('add-room-to'),
+					function() {
+						res.send('ok', 200);						
+					}, function(e) {
+						res.send(e, 400);
+					});
+			} else if(req.param('remove-room-to')) {
+				AM.removeRoom(req.param('remove-room-to'),
+					function() {
+						res.send('ok', 200);						
+					}, function(e) {
+						res.send(e, 400);
+					});
+			} else {
+				res.send('Incorrect client query', 400);
+			}
+		}
+	});
 
 	app.get('/user', function(req, res) {
 		if (req.session.user == null){
@@ -176,15 +200,6 @@ module.exports = function(app) {
 		}
 	});
 	
-// creating new accounts //
-	
-/*	app.get('/signup', function(req, res) {
-		res.render('signup', {  title: 'Signup', countries : CT });
-	});
-	
-	app.post('/signup', function(req, res){
-
-	}); */
 
 // password reset //
 
@@ -236,32 +251,6 @@ module.exports = function(app) {
 				res.send('unable to update password', 400);
 			}
 		})
-	});
-	
-// view & delete accounts //
-	
-	app.get('/print', function(req, res) {
-		AM.getAllRecords( function(e, accounts){
-			res.render('print', { title : 'Account List', accts : accounts });
-		})
-	});
-	
-	app.post('/delete', function(req, res){
-		AM.deleteUser(req.body.id, function(e, obj){
-			if (!e){
-				res.clearCookie('user');
-				res.clearCookie('pass');
-	            req.session.destroy(function(e){ res.send('ok', 200); });
-			}	else{
-				res.send('record not found', 400);
-			}
-	    });
-	});
-	
-	app.get('/reset', function(req, res) {
-		AM.delAllRecords(function(){
-			res.redirect('/print');	
-		});
 	});
 	
 

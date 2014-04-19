@@ -1,7 +1,4 @@
-$(document).ready(function(){
-	$('#modal .cancel').click(hideModal).text('OK');
-	$('#modal #modalSubmit').hide();
-	
+$(document).ready(function(){	
 	$('#login-form').ajaxForm({
 		beforeSubmit : function(formData, jqForm, options){
 			if ($('#user-tf').val().length === 0){
@@ -18,7 +15,6 @@ $(document).ready(function(){
 		},
 		success	: function(){ window.location.href = '/'; },
 		error : function(e){
-            //lv.showLoginError('Login Failure', 'Please check your username and/or password');
 			modalError('Please check your username and/or password');
 		}
 	});
