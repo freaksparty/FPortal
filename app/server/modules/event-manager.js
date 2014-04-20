@@ -3,24 +3,18 @@
  * @copyright: 2014 Siro González Rodríguez
  */
 var db = require('./database');
-var rooms = db.collection('rooms');
+var events = db.collection('events');
 var N = require('./../../../nuve');
 
+exports.listEventsCreatedBy = function(user,callback){
+	events.find({room:user.room}).toArray(callback);
+};
 
-/* Checks if my app rooms actually exist in nuve DB */
-/*setTimeout(function(){
-	rooms.find({}).toArray(function(err, roomlist){
-		roomlist.forEach(function(room){
-			var cb = function() {
-				console.log("Removing inexistent (in nuve) room:", room._id);
-				rooms.remove({_id: room._id}, function(){});
-			};
-			N.API.getRoom(room._id, function(){}, cb);
-		});
-	});
-}, 500);*/
+exports.listEventsByParticipant = function(user, callback){
+	events.find({participants: user._id}).toArray(callback);
+};
 
-exports.addRoom = function(roomData, callback)
+/*exports.addRoom = function(roomData, callback)
 {
 	N.API.createRoom(
 			roomData.name, 
@@ -45,7 +39,7 @@ exports.getRooms = function( callback )
 /*
  * @param callback(newTokenString)
  */
-exports.getRoomToken = function (roomId, userName, callback)
+/*exports.getRoomToken = function (roomId, userName, callback)
 {
 	N.API.createToken(roomId, userName, 'presenter', callback, function(e){console.log('Error creating token:'+e);});
-};
+};*/

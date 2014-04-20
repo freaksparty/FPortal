@@ -6,7 +6,7 @@
  */
 /*jshint eqnull:true */
 var AM = require('./modules/account-manager');
-var EM = require('./modules/email-dispatcher');
+var email = require('./modules/email-dispatcher');
 var N = require('./../../nuve');
 
 module.exports = function(app) {
@@ -25,7 +25,7 @@ module.exports = function(app) {
 					if(AM.isAdmin(o))
 						res.redirect('/admin');
 					else
-						res.redirect('/roomList');
+						res.redirect('/events');
 				}	else{
 					res.render('login', { title: 'Hello - Please Login To Your Account' });
 				}
@@ -63,7 +63,7 @@ module.exports = function(app) {
 		} else {
 			AM.listUsers(function(e, l){
 				if(e)
-					console.log('Error /admin:', e);
+					console.log('[Error] router-accounts /admin:', e);
 				res.render('admin',{
 					sessionUser : req.session.user,
 					title : 'Admin Panel',
@@ -208,7 +208,7 @@ module.exports = function(app) {
 		AM.getUserByEmail(req.param('email'), function(o){
 			if (o){
 				res.send('ok', 200);
-				EM.dispatchResetPasswordLink(o, function(e, m){
+				email.dispatchResetPasswordLink(o, function(e, m){
 				// this callback takes a moment to return //
 				// should add an ajax loader to give user feedback //
 					if (!e) {

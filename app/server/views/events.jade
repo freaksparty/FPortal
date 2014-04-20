@@ -1,0 +1,58 @@
+extends layout
+
+block sessionvars
+	- var authUser = sessionUser
+	- var pageTitle = title
+	
+block content
+	include navigation
+	div.container
+		if(authUser.room)
+			h3 Own Events
+			div.content-block
+				a(href='/events')#btn-adduser.btn.float-right
+					i.icon-plus.icon-black
+					| New event
+				table.table.table-bordered.table-striped#table1
+					thead
+						tr
+							//(style='width:40px')
+							th Start
+							th Duration
+							th Participants
+							th Comments/Subject
+					tbody
+						each event in ownEventList
+							tr
+								td
+									a(href='/event/edit/#{event._id}')
+										span=event.start
+								td=event.duration
+								td=event.participants.join(', ')
+								td=event.comments
+								
+		h3 Events you are invited
+		div.content-block
+			table.table.table-bordered.table-striped#table1
+				thead
+					tr
+						//(style='width:40px')
+						th Start
+						th Duration
+						th Participants
+						th Comments/Subject
+				tbody
+					each event in guestEventList
+						tr
+							td
+								a(href='/event/edit/#{event._id}')
+									span=event.start
+							td=event.duration
+							td=event.participants.join(', ')
+							td=event.comments
+
+	include modals/modal
+
+block scripts
+	script(src='/vendor/jquery.form.js')
+	script(src='/js/views/events.js')

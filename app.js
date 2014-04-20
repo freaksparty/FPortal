@@ -64,7 +64,7 @@ N.API.getRooms(function (roomlist) {
 });*/
 
 require('./app/server/router-accounts')(app);
-require('./app/server/router-rooms')(app);
+require('./app/server/router-events')(app);
 app.get('*', function(req, res) { res.render('404', { title: 'Page Not Found'}); });
 
 app.configure('development', function(){
