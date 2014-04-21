@@ -10,7 +10,7 @@ block content
 		if(authUser.room)
 			h3 Own Events
 			div.content-block
-				a(href='/events')#btn-adduser.btn.float-right
+				a(href='/event')#btn-addevent.btn.float-right
 					i.icon-plus.icon-black
 					| New event
 				table.table.table-bordered.table-striped#table1
@@ -21,7 +21,7 @@ block content
 							th Duration
 							th Participants
 							th Comments/Subject
-					tbody
+					tbody.autolink
 						each event in ownEventList
 							tr
 								td
@@ -41,7 +41,7 @@ block content
 						th Duration
 						th Participants
 						th Comments/Subject
-				tbody
+				tbody.autolink
 					each event in guestEventList
 						tr
 							td

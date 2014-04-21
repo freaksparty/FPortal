@@ -105,29 +105,34 @@ body
 		float: left
 // login form //
 
-table
+.table
 	margin: 0.5em 0
 	border-collapse: collapse;
 	width 100%
 	color #000
 	a
 		color #000
-
-tbody
-	background-color: #FFF;
-	border 1px solid #D4D4D4
-	border-radius: 4px;
+	tbody
+		background-color: #FFF;
+		border 1px solid #D4D4D4
+		border-radius: 4px;
+		
+	tr:nth-child(even)
+		background-color: #F5F5F5;
 	
-tr:nth-child(even)
-	background-color: #F5F5F5;
+	td
+		border-collapse: collapse;
 
-td
-	border-collapse: collapse;
-
-tbody tr:hover
-	background-color: #8FB5CB
+	tbody tr:hover
+		background-color: #8FB5CB
+		color: #FFF
+		cursor: pointer
+		
+.ui-datepicker select
+	padding: 1px
+	height: auto
+	background-color: #373A3D
 	color: #FFF
-	cursor: pointer
     
 #login-container{
 	width 340px

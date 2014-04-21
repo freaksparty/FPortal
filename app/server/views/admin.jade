@@ -31,7 +31,7 @@ block content
 			a(href='/user')#btn-adduser.btn.float-right
 				i.icon-plus.icon-black
 				| Add User
-			table.table.table-bordered.table-striped#table1
+			table.table#table1
 				thead
 					tr
 						//(style='width:40px')
@@ -42,7 +42,7 @@ block content
 						th Creation Date
 	
 						//th Sala
-				tbody
+				tbody.autolink
 					each user in userList
 						tr
 							td

@@ -1,0 +1,49 @@
+extends layout
+block sessionvars
+	- var authUser = sessionUser;
+	- var pageTitle = title;
+block content
+	include navigation
+
+	// preset form values if we receive a eventdata object //
+	- event = typeof(udata) != 'undefined' ? udata : { }
+	// store the eventId on the client side in a hidden input field //
+	input(type='hidden', value= event._id)#eventId
+	
+	#account-form-container.content-block
+		form(method="post")#event-form
+			if event
+				h1 Editing event
+			else
+				h1 Insert new event
+			hr
+			.form-input
+				label.control-label(for='date-tf') Date
+				input#txt-date.input-xlarge(type='text', name='date', value= event.date, readonly="readonly", placeholder="Click to pick up date")
+			.form-input
+				label.control-label(for='email-tf') Hour
+				input#email-tf.input-xlarge(type='text', name='Hour', value= event.hour,  placeholder="Format: HH:MM")
+			.form-input
+				label.control-label(for='event-tf') Duration
+				select#duration.input-xlarge(name='duration')
+					- for (var i = 1; i < 49; ++i) {
+					option(value=i*5) #{i*5} min
+					- }
+			.form-input
+				label.control-label(for='pass-tf') Role
+				input#comments.input-xlarge(type='text', name='comments')
+			.form-actions
+				span#response-panel
+				if ((authUser.role=='Admin') && (event.event))
+					button(type='button')#event-btn-del.btn.btn-danger Delete
+				if event
+					button(type='submit')#account-form-submit.btn Update
+				else
+					button(type='submit')#account-form-submit.btn Create
+
+	include modals/modal
+
+block scripts
+	script(src='/vendor/jquery.form.js')
+	script(src='/vendor/jquery-ui.min.js')
+	script(src='/js/views/event.js')

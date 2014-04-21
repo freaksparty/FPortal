@@ -1,5 +1,5 @@
 //Convert first a link into all row link
-$('tbody>tr').click( function() {
+$('tbody.autolink>tr').click( function() {
     window.location = $(this).find('a').attr('href');
 });
 

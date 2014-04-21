@@ -39,6 +39,30 @@ module.exports = function (app){
 			}
 		}
 	});
+	app.get('/event', function(req, res){
+		if ((req.session.user == null) || (req.session.user.role !== 'Medic')){
+			res.redirect('/');
+		} else {
+			res.render('event', {
+				title		: 'Create event',
+				sessionUser	: req.session.user
+			});
+		}
+	});
+	app.get('/event/:eventId', function(req, res) {
+		if ((req.session.user == null)){
+			res.redirect('/');
+		} else {
+			
+		}
+	});
+	app.post('/events', function(req, res) {
+		if ((req.session.user == null)){
+			res.redirect('/');
+		} else {
+			
+		}
+	});
 };
 
 
