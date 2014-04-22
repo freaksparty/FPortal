@@ -123,6 +123,7 @@ exports.updateUser = function(newData, callback)
 							o.user	= newData.user;
 						o.name		= newData.name;
 						o.email		= newData.email;
+						o.role		= newData.role;
 						if (newData.pass === ''){
 							users.save(o, {safe: true}, function(err) {
 								if (err) callback(err);
@@ -272,6 +273,17 @@ exports.listUsers = function(callback, size, skip)
 			'room':true
 	};
 	users.find({},fields, options).toArray(callback);
+};
+
+exports.listUsersSmall = function(callback)
+{
+	var fields = {
+			"_id":true,
+			"user":true,
+			"name":true,
+			'role':true
+	};
+	users.find({},fields, {}).toArray(callback);
 };
 
 exports.findById = function(id, callback)

@@ -14,6 +14,46 @@ exports.listEventsByParticipant = function(user, callback){
 	events.find({participants: user._id}).toArray(callback);
 };
 
+exports.findEventById = function(eventId, callback) {
+	events.find({_id:ObjectId(eventId)}, function(e, o){
+		if(e) callback(e);
+		else callback(null, o);
+	});
+};
+
+exports.updateEvent = function(newData, callback) {
+	newData._id = ObjectId(newData._id);
+	events.find({_id : newData._id}, function(e,o){
+		if(e) {
+			console.log('[Error] event-manager updateEvent: ',e);
+			callback('Event not found');
+		} else {
+			events.save(newData, {safe:true}, function(err){
+				if(err){
+					console.log('[Error] event-manager saving new data: ',err);
+					callback('Error saving data');
+				} else 
+					callback(null, newData);
+			});
+		}			
+	});
+};
+
+exports.createEvent = function(data, callback) {
+	if(data._id) {
+		console.log('[Error] event-manager createEvent: event._id is set');
+		callback('_id is set');
+	} else {
+		events.save(data, {safe:true}, function(err, o){
+			if(err){
+				console.log('[Error] event-manager createEvent: saving new data: ',err);
+				callback('Error saving data');
+			} else 
+				callback(null, o);
+		});
+	}
+};
+
 /*exports.addRoom = function(roomData, callback)
 {
 	N.API.createRoom(

@@ -5,38 +5,53 @@ block sessionvars
 block content
 	include navigation
 
-	// preset form values if we receive a eventdata object //
-	- event = typeof(udata) != 'undefined' ? udata : { }
-	// store the eventId on the client side in a hidden input field //
-	input(type='hidden', value= event._id)#eventId
+	- event = typeof(event) != 'undefined' ? event : { }
+	
+	script
+		|var userNames = {
+		- each user in userList
+			|"#{user.name}":"#{user._id}",
+		|"":""};var userUsers = {
+		- each user in userList
+			|"#{user.user}":"#{user._id}",
+		|"":""};
 	
 	#account-form-container.content-block
 		form(method="post")#event-form
-			if event
+			if event._id
 				h1 Editing event
 			else
 				h1 Insert new event
 			hr
+			input#eventId(type="hidden", value=event._id)
 			.form-input
-				label.control-label(for='date-tf') Date
+				label.control-label(for='txt-date') Date
 				input#txt-date.input-xlarge(type='text', name='date', value= event.date, readonly="readonly", placeholder="Click to pick up date")
 			.form-input
-				label.control-label(for='email-tf') Hour
-				input#email-tf.input-xlarge(type='text', name='Hour', value= event.hour,  placeholder="Format: HH:MM")
+				label.control-label(for='txt-hour') Hour
+				input#txt-hour.input-xlarge(type='text', name='hour', value= event.hour,  placeholder="HH:MM")
 			.form-input
 				label.control-label(for='event-tf') Duration
 				select#duration.input-xlarge(name='duration')
 					- for (var i = 1; i < 49; ++i) {
-					option(value=i*5) #{i*5} min
+					option(value=i*5, selected=(i*5)==event.duration) #{i*5} min
 					- }
 			.form-input
-				label.control-label(for='pass-tf') Role
-				input#comments.input-xlarge(type='text', name='comments')
+				label.control-label(for='txt-comments') Comments
+				input#txt-comments.input-xlarge(type='text', name='comments', value= event.comments)
+			.form-input
+				label.control-label(for='pass-tf') Participant
+				input#add-participant.input-xlarge(type='text', name='add-participant', placeholder="Inser name or user and click the plus button")
+				i#btn-add-participant.float-right.icon-plus.icon-black
+			table.table
+				thead
+					th Participants (click to remove)
+				tbody#table-participants
 			.form-actions
 				span#response-panel
 				if ((authUser.role=='Admin') && (event.event))
 					button(type='button')#event-btn-del.btn.btn-danger Delete
-				if event
+				if event._id
 					button(type='submit')#account-form-submit.btn Update
 				else
 					button(type='submit')#account-form-submit.btn Create

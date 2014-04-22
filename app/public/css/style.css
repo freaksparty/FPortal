@@ -176,6 +176,10 @@ label
 .form-input {
   margin-bottom: 18px;
 }
+.form-input .float-right {
+  margin-top: -31px;
+  margin-right: 5px;
+}
 .form-input label {
   width: 18%;
   text-align: right;
@@ -273,4 +277,5 @@ textarea {
 }
 .float-right {
   float: right;
+  display: inline;
 }

@@ -133,7 +133,7 @@ module.exports = function(app) {
 	app.post('/user', function(req, res){
 		if (req.session.user == null){
 			// if user is not logged-in redirect back to login page //
-			res.redirect('/');
+			res.send('Permission denied', 403);
 		}
 		
 		var data = {

@@ -27,7 +27,7 @@ block content
 								td
 									a(href='/event/edit/#{event._id}')
 										span=event.start
-								td=event.duration
+								td=event.duration+' min'
 								td=event.participants.join(', ')
 								td=event.comments
 								

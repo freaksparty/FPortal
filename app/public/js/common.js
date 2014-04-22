@@ -27,7 +27,7 @@ function tooltip_right(parent, text){
 function tooltip_error(parent, text) {
 	var tt = tooltip_right(parent, text).css("border-color", "red");
 	var preBorder = $(parent).css("border-color");
-	$(parent).css("border-color", "red").click(function(){
+	$(parent).css("border-color", "red").focus(function(){
 		$(parent).css("border-color", preBorder);
 		tt.fadeOut();
 	});
