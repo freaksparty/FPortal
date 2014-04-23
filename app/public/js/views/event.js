@@ -23,18 +23,17 @@ $(document).ready(function(){
 			var usId = userNames[txt.val()];
 			if(!usId){
 				usId = userUsers[txt.val()];
-				if(usId){
-					$.each(userNames, function(k,v){
-						if(v===usId)
-							txt.val(k);
-					});
-				}
+				if(usId){txt.val(nameOfId(usId));}
 			}
 			if(!usId)
 				tooltip_error(txt,'User not found, please check speeling');
-			else {
+			else if($.inArray(usId, participants) > -1) {
+				txt.val('');//already added
+				$('#'+usId).fadeOut(200).fadeIn(200);
+			} else {
 				participants.push(usId);
-				$('#table-participants').append('<tr id="'+usId+'"><td>'+txt.val()+'</td></tr>');
+				$('#table-participants').append('<tr id="'+usId+'"><td>'+nameOfId(usId)+'</td></tr>');
+				$('#'+usId).hide().fadeIn(200);
 				txt.val('');
 				bindTable();
 			}
@@ -57,7 +56,21 @@ $(document).ready(function(){
 		}
 	});
 	bindTable();
+	$('#table-participants>tr').each(function(){
+		var id = $(this).prop('id');
+		$(this).find('td').html(nameOfId(id));
+		participants.push(id);
+	});
 });
+
+function nameOfId(id){
+	rtn = '';
+	$.each(userNames, function(k,v){
+		if(v===id)
+			rtn = k;
+	});
+	return rtn;
+}
 
 function bindTable() {
 	$('#table-participants>tr').unbind("click").click(function(){

@@ -5,6 +5,7 @@
 var db = require('./database');
 var events = db.collection('events');
 var N = require('./../../../nuve');
+var ObjectId = require('mongodb').ObjectID;
 
 exports.listEventsCreatedBy = function(user,callback){
 	events.find({room:user.room}).toArray(callback);
@@ -15,7 +16,7 @@ exports.listEventsByParticipant = function(user, callback){
 };
 
 exports.findEventById = function(eventId, callback) {
-	events.find({_id:ObjectId(eventId)}, function(e, o){
+	events.findOne({_id:ObjectId(eventId)}, function(e, o){
 		if(e) callback(e);
 		else callback(null, o);
 	});

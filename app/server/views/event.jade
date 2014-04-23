@@ -38,7 +38,7 @@ block content
 					- }
 			.form-input
 				label.control-label(for='txt-comments') Comments
-				input#txt-comments.input-xlarge(type='text', name='comments', value= event.comments)
+				input#txt-comments.input-xlarge(type='text', name='comments', value=event.comments)
 			.form-input
 				label.control-label(for='pass-tf') Participant
 				input#add-participant.input-xlarge(type='text', name='add-participant', placeholder="Inser name or user and click the plus button")
@@ -47,6 +47,8 @@ block content
 				thead
 					th Participants (click to remove)
 				tbody#table-participants
+					each participant in event.participants
+						tr(id=participant): td=participant
 			.form-actions
 				span#response-panel
 				if ((authUser.role=='Admin') && (event.event))

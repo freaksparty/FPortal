@@ -25,7 +25,7 @@ block content
 						each event in ownEventList
 							tr
 								td
-									a(href='/event/edit/#{event._id}')
+									a(href='/event/#{event._id}')
 										span=event.start
 								td=event.duration+' min'
 								td=event.participants.join(', ')
@@ -41,13 +41,13 @@ block content
 						th Duration
 						th Participants
 						th Comments/Subject
-				tbody.autolink
+				tbody
 					each event in guestEventList
 						tr
 							td
-								a(href='/event/edit/#{event._id}')
-									span=event.start
-							td=event.duration
+								//a(href='/event/#{event._id}')
+								span=event.start
+							td=event.duration+' min'
 							td=event.participants.join(', ')
 							td=event.comments
 

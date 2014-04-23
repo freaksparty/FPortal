@@ -72,7 +72,33 @@ module.exports = function (app){
 		if ((req.session.user == null)){
 			res.redirect('/');
 		} else {
-			
+			var route = 'router-events /event/'+req.params.eventId+' ';
+			AM.listUsersSmall(function(e,ul) {
+				if(e) {
+					console.log('[Error] '+route,e);
+					res.render('error',{
+						title	: 'Internal Error'
+					});
+				} else {
+					EM.findEventById(req.params.eventId, function(e, ev){
+						if(e || !ev) {
+							console.log('[Error] '+route+'findEventById() says:', e);
+							res.render('404', {
+								title	: 'Event not found'
+							});
+						}
+						ev.date = moment(ev.start).format('DD/MM/YYYY');
+						ev.hour = moment(ev.start).format('HH:mm');
+						res.render('event', {
+							title		: 'Event',
+							sessionUser	: req.session.user,
+							userList	: ul,
+							event		: ev
+						});
+					});
+					
+				}
+			});	
 		}
 	});
 	app.post('/event', function(req, res) {
