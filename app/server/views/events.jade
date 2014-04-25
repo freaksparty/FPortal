@@ -23,6 +23,7 @@ block content
 							th Comments/Subject
 					tbody.autolink
 						each event in ownEventList
+							-event.participants = []
 							tr
 								td
 									a(href='/event/#{event._id}')
@@ -48,7 +49,8 @@ block content
 								a(href='/event/#{event._id}')
 								span=event.start
 							td=event.duration+' min'
-							td=event.participants.join(', ')
+							td
+							//td=event.participants.join(', ')
 							td=event.comments
 
 	include modals/modal

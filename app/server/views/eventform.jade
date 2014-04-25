@@ -19,13 +19,14 @@ block content
 		|"":""};var medics = [#{medics.join()}];
 	
 	#account-form-container.content-block
-		form(method="post")#event-form
+		form(method="post", action="/event")#event-form
 			if event._id
 				h1 Editing event
 			else
 				h1 Insert new event
 			hr
-			input#eventId(type="hidden", value=event._id)
+			if event._id
+				input#eventId(type="hidden", value=event._id, name='eventId')
 			.form-input
 				label.control-label(for='txt-date') Date
 				input#txt-date.input-xlarge(type='text', name='date', value= event.date, readonly="readonly", placeholder="Click to pick up date")
@@ -43,12 +44,12 @@ block content
 				input#txt-comments.input-xlarge(type='text', name='comments', value=event.comments)
 			.form-input
 				label.control-label(for='txt-patient') Patient
-				input#txt-patient.input-xlarge(type='text', name='patient', value=event.patient)
+				input#txt-patient.input-xlarge(type='text', name='patient-name', value=event.patient)
 			.form-input
 				label.control-label(for='pass-tf') Participant
 				input#add-participant.input-xlarge(type='text', name='add-participant', placeholder="Inser name or user and click the plus button")
 				i#btn-add-participant.float-right.icon-plus.icon-black
-			table.data
+			table.table
 				thead
 					th Participants (click to remove)
 				tbody#table-participants
@@ -68,4 +69,4 @@ block content
 block scripts
 	script(src='/vendor/jquery.form.js')
 	script(src='/vendor/jquery-ui.min.js')
-	script(src='/js/views/event.js')
+	script(src='/js/views/eventform.js')

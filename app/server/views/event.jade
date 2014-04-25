@@ -12,7 +12,7 @@ block content
 		|var userNames = {
 		- each user in userList
 			|"#{user.name}":"#{user._id}",
-			-medics.push(sprintf('"%s"',user._id))
+			-if(user.role==='Medic') {medics.push(sprintf("'%s'",user._id));}
 		|"":""};var userUsers = {
 		- each user in userList
 			|"#{user.user}":"#{user._id}",
@@ -30,17 +30,23 @@ block content
 			label.data=event.duration+' min'
 		.form-input
 			label.control-label Medic
-			label.data=event.owner
+			label.data.user=event.owner
 		if(event.collaborators && (evevent.collaborators.length > 0))
 			.form-input
 				label.control-label Collaborators
 				div.data: table#collaborators
 		.form-input
 			label.control-label Patient
-			label.data TODO
+			label.data.user=event.patient
 		.form-input
 			label.control-label Other assistants
-			div.data: table#table-familiars
+			div.data: table
+				if(event.collaborators)
+					each c in event.collaborators
+						tr: td.user=c
+				if(event.relatives)
+					each r in event.relatives
+						tr: td.user=r
 		.form-input
 			label.control-label Comments
 			label.data=event.comments

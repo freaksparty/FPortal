@@ -8,12 +8,11 @@ var db			= require('./database');
 var crypto		= require('crypto');
 var moment		= require('moment');
 var N			= require('./../../../nuve');
+var ObjectId = require('mongodb').ObjectID;
 
 var users	= db.collection('users');
 
 var roles = ['Medic', 'Patient', 'Admin', 'Familiar'];
-
-var ObjectId = require('mongodb').ObjectID;
 
 exports.roleList = roles;
 

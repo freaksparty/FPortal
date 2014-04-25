@@ -12,7 +12,11 @@ exports.listEventsCreatedBy = function(user,callback){
 };
 
 exports.listEventsByParticipant = function(user, callback){
-	events.find({participants: user._id}).toArray(callback);
+	events.find({$or: 
+		[{participants: user._id},
+		 {patient: user._id}, 
+		 {collaborators: user._id}]}
+	).toArray(callback);
 };
 
 exports.findEventById = function(eventId, callback) {
@@ -23,7 +27,7 @@ exports.findEventById = function(eventId, callback) {
 };
 
 exports.updateEvent = function(newData, callback) {
-	newData._id = ObjectId(newData._id);
+	//newData._id = ObjectId(newData._id);
 	events.find({_id : newData._id}, function(e,o){
 		if(e) {
 			console.log('[Error] event-manager updateEvent: ',e);

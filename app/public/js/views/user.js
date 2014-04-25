@@ -17,19 +17,6 @@ function deleteUser() {
 	});
 }
 
-function showError(text){
-	$(document).ready(function(){
-		$('#response-panel').css({'border-color' : 'red', 'color': 'red'});
-		$('#response-panel').text(text).fadeIn(200).fadeOut(150).fadeIn();		
-	});		
-}
-function showSucess(text) {
-	$(document).ready(function(){
-		$('#response-panel').css({'border-color' : 'green', 'color': 'green'});
-		$('#response-panel').text(text).fadeIn();		
-	});		
-}
-
 function validUser(){
 	var rtn = true;
 	$('#response-panel').hide();

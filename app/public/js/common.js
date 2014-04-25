@@ -43,3 +43,14 @@ function modalError(text){
 	$('#modal-background').slideDown();
 	$('#modal').fadeIn();
 }
+function showError(text){
+	$('#response-panel').css({'border-color' : 'red', 'color': 'red'});
+	$('#response-panel').text(text).fadeIn(200).fadeOut(150).fadeIn();				
+}
+function showSucess(text) {
+	$('#response-panel').css({'border-color' : 'green', 'color': 'green'});
+	$('#response-panel').text(text).fadeIn();				
+}
+/**/
+function isEmpty(s){return(!s||0===s.length);
+}

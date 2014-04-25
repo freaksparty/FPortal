@@ -8,6 +8,7 @@ $(document).ready(function(){
 				tooltip_error('#pass-tf','Empty passwords are not allowed');
 				return false;
 			} else {
+				//TODO: redo remember me (sending username and hash password in client cookies¿¿?? I don't think so)
 				// append 'remember-me' option to formData to write local cookie //
 				formData.push({name:'remember-me', value:$("input:checkbox:checked").length == 1});
 				return true;

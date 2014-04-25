@@ -102,10 +102,14 @@ module.exports = function (app){
 						if(ev.owner === req.session.user._id){
 							ev.date = moment(ev.start).format('DD/MM/YYYY');
 							ev.hour = moment(ev.start).format('HH:mm');
+							if(!ev.collaborators) ev.collaborators = [];
+							if(!ev.relatives) ev.relatives = [];
+							ev.participants = ev.collaborators.concat(ev.relatives);
 							res.render('eventform', {
 								title		: 'Edit event',
 								sessionUser	: req.session.user,
-								userList	: ul
+								userList	: ul,
+								event		: ev
 							});
 						} else {
 							ev.start = moment(ev.start).format('dddd, DD MMMM YYYY HH:mm');
@@ -125,50 +129,72 @@ module.exports = function (app){
 	app.post('/event', function(req, res) {
 		if ((req.session.user == null) || (req.session.user.room == null)){
 			res.send('Permission denied', 403);
-		} else {
-			data = {};
-			if(req.param['eventId'] !== '') { //Create
-				var event = {
-						owner : req.session.user._id,
-						start : moment(req.param('date')+ ' ' +req.param('hour'), "DD/MM/YYYY H:mm").toDate(),
-						duration : req.param('duration'),
-						participants : req.param('participants')
-				};
-				if(req.param.comments !== '')
-					event.comments = req.param.comments;
-				EM.createEvent(event, function(e, ev){
-					if(e){
-						res.send('Error getting event data', 400);
-						console.log('[Error] router-events POST/event creating: ',e);
-					} else {
-						res.send(ev, 201);
-					}
-				});				
-			//Update
-			} else EM.findEventById(req.param['eventId'], function(err, ev){
-				if(e){
-					res.send('Error getting event data', 400);
-					console.log('[Error] router-events POST/event finding: ',e);
-				} else if(ev.owner != req.session.user._id){
-					res.send('Permission denied', 403);
-					console.log('[Error] router-events POST/event: user ('+req.session.user.user+') does not own event ('+ev._id+')');
-				} else {
-					ev.participants = req.param.participants;
-					ev.comments = req.param['comments'];
-					ev.start = moment(req.param('date')+ ' ' +req.param('hour'), "DD/MM/YYYY H:mm");
-					ev.duration = req.param.duration;
-					EM.update(ev, function(er, upevent){
-						if(e) {
-							console.log('[Error] router-events POST/event updating: '+e);
-							res.send('Error updating: '+e,400);
+		} else validEventForm(req, function(error){
+			if(error) {
+				res.send(error, 400);
+			} else {
+				data = {};
+				if(req.param('eventId') === undefined) { //Create
+					var event = {
+							owner : req.session.user._id,
+							start : moment(req.param('date')+ ' ' +req.param('hour'), "DD/MM/YYYY H:mm").toDate(),
+							duration : req.param('duration'),
+							patient : req.param('patient'),
+							collaborators : req.param('collaborators'),
+							relatives : req.param('relatives'),
+					};
+					if(req.param('comments') !== '')
+						event.comments = req.param('comments');
+					EM.createEvent(event, function(e, ev){
+						if(e){
+							console.log('[Error] router-events POST/event creating: ',e);
+							res.send('Error getting event data', 400);
 						} else {
-							res.send(upevent,200);
+							res.send(ev, 201);
 						}
-					});
-				}
-			});
-		}
+					});				
+				//Update
+				} else EM.findEventById(req.param('eventId'), function(err, ev){
+					if(err || !ev){
+						res.send('Error getting event data', 400);
+						console.log('[Error] router-events POST/event finding: ',err);
+					} else if(ev.owner != req.session.user._id){
+						console.log('[Error] router-events POST/event: user ('+req.session.user.user+') does not own event ('+ev._id+')');
+						res.send('Permission denied', 403);
+					} else {
+						ev.patient = req.param('patient');
+						ev.relatives = req.param('relatives');
+						ev.collaborators = req.param('collaborators');
+						ev.comments = req.param('comments');
+						ev.start = moment(req.param('date')+ ' ' +req.param('hour'), "DD/MM/YYYY H:mm").toDate(),
+						ev.duration = req.param('duration');
+						EM.updateEvent(ev, function(er, upevent){
+							if(er) {
+								console.log('[Error] router-events POST/event updating: '+er);
+								res.send('Error updating: '+er,400);
+							} else {
+								res.send(upevent,200);
+							}
+						});
+					}
+				});
+			}
+		});
 	});
 };
 
+/*Validation*/
+function validEventForm(req, callback){
+	var patient = req.param('patient');
+	//TODO: check patient and medic ids
+	if(!patient || patient.length === 0)
+		callback('Patient is mandatory');
+	else if(!moment(req.param('date'), "DD/MM/YYYY").isValid())
+		callback('Incorrect date format');
+	else if(!moment(req.param('hour'), "H:mm").isValid())
+		callback('Incorrect hour format');
+	else if(!req.param('duration') || req.param('duration').length === 0)
+		callback('Duration is mandatory');
+	else callback(null);
+}
 
