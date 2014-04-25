@@ -1,0 +1,71 @@
+extends layout
+block sessionvars
+	- var authUser = sessionUser;
+	- var pageTitle = title;
+block content
+	include navigation
+
+	- event = typeof(event) != 'undefined' ? event : {participants:[]}
+	- var medics = []
+	
+	script
+		|var userNames = {
+		- each user in userList
+			|"#{user.name}":"#{user._id}",
+			-if(user.role==='Medic') {medics.push(sprintf("'%s'",user._id));}
+		|"":""};var userUsers = {
+		- each user in userList
+			|"#{user.user}":"#{user._id}",
+		|"":""};var medics = [#{medics.join()}];
+	
+	#account-form-container.content-block
+		form(method="post")#event-form
+			if event._id
+				h1 Editing event
+			else
+				h1 Insert new event
+			hr
+			input#eventId(type="hidden", value=event._id)
+			.form-input
+				label.control-label(for='txt-date') Date
+				input#txt-date.input-xlarge(type='text', name='date', value= event.date, readonly="readonly", placeholder="Click to pick up date")
+			.form-input
+				label.control-label(for='txt-hour') Hour
+				input#txt-hour.input-xlarge(type='text', name='hour', value= event.hour,  placeholder="HH:MM")
+			.form-input
+				label.control-label(for='event-tf') Duration
+				select#duration.input-xlarge(name='duration')
+					- for (var i = 2; i < 49; ++i) {
+					option(value=i*10, selected=(i*10)==event.duration) #{i*10} min
+					- }
+			.form-input
+				label.control-label(for='txt-comments') Comments
+				input#txt-comments.input-xlarge(type='text', name='comments', value=event.comments)
+			.form-input
+				label.control-label(for='txt-patient') Patient
+				input#txt-patient.input-xlarge(type='text', name='patient', value=event.patient)
+			.form-input
+				label.control-label(for='pass-tf') Participant
+				input#add-participant.input-xlarge(type='text', name='add-participant', placeholder="Inser name or user and click the plus button")
+				i#btn-add-participant.float-right.icon-plus.icon-black
+			table.data
+				thead
+					th Participants (click to remove)
+				tbody#table-participants
+					each participant in event.participants
+						tr(id=participant): td=participant
+			.form-actions
+				span#response-panel
+				if ((authUser.role=='Admin') && (event.event))
+					button(type='button')#event-btn-del.btn.btn-danger Delete
+				if event._id
+					button(type='submit')#account-form-submit.btn Update
+				else
+					button(type='submit')#account-form-submit.btn Create
+
+	include modals/modal
+
+block scripts
+	script(src='/vendor/jquery.form.js')
+	script(src='/vendor/jquery-ui.min.js')
+	script(src='/js/views/event.js')

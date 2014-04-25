@@ -25,11 +25,23 @@ module.exports = function (app){
 					console.log('[Error] router-events /events: failed to get invited event list:',e);
 					list = [];
 				}
-				res.render('events', {
-					title			: 'Your events',
-					sessionUser		: req.session.user,
-					ownEventList	: ownList,
-					guestEventList	: list
+				AM.listUsersSmall(function(e, users){
+					if(e){
+						console.log('[Error] router-events /events: failed to get all user list', e);
+						res.render('error', {
+							title : 'Internal error',
+						});
+					} else {
+						//TODO: convert uids to names
+						//for(var i = 0; i<users.ownList; i++)
+						res.render('events', {
+							title			: 'Your events',
+							sessionUser		: req.session.user,
+							ownEventList	: ownList,
+							guestEventList	: list,
+							users			: users
+						});
+					}
 				});
 			});
 		};
@@ -59,7 +71,7 @@ module.exports = function (app){
 						title	: 'Internal Error'
 					});
 				} else {
-					res.render('event', {
+					res.render('eventform', {
 						title		: 'Create event',
 						sessionUser	: req.session.user,
 						userList	: ul
@@ -87,14 +99,23 @@ module.exports = function (app){
 								title	: 'Event not found'
 							});
 						}
-						ev.date = moment(ev.start).format('DD/MM/YYYY');
-						ev.hour = moment(ev.start).format('HH:mm');
-						res.render('event', {
-							title		: 'Event',
-							sessionUser	: req.session.user,
-							userList	: ul,
-							event		: ev
-						});
+						if(ev.owner === req.session.user._id){
+							ev.date = moment(ev.start).format('DD/MM/YYYY');
+							ev.hour = moment(ev.start).format('HH:mm');
+							res.render('eventform', {
+								title		: 'Edit event',
+								sessionUser	: req.session.user,
+								userList	: ul
+							});
+						} else {
+							ev.start = moment(ev.start).format('dddd, DD MMMM YYYY HH:mm');
+							res.render('event', {
+								title		: 'Event',
+								sessionUser	: req.session.user,
+								userList	: ul,
+								event		: ev
+							});
+						}
 					});
 					
 				}
@@ -108,7 +129,7 @@ module.exports = function (app){
 			data = {};
 			if(req.param['eventId'] !== '') { //Create
 				var event = {
-						room : req.session.user.room,
+						owner : req.session.user._id,
 						start : moment(req.param('date')+ ' ' +req.param('hour'), "DD/MM/YYYY H:mm").toDate(),
 						duration : req.param('duration'),
 						participants : req.param('participants')

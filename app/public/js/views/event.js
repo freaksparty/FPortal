@@ -1,4 +1,5 @@
-var participants = [];
+var relatives = [];
+var collaborators = [];
 
 $(document).ready(function(){
 	$('#txt-date').datepicker({
@@ -11,27 +12,25 @@ $(document).ready(function(){
 	});
 
 	var nameList = [];
-	$.each(userNames, function(k,v){k?nameList.push(k):{};});
-	$.each(userUsers, function(k,v){k?nameList.push(k):{};});
+	var patients = [];
+	$.each(userNames, function(k,v){if(k){nameList.push(k);isMedic(v)?{}:patients.push(k);};});
+	$.each(userUsers, function(k,v){if(k){nameList.push(k);isMedic(v)?{}:patients.push(k);};});
 
+	$('#txt-patient').val(nameOfId($('#txt-patient').val())).autocomplete({source: patients});
 	$('#add-participant').autocomplete({source: nameList});
 	$('#btn-add-participant').css('cursor','pointer').click(function(){
 		var txt = $('#add-participant');
 		if(txt.val() === '')
 			tooltip_error(txt,'Please, write the name or user of the participant');
 		else {
-			var usId = userNames[txt.val()];
-			if(!usId){
-				usId = userUsers[txt.val()];
-				if(usId){txt.val(nameOfId(usId));}
-			}
+			var usId = idOfName(txt.val());
 			if(!usId)
 				tooltip_error(txt,'User not found, please check speeling');
-			else if($.inArray(usId, participants) > -1) {
+			else if(($.inArray(usId, relatives) > -1) || ($.inArray(usId, collaborators) > -1)) {
 				txt.val('');//already added
 				$('#'+usId).fadeOut(200).fadeIn(200);
 			} else {
-				participants.push(usId);
+				isMedic(usId) ? collaborators.push(usId):relatives.push(usId);
 				$('#table-participants').append('<tr id="'+usId+'"><td>'+nameOfId(usId)+'</td></tr>');
 				$('#'+usId).hide().fadeIn(200);
 				txt.val('');
@@ -63,21 +62,31 @@ $(document).ready(function(){
 	});
 });
 
+function idOfName(n){
+	var id = userNames[n];
+	if(!id)id=userUsers[n];
+	return id;
+}
 function nameOfId(id){
-	rtn = '';
+	var rtn = '';
 	$.each(userNames, function(k,v){
 		if(v===id)
 			rtn = k;
 	});
+	if(isMedic(id))
+		rtn += ' (Medic)';
 	return rtn;
+}
+function isMedic(id){
+	var rtn = $.inArray(id,medics);
+	return (rtn !== -1);
 }
 
 function bindTable() {
 	$('#table-participants>tr').unbind("click").click(function(){
 		that = $(this);
-		participants = jQuery.grep(participants, function(value) {
-			  return value != that.prop('id');
-		});
+		collaborators = $.grep(collaborators, function(value) {return value != that.prop('id');});
+		relatives = $.grep(relatives, function(value) {return value != that.prop('id');});
 		that.remove();
 	});
 }

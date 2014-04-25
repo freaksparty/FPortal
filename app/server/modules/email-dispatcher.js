@@ -5,11 +5,10 @@ module.exports = EM;
 
 EM.server = require("emailjs/email").server.connect({
 
-	host 	    : ES.host,
-	user 	    : ES.user,
-	password    : ES.password,
-	ssl		    : true
-
+	host		: ES.host,
+	user		: ES.user,
+	password	: ES.password,
+	ssl			: true
 });
 
 EM.dispatchResetPasswordLink = function(account, callback)
@@ -23,8 +22,9 @@ EM.dispatchResetPasswordLink = function(account, callback)
 	}, callback );
 }
 
-EM.composeEmail = function(o)
+EM.forgotPasswordEmail = function(o)
 {
+	//TODO: fix link
 	var link = 'http://node-login.braitsch.io/reset-password?e='+o.email+'&p='+o.pass;
 	var html = "<html><body>";
 		html += "Hi "+o.name+",<br><br>";
@@ -34,4 +34,12 @@ EM.composeEmail = function(o)
 		html += "<a href='http://twitter.com/braitsch'>braitsch</a><br><br>";
 		html += "</body></html>";
 	return  [{data:html, alternative:true}];
+}
+
+EM.eventInviteEmail = function(event, user, medic) {
+	//TODO: alll!! :(
+	var html = '<html><body>Hello '+user.name+', <br><br>';
+		html +='You have a new appointment with medic '+medic.name+'.<br>';
+		html +='Please, confirm your assistance with the following link:';
+	return [{data:html, alternative:true}];
 }

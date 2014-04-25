@@ -8,7 +8,7 @@ var N = require('./../../../nuve');
 var ObjectId = require('mongodb').ObjectID;
 
 exports.listEventsCreatedBy = function(user,callback){
-	events.find({room:user.room}).toArray(callback);
+	events.find({owner:user._id}).toArray(callback);
 };
 
 exports.listEventsByParticipant = function(user, callback){

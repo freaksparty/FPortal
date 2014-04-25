@@ -14,6 +14,7 @@ var express = require('express'),
 var http = require('http');
 var app = express();
 app.locals.moment = require('moment');
+app.locals.sprintf = require('sprintf').sprintf;
 
 app.configure(function(){
 	app.set('port', 8888);

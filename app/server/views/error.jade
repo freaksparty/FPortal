@@ -3,9 +3,23 @@ extends layout
 
 block content
 	.container
-		h3 Not Found!
-		.content-block
-			p You tried to open a page that does not exist, maybe you followed an incorrect link or there is a typo in the navigation box.
-			p If you feel that is an error and you were correctly navigating in the page, please contact us.
-			a.btn(href='/') Go to home page
+		if(title)
+			h3=title
+		else
+			h3 Internal error
+		.content-block.centered
+			if(!error)
+				p We are sorry, the application found an unexpected error and your action needed to be stopped
+				p If the error persist, please contact us with detailed information about what you were doing in the application and when it occurs.
+			else 
+				if (typeof error == 'string')
+					p error
+				else
+					each text in error
+						p=text
+			
+			if(backUrl)
+				a.btn(href=backUrl) Go back
+			else
+				a.btn(href='/') Go to home page
 		
