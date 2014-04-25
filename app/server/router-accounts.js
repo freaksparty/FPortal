@@ -22,7 +22,11 @@ module.exports = function(app) {
 			AM.autoLogin(req.cookies.user, req.cookies.pass, function(o){
 				if (o !== null){
 					req.session.user = o;
-					if(AM.isAdmin(o))
+					if(req.session.redirect){
+						var url = req.session.redirect;
+						delete req.session.redirect;
+						res.redirect(url);
+					} else if(AM.isAdmin(o))
 						res.redirect('/admin');
 					else
 						res.redirect('/events');

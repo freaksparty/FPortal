@@ -82,46 +82,62 @@ module.exports = function (app){
 	});
 	app.get('/event/:eventId', function(req, res) {
 		if ((req.session.user == null)){
+			req.session.redirect = req.protocol + '://' + req.get('host') + req.originalUrl;
 			res.redirect('/');
 		} else {
-			var route = 'router-events /event/'+req.params.eventId+' ';
-			AM.listUsersSmall(function(e,ul) {
-				if(e) {
-					console.log('[Error] '+route,e);
-					res.render('error',{
-						title	: 'Internal Error'
+			var route = 'router-events /event/'+req.params.eventId+' ';			
+			EM.findEventById(req.params.eventId, function(e, ev){
+				if(e || !ev) {
+					console.log('[Error] '+route+'findEventById() says:', e);
+					res.render('error', {
+						title	: 'Event not found',
+						error	: ['The event you tried to open does not exist.','Maybe it was cancelled er edited.'],
+						backUrl	: '/events'
 					});
 				} else {
-					EM.findEventById(req.params.eventId, function(e, ev){
-						if(e || !ev) {
-							console.log('[Error] '+route+'findEventById() says:', e);
-							res.render('404', {
-								title	: 'Event not found'
-							});
-						}
-						if(ev.owner === req.session.user._id){
-							ev.date = moment(ev.start).format('DD/MM/YYYY');
-							ev.hour = moment(ev.start).format('HH:mm');
-							if(!ev.collaborators) ev.collaborators = [];
-							if(!ev.relatives) ev.relatives = [];
-							ev.participants = ev.collaborators.concat(ev.relatives);
-							res.render('eventform', {
-								title		: 'Edit event',
-								sessionUser	: req.session.user,
-								userList	: ul,
-								event		: ev
+					if(!ev.collaborators) ev.collaborators = [];
+					if(!ev.relatives) ev.relatives = [];
+					if ((ev.owner != req.session.user._id) &&
+							(ev.patient != req.session.user._id) &&
+							(ev.collaborators.indexOf(String(req.session.user._id)) === -1) &&
+							(ev.relatives.indexOf(String(req.session.user._id)) === -1)) {
+						console.log('[Error] '+route+' permission denied to '+req.session.user._id+
+								' to event '+ev._id, e);
+						res.render('error', {
+							title	: 'Event not found',
+							error	: ['The event you tried to open does not exist.','Maybe it was cancelled er edited.'],
+							backUrl	: '/events'
+						});
+					} else AM.listUsersSmall(function(e,ul) {
+						if(e) {
+							console.log('[Error] '+route,e);
+							res.render('error',{
+								title	: 'Internal Error'
 							});
 						} else {
-							ev.start = moment(ev.start).format('dddd, DD MMMM YYYY HH:mm');
-							res.render('event', {
-								title		: 'Event',
-								sessionUser	: req.session.user,
-								userList	: ul,
-								event		: ev
-							});
+							if(ev.owner === req.session.user._id){
+								ev.date = moment(ev.start).format('DD/MM/YYYY');
+								ev.hour = moment(ev.start).format('HH:mm');
+								if(!ev.collaborators) ev.collaborators = [];
+								if(!ev.relatives) ev.relatives = [];
+								ev.participants = ev.collaborators.concat(ev.relatives);
+								res.render('eventform', {
+									title		: 'Edit event',
+									sessionUser	: req.session.user,
+									userList	: ul,
+									event		: ev
+								});
+							} else {
+								ev.start = moment(ev.start).format('dddd, DD MMMM YYYY HH:mm');
+								res.render('event', {
+									title		: 'Event',
+									sessionUser	: req.session.user,
+									userList	: ul,
+									event		: ev
+								});
+							}
 						}
 					});
-					
 				}
 			});	
 		}
@@ -181,7 +197,22 @@ module.exports = function (app){
 			}
 		});
 	});
+	app.get('/event/:eventId/join', function(req, res) {
+		if ((req.session.user == null)){
+			req.session.redirect = req.protocol + '://' + req.get('host') + req.originalUrl;
+			res.redirect('/');
+		} else {
+			res.render('room', {
+				title		: 'Event room',
+				sessionUser	: req.session.user
+				//userList	: ul,
+				//event		: ev
+			});
+		}
+	});
 };
+
+
 
 /*Validation*/
 function validEventForm(req, callback){

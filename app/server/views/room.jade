@@ -3,15 +3,12 @@ extends layout
 block content
 	include navigation
 
-	div#vidcontainer.container(name=token, style='width:320px; height: 240px;')
+//	div#vidcontainer.container(name=token, style='width:320px; height: 240px;')
 
-	include modals/alert
-	include modals/confirm
+	div#loader
+		i(src="/img/loading.gif")
+		p Loading the room
 
 block scripts
-	script(src='/vendor/jquery.min.js')
-	script(src='/vendor/jquery.form.js')
-	script(src='/vendor/bootstrap-modal.js')
-	script(src='/vendor/bootstrap-transition.js')
 	script(src='/js/erizo.js')
 	script(src='/js/views/room.js')
