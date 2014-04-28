@@ -59,32 +59,11 @@ exports.createEvent = function(data, callback) {
 	}
 };
 
-/*exports.addRoom = function(roomData, callback)
-{
-	N.API.createRoom(
-			roomData.name, 
-			function(licodeRoom) {
-				rooms.insert(
-						{
-							_id			: licodeRoom._id,			//Keeps _id same as Licode's
-							name		: roomData.name,
-							owner		: roomData.user
-						}, {w:0});  //TODO: delete room if inserting fails
-			},
-			function(e){
-				console.log('Error creating room:', e);
-			});
+exports.getToken = function(user, roomId, callback) {
+	N.API.createToken(roomId, user.user, 'presenter', function(token) {
+		callback(null, token);
+	}, function(e){
+		console.log('[Error] event-manager getToken unable to create token: '+e);
+		callback('Internal error');
+	});
 };
-
-exports.getRooms = function( callback )
-{
-	rooms.find({}).toArray(callback);
-};
-
-/*
- * @param callback(newTokenString)
- */
-/*exports.getRoomToken = function (roomId, userName, callback)
-{
-	N.API.createToken(roomId, userName, 'presenter', callback, function(e){console.log('Error creating token:'+e);});
-};*/

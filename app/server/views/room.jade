@@ -1,13 +1,19 @@
 extends layout
 
+
+block sessionvars
+	- var authUser = sessionUser;
+	- var pageTitle = title;
+	
 block content
 	include navigation
-
-//	div#vidcontainer.container(name=token, style='width:320px; height: 240px;')
-
+	
 	div#loader
-		i(src="/img/loading.gif")
-		p Loading the room
+		img(src="/img/loading.gif")
+		p#loader-message Loading the room
+	div#vidcontainer.container(style='width:320px; height: 240px;')
+	
+	include modals/modal
 
 block scripts
 	script(src='/js/erizo.js')

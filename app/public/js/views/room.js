@@ -1,7 +1,36 @@
-window.onload = function () {
-	var localStream = Erizo.Stream({audio: true, video: true, data: false});
-	var room = Erizo.Room({token: $('#vidcontainer').attr('name')});
+var eventStatus = 'unknown';
+var localStream = Erizo.Stream({audio: true, video: true, data: false});
+var room;
 
+function checkStatus(){
+	$.ajax('status', {
+		cache	: false,
+		statusCode : {
+			404	: function(xhr){
+				modalError(xhr.responseText, '/events');
+			},
+			409 : function(xhr){
+				$('#loader-message').text(xhr.responseText);
+				setTimeout(checkStatus, 5000);
+			},
+			410 : function(xhr){
+				modalError(xhr.responseText, '/events');
+			},
+			500 : function() {
+				modalError('A critical error has occurred', '/events');
+			},
+			201 : function(xhr) {
+				$('#loader-message').text('Joining room...');
+				$('#loader').fadeOut();
+				joinRoom(xhr);
+			}
+		}
+	});
+}
+
+function joinRoom(token){
+	room = Erizo.Room({token:token});
+	
 	localStream.addEventListener("access-accepted", function () {
 
 		var subscribeToStreams = function (streams) {
@@ -14,7 +43,6 @@ window.onload = function () {
 		};
 
 		room.addEventListener("room-connected", function (roomEvent) {
-
 			room.publish(localStream);
 			subscribeToStreams(roomEvent.streams);
 		});
@@ -45,7 +73,12 @@ window.onload = function () {
 		});
 
 		room.connect();
-		localStream.show("vidcontainer");
+		localStream.show("vidcontainer");		
+		
 	});
 	localStream.init();
-};
+}
+
+$(document).ready(function(){
+	checkStatus();
+});

@@ -36,12 +36,16 @@ function hideModal() {
 	$('#modal-background').slideUp();
 	$('#modal').fadeOut();
 }
-function modalError(text){
-	$('#modal .cancel').click(hideModal).text('OK');
+function modalError(text, url){
+	if(url)
+		$('#modal .cancel').click(function(){window.location = url;});
+	else
+		$('#modal .cancel').click(hideModal).text('OK');
 	$('#modal #modalSubmit').hide();
 	$('#modal p').text(text);
 	$('#modal-background').slideDown();
 	$('#modal').fadeIn();
+
 }
 function showError(text){
 	$('#response-panel').css({'border-color' : 'red', 'color': 'red'});

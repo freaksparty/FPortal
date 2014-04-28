@@ -210,6 +210,49 @@ module.exports = function (app){
 			});
 		}
 	});
+	
+	
+	app.get('/event/:eventId/status', function(req, res) {
+		if ((req.session.user == null)){
+			req.session.redirect = req.protocol + '://' + req.get('host') + req.originalUrl;
+			res.redirect('/');
+		} else {
+			EM.findEventById(req.param('eventId'), function(err, ev){
+				if(!ev.relatives) ev.relatives = [];
+				if(!ev.collaborators) ev.collaborators = [];
+				ev.start = moment(ev.start);
+				if(err || !ev){
+					res.send('The event does not exists', 404);
+					console.log('[Error] router-events get/event/'+req.params.eventId+'/status finding: ',err);
+				} else if((ev.owner != req.session.user._id) && (ev.patient != req.session.user._id) &&
+						(ev.relatives.indexOf(req.session.user._id) == -1) && (ev.collaborators.indexOf(req.session.user._id) == -1)){
+					console.log('[Error] router-events POST/event: user ('+req.session.user.user+') is not invited to event ('+ev._id+')');
+					res.send('The event does not exists', 404);
+				} else if(moment().isBefore(ev.start)) {
+					res.send('The event will open in '+ev.start.from(moment(),true),409);					
+				} else if(moment().isAfter(ev.start.add('m',ev.duration))) {
+					res.send('The event is closed',410);
+				} else {
+					AM.findById(ev.owner, function(e, medic){
+						if(e || !medic){
+							res.send('Internal error', 500);
+							console.log('[Error] router-events get/event/'+req.params.eventId+'/status retrieving event owner: ',err);
+						} else 
+							EM.getToken(req.session.user, medic.room, function(er,token){
+								if(er || !token){
+									res.send('Internal error', 500);
+									console.log('[Error] router-events get/event/'+req.params.eventId+'/status retrieving event token: ',err);
+								} else {
+									res.send(token, 201);
+								}
+							});
+							
+					});
+					
+				}
+			});
+		}
+	});
 };
 
 
