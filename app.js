@@ -13,6 +13,7 @@ var express = require('express'),
     config = require('./../licode/licode_config');
 var http = require('http');
 var app = express();
+process.env.TZ = 'Europe/Madrid'; //TODO config file
 app.locals.moment = require('moment');
 app.locals.sprintf = require('sprintf').sprintf;
 

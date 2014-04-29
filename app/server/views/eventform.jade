@@ -57,12 +57,13 @@ block content
 						tr(id=participant): td=participant
 			.form-actions
 				span#response-panel
-				if ((authUser.role=='Admin') && (event.event))
-					button(type='button')#event-btn-del.btn.btn-danger Delete
 				if event._id
+					a.btn.btn-danger Cancel event
 					button(type='submit')#account-form-submit.btn Update
+					a.hide.btn.btn-success Join
 				else
 					button(type='submit')#account-form-submit.btn Create
+				
 
 	include modals/modal
 

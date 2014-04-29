@@ -216,46 +216,64 @@ module.exports = function (app){
 		if ((req.session.user == null)){
 			req.session.redirect = req.protocol + '://' + req.get('host') + req.originalUrl;
 			res.redirect('/');
-		} else {
-			EM.findEventById(req.param('eventId'), function(err, ev){
-				if(!ev.relatives) ev.relatives = [];
-				if(!ev.collaborators) ev.collaborators = [];
-				ev.start = moment(ev.start);
-				if(err || !ev){
-					res.send('The event does not exists', 404);
-					console.log('[Error] router-events get/event/'+req.params.eventId+'/status finding: ',err);
-				} else if((ev.owner != req.session.user._id) && (ev.patient != req.session.user._id) &&
-						(ev.relatives.indexOf(req.session.user._id) == -1) && (ev.collaborators.indexOf(req.session.user._id) == -1)){
-					console.log('[Error] router-events POST/event: user ('+req.session.user.user+') is not invited to event ('+ev._id+')');
-					res.send('The event does not exists', 404);
-				} else if(moment().isBefore(ev.start)) {
-					res.send('The event will open in '+ev.start.from(moment(),true),409);					
-				} else if(moment().isAfter(ev.start.add('m',ev.duration))) {
-					res.send('The event is closed',410);
-				} else {
-					AM.findById(ev.owner, function(e, medic){
-						if(e || !medic){
-							res.send('Internal error', 500);
-							console.log('[Error] router-events get/event/'+req.params.eventId+'/status retrieving event owner: ',err);
-						} else 
-							EM.getToken(req.session.user, medic.room, function(er,token){
-								if(er || !token){
-									res.send('Internal error', 500);
-									console.log('[Error] router-events get/event/'+req.params.eventId+'/status retrieving event token: ',err);
-								} else {
-									res.send(token, 201);
-								}
-							});
-							
-					});
-					
-				}
-			});
-		}
+		} else eventStatus(req.param('eventId'), req.session.user, function(text, status, event, room){
+			if(status == 201){
+				EM.getToken(req.session.user, room, function(er,token){
+					if(er || !token){
+						res.send('Internal error', 500);
+						console.log('[Error] router-events get/event/'+req.params.eventId+'/status retrieving event token: ',err);
+					} else {
+						res.send(token, 201);
+					}
+				});
+			} else if((status == 202) && (event) && (event.owner == req.session.user._id)) {
+				EM.getTokenForMedic(req.session.user, event, function(er,token){
+					if(er || !token){
+						res.send('Internal error', 500);
+						console.log('[Error] router-events get/event/'+req.params.eventId+'/status retrieving event token: ',err);
+					} else {
+						res.send(token, 201);
+					}
+				});
+			} else {
+				res.send(text,status);
+			}
+			
+		});
 	});
 };
 
-
+function eventStatus(eventId, user, callback){
+	EM.findEventById(eventId, function(err, ev){
+		if(!ev.relatives) ev.relatives = [];
+		if(!ev.collaborators) ev.collaborators = [];
+		ev.start = moment(ev.start);
+		if(err || !ev){
+			callback('The event does not exists', 404, ev);
+			console.log('[Error] router-events eventStatus('+eventId+') finding: ',err);
+		} else if((ev.owner != user._id) && (ev.patient != user._id) &&
+				(ev.relatives.indexOf(user._id) == -1) && (ev.collaborators.indexOf(user._id) == -1)){
+			console.log('[Error] router-events POST/event: user ('+user.user+') is not invited to event ('+eventId+')');
+			callback('The event does not exists', 404, ev);
+		} else if(ev.closed) {
+			callback('The event is closed', 410, ev);
+		} else if(moment().isBefore(ev.start)) {
+			callback('The event will open in '+ev.start.from(moment(),true), 200, ev);					
+		} else if(moment().isAfter(ev.start.add('m',ev.duration))) {
+			callback('The event is closed',410, ev);
+		} else if(!ev.mediconline) {
+			callback('Waiting for medic to enter', 202, ev);
+		} else
+			AM.findById(ev.owner, function(e, medic){
+				if(e || !medic){
+					callback('Internal error', 500);
+					console.log('[Error] router-events eventStatus('+eventId+') retrieving event owner: ',err);
+				} else {
+					callback('Open', 201,medic.room);
+				}			
+			});
+	});
+}
 
 /*Validation*/
 function validEventForm(req, callback){

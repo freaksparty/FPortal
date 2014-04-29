@@ -9,7 +9,6 @@ roundedBox()
 	border 1px solid #393C3F
 	border-radius: 4px;	
 	padding 20px
-	margin-left: -24px
 
 a
 	color: #08C;
@@ -167,6 +166,8 @@ body
 
 .form-actions
 	text-align right
+	.btn
+		margin-left: 5px
 
 // account edit/create form //
 
@@ -219,6 +220,7 @@ body
 	roundedBox()
 	display: none
 	z-index: 1000;
+	margin-left: -24px
 		
 	.form-actions {
 	}
@@ -309,3 +311,18 @@ input, button, select, textarea {
 	
 .centered
 	text-align: center
+	
+.hide
+	display: none
+	
+/**ROOM*/
+#leftbar
+	position: absolute
+	roundedBox()
+	top:55px
+	bottom:10%
+	left: 15px
+	width: 20%
+	#vidYourself
+		width: 100%
+	

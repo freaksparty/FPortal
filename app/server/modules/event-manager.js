@@ -67,3 +67,19 @@ exports.getToken = function(user, roomId, callback) {
 		callback('Internal error');
 	});
 };
+
+exports.getTokenForMedic = function(user, event, callback) {
+	N.API.createToken(user.room, user.user, 'presenter', function(token) {
+		event.mediconline = true;
+		events.save(event, {safe:true}, function(err){
+			if(err){
+				console.log('[Error] event-manager getTokenForMedic setting mediconline: ',err);
+				callback('Internal error');
+			} else 
+				callback(null, token);
+		});		
+	}, function(e){
+		console.log('[Error] event-manager getTokenForMedic unable to create token: '+e);
+		callback('Internal error');
+	});
+};

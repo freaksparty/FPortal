@@ -11,7 +11,13 @@ block content
 	div#loader
 		img(src="/img/loading.gif")
 		p#loader-message Loading the room
-	div#vidcontainer.container(style='width:320px; height: 240px;')
+	
+	div#room(style='display:none')
+		div#leftbar
+			div#vidYourself.video(style='width:320px; height: 240px;')
+			h2 (You)
+		div#vidMain
+		div#online
 	
 	include modals/modal
 
