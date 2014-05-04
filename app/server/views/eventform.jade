@@ -55,6 +55,10 @@ block content
 				tbody#table-participants
 					each participant in event.participants
 						tr(id=participant): td=participant
+			.form-input
+				label.control-label Status
+				label#status.data Retrieving...
+				
 			.form-actions
 				span#response-panel
 				if event._id

@@ -269,7 +269,7 @@ function eventStatus(eventId, user, callback){
 					callback('Internal error', 500);
 					console.log('[Error] router-events eventStatus('+eventId+') retrieving event owner: ',err);
 				} else {
-					callback('Open', 201,medic.room);
+					callback('Open', 201, ev, medic.room);
 				}			
 			});
 	});

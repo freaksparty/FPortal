@@ -29,29 +29,31 @@ function isMedic(id){
 	var rtn = $.inArray(id,medics);
 	return (rtn !== -1);
 }
+function showJoin(){
+	$('#status').text('Please, click on the Join button to start the event');
+	$('.form-actions').fadeOut();
+	$('#btn-join').show();
+	$('.form-actions').fadeIn();	
+}
 function checkStatus(){
-	$.ajax('./status', {
+	$.ajax('status', {
 		cache	: false,
 		statusCode : {
 			404	: function(xhr){
 				modalError(xhr.responseText, '/events');
 			},
-			409 : function(xhr){
-				$('#status-data').text(xhr.responseText);
-				setTimeout(checkStatus, 1000*60);
-			},
 			410 : function(xhr){
-				$('#status-data').text(xhr.responseText);
+				$('#status').text(xhr.responseText);
 			},
 			500 : function() {
 				modalError('A critical error has occurred', '/events');
 			},
-			201 : function(xhr) {
-				$('#loader-message').text('Joining room...');
-				$('#loader').fadeOut();
-				$('#room').fadeIn();
-				joinRoom(xhr);
-			}
+			200 : function(xhr) {
+				$('#status').text(xhr);
+				setTimeout(checkStatus, 1000*60);
+			},
+			201 : showJoin,
+			202 : showJoin			
 		}
 	});
 }
