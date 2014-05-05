@@ -4,13 +4,16 @@
  * @Copyright: 2013 Stephen Braitsch
  * @Copyright: 2014 Siro González Rodríguez
  */
-var db			= require('./database');
+var mongo		= require('./database');
+var db			= require('./sql');
 var crypto		= require('crypto');
 var moment		= require('moment');
 var N			= require('./../../../nuve');
-var ObjectId = require('mongodb').ObjectID;
+//var ObjectId = require('mongodb').ObjectID;
+var ObjectId = parseInt;
 
-var users	= db.collection('users');
+//var users	= db.collection('users');
+var users = db.users;
 
 var roles = ['Medic', 'Patient', 'Admin', 'Familiar'];
 
@@ -25,24 +28,28 @@ exports.isAdmin = function(user){
 
 /* if no admin user, create default */
 setTimeout(function(){
-	users.findOne({role:'Admin'}, function(e, o) {
-		if (o){
-			console.log('[OK]	Admin user found!');
-		} else{
-			console.log('[!!]	No admin user... creating');
-			var newData = {
-					user : 'admin',
-					pass : 'admin',
-					role : 'Admin',
-					name : 'Admin'
-			};
-			saltAndHash(newData.pass, function(hash){
-				newData.user = 'admin';
-				newData.pass = hash;
-				// append date stamp when record was created //
-				newData.date = moment().format('MMMM Do YYYY, h:mm:ss a');
-				users.insert(newData, {safe: true}, function(a){});
-			});
+	db.howMany("Users", {role:'Admin'}, function(err, num){
+		if(err || !num){
+			console.log("[Error] account-manager, checking if admin exists;", err);
+		} else {
+			if(num>0)
+				console.log('[OK]	Admin user found!');
+			else {
+				console.log('[!!]	No admin user... creating');
+				var newData = {
+						user : 'admin',
+						pass : 'admin',
+						role : 'Admin',
+						name : 'Admin'
+				};
+				saltAndHash(newData.pass, function(hash){
+					newData.user = 'admin';
+					newData.pass = hash;
+					// append date stamp when record was created //
+					newData.date = moment().format('MMMM Do YYYY, h:mm:ss a');
+					users.insert(newData);
+				});
+			}
 		}
 	});
 }, 500);
@@ -63,9 +70,11 @@ exports.autoLogin = function(user, pass, callback)
 exports.manualLogin = function(user, pass, callback)
 {
 	users.findOne({user:user}, function(e, o) {
-		if (o === null){
+		if(e)
+			callback('Error finding user:', e);
+		else if (o === undefined)
 			callback('Invalid user/password'); //User not found
-		}	else{
+		else {
 			validatePassword(pass, o.pass, function(err, res) {
 				if (res){
 					callback(null, o);
@@ -106,11 +115,11 @@ exports.updateUser = function(newData, callback)
 {
 	newData._id = ObjectId(newData._id);  //convert string into ObjectId
 	users.findOne({user:newData.user}, function(e1, o1) {
-		if(o1 && !o1._id.equals(newData._id) ){
+		if(o1 && (o1._id != newData._id) ){
 			callback('Username already in use');
 		} else {
 			users.findOne({email:newData.email}, function(e2, o2){
-				if(o2 && !o2._id.equals(newData._id) ){
+				if(o2 && (o2._id != newData._id) ){
 					callback('Email already in use');
 				} else {
 					users.findOne({_id:ObjectId(newData._id)}, function(e, o){
@@ -263,15 +272,7 @@ exports.listUsers = function(callback, size, skip)
 		options['size'] = size;
 	if(skip != null)
 		options['skip'] = skip;
-	var fields = {
-			"_id":true,
-			"user":true,
-			"name":true,
-			"email":true,
-			'role':true,
-			'room':true
-	};
-	users.find({},fields, options).toArray(callback);
+	db.queryToList("SELECT _id, user, name, email, role, room FROM Users",{}, options, callback);
 };
 
 exports.listUsersSmall = function(callback)
@@ -337,7 +338,8 @@ var validatePassword = function(plainPass, hashedPass, callback)
 
 var getObjectId = function(id)
 {
-	return users.db.bson_serializer.ObjectID.createFromHexString(id);
+	return id;
+//	return users.db.bson_serializer.ObjectID.createFromHexString(id);
 }
 
 

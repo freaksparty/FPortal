@@ -71,8 +71,8 @@ exports.getToken = function(user, roomId, callback) {
 exports.getTokenForMedic = function(user, event, callback) {
 	N.API.createToken(user.room, user.user, 'presenter', function(token) {
 		event.mediconline = true;
-		//events.save(event, {safe:true}, function(err){
-		events.update({_id:event._id}, {mediconline:true})
+		events.save(event, {safe:true}, function(err){
+		//events.update({_id:event._id}, {mediconline:true})
 			if(err){
 				console.log('[Error] event-manager getTokenForMedic setting mediconline: ',err);
 				callback('Internal error');

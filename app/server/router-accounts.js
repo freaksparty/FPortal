@@ -135,9 +135,10 @@ module.exports = function(app) {
 	});
 	
 	app.post('/user', function(req, res){
-		if (req.session.user == null){
+		if (!req.session.user){
 			// if user is not logged-in redirect back to login page //
 			res.send('Permission denied', 403);
+			return;
 		}
 		
 		var data = {
@@ -151,7 +152,7 @@ module.exports = function(app) {
 		}
 		
 		if(req.query.userId !== undefined) {
-			data._id	= req.query.userId;
+			data._id	= parseInt(req.query.userId);
 			if (AM.isAdmin(req.session.user) ||
 				(req.session.user._id == data._id)) {
 				AM.updateUser(data, function(e, o){
