@@ -111,9 +111,10 @@ function saveQuery(query, values, callback){
 }
 function insertQuery(query, values, callback){
 	saveQuery(query, values, function(err, info){
-		if(err)
+		if(err) {
 			callback(err);
-		else if(info.affectedRows == 1)
+			console.log("[Error] [SQL]", query);
+		} else if(info.affectedRows == 1)
 			callback(null, info.insertId);
 		else
 			callback("inserting: unexpected affected rows number="+info.affectedRows);			
@@ -121,33 +122,37 @@ function insertQuery(query, values, callback){
 };
 function updateQuery(query, values, callback){
 	saveQuery(query, values, function(err, info){
-		if(err)
+		if(err) {
 			callback(err);
-		else 
+			console.log("[Error] [SQL]", query);
+		} else 
 			callback(null, info.affectedRows);
 	});
 };
 
-/* mongo-like API */
-exports.howMany = function(table, filters, callback){
-	var query = sprintf("SELECT COUNT(*) FROM %s WHERE %s", table, filtersToWhere(filters));
-	c.query(query, null, true)
-	.on('result', function(res) {
-		res.on('row', function(row) {
-			callback(null, row[0]);
-		})
-		.on('error', function(err) {
-			console.log('[Error] Database queryToObject() Error in row: ' + inspect(err));
-		    callback(err);
-		});
-	});
-};
+//** Simple ORM **//
+function Entity(table, checkData, columns) {
 
-exports.users = {
-	insert :	function(user, callback){
-		user.user = user.user?user.user:null;
-		user.email = user.email?user.email:null;
-		insertQuery("INSERT INTO Users (user, name, role, email, pass) VALUES (:user, :name, :role, :email, :pass)",
+	this.table = table;
+	this.columns = columns;
+	
+	this.entityFromData = function(data){
+		var rtn = {};
+		var columns = this.columns;
+		var column;
+		for(i in columns){
+			column = columns[i];
+			if((data[column] == undefined) || (data[column] == null))
+				rtn[column] = null;
+			else
+				rtn[column] = data[column];
+		}
+		return rtn;
+	};
+	
+	this.insert = function(data, options, callback){
+		data = checkData(data);
+		insertQuery("INSERT INTO "+this.table+" (user, name, role, email, pass) VALUES (:user, :name, :role, :email, :pass)",
 		user, function(err, id){
 			if(err)
 				callback(null, err);
@@ -156,37 +161,55 @@ exports.users = {
 				callback(null,user);
 			}					
 		});
-	},
-	findOne :	function(filters, callback){
-		var query = sprintf("SELECT * FROM Users WHERE %s", filtersToWhere(filters));
+	};
+	
+	this.findOne = function(filters, callback){
+		var query = sprintf("SELECT * FROM "+this.table+" WHERE %s", filtersToWhere(filters));
 		queryToObject(query, null, function(e, o){
 			if(o && o._id) o._id = parseInt(o._id);
 			callback(e,o);
 		});
-	},
-	save :		function(data, options, callback){
+	};
+	this.save = function(data, options, callback){
 		if(!data._id)
-			callback('User update needs the _id');
+			callback(table+' update needs the _id');
 		else {
-			var user = {
-					_id: data._id,
-					user: data.user,
-					name: data.name,
-					role: data.role,
-					email: data.email,
-					pass: data.pass,
-					room: data.room
-			};
-			var query = sprintf("UPDATE Users SET %s WHERE _id=?", filtersToSet(user));
+			var entity = this.entityFromData(data);
+			var query = sprintf("UPDATE "+this.table+" SET %s WHERE _id=?", filtersToSet(entity));
 			updateQuery(query, [data._id], function(error, affected){
 				if(error){
-					console.log("[Error] [SQL]",query);
 					callback(error);
 				} else if(affected == 1)
-					callback(null, user);
+					callback(null, entity);
 				else
-					callback("updating user: unexpected affected rows number="+affected);
+					callback("updating "+this.table+": unexpected affected rows number="+affected);
 			});
 		}
-	}
-};
+	};
+	this.remove = function(filters, callback){
+		var query = sprintf("DELETE FROM "+this.table+" WHERE %s", filtersToWhere(filters));
+		insertQuery(query, {}, callback);
+	};
+	this.update = function(filters, sets, callback){
+		var query = sprintf("UPDATE "+this.table+" SET %s WHERE %s", filtersToSet(sets), filtersToWhere(filters),callback);
+		updateQuery(query, {}, callback);
+	};
+	this.howMany = function(filters, callback){
+		var query = sprintf("SELECT COUNT(*) FROM %s WHERE %s", this.table, filtersToWhere(filters));
+		c.query(query, null, true)
+		.on('result', function(res) {
+			res.on('row', function(row) {
+				callback(null, row[0]);
+			})
+			.on('error', function(err) {
+				console.log('[Error] Database howMany() Error in row: ' + inspect(err));
+			    callback(err);
+			});
+		});
+	};
+}
+
+exports.users = new Entity("Users", function(user){
+	user.user = user.user?user.user:null;
+	user.email = user.email?user.email:null;
+	}, 	["_id", "user", "name", "role", "email", "pass", "room"]);

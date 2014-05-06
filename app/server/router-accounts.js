@@ -193,7 +193,7 @@ module.exports = function(app) {
 	
 	app.delete('/user', function(req,res) {
 		if(req.session.user.role == 'Admin'){
-			AM.deleteUser(req.query.userId, function(e, obj){
+			AM.deleteUser(req.query.userId, function(e){
 				if (!e){
 					res.send('ok', 200);
 				} else {

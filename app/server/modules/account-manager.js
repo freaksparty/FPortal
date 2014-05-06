@@ -28,7 +28,7 @@ exports.isAdmin = function(user){
 
 /* if no admin user, create default */
 setTimeout(function(){
-	db.howMany("Users", {role:'Admin'}, function(err, num){
+	users.howMany({role:'Admin'}, function(err, num){
 		if(err || !num){
 			console.log("[Error] account-manager, checking if admin exists;", err);
 		} else {
@@ -45,8 +45,6 @@ setTimeout(function(){
 				saltAndHash(newData.pass, function(hash){
 					newData.user = 'admin';
 					newData.pass = hash;
-					// append date stamp when record was created //
-					newData.date = moment().format('MMMM Do YYYY, h:mm:ss a');
 					users.insert(newData);
 				});
 			}
@@ -174,7 +172,7 @@ exports.addRoom = function(medicId, callback) {
 		N.API.createRoom(
 			user._id, 
 			function(licodeRoom) {
-				users.update({_id:user._id},{$set: {room:licodeRoom._id}}, function(e, count){
+				users.update({_id:user._id},{room:licodeRoom._id}, function(e, count){
 					if(e){
 						console.log('[Error] account-manager.addRoom().assignRoom(): updating user.room, mongo says:', e);
 						callback('Updating user: '+e);
@@ -216,7 +214,7 @@ exports.removeRoom = function(medicId, callback) {
 		} else {
 			N.API.deleteRoom(medic.room,
 				function() {
-					users.update({_id:medic._id},{$unset: {room:''}}, function(e, count){
+					users.update({_id:medic._id},{room:null}, function(e, count){
 						if(e){
 							console.log('[Error] account-manager.removeRoom(): unsetting user.room, mongo says:', e);
 							callback('Updating user: '+e);
@@ -251,7 +249,7 @@ exports.validateResetLink = function(email, passHash, callback)
 	});
 }
 
-exports.getAllRecords = function(callback)
+/*exports.getAllRecords = function(callback)
 {
 	users.find().toArray(
 		function(e, res) {
@@ -263,7 +261,7 @@ exports.getAllRecords = function(callback)
 exports.delAllRecords = function(callback)
 {
 	users.remove({}, callback); // reset users collection for testing //
-};
+};*/
 
 exports.listUsers = function(callback, size, skip)
 {
@@ -277,13 +275,7 @@ exports.listUsers = function(callback, size, skip)
 
 exports.listUsersSmall = function(callback)
 {
-	var fields = {
-			"_id":true,
-			"user":true,
-			"name":true,
-			'role':true
-	};
-	users.find({},fields, {}).toArray(callback);
+	db.queryToList("SELECT _id, user, name, role FROM Users",{}, {},callback);
 };
 
 exports.findById = function(id, callback)
