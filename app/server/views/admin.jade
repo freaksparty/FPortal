@@ -36,6 +36,7 @@ block content
 					tr
 						//(style='width:40px')
 						th User
+						th SSN
 						th Name
 						th Role
 						th Room
@@ -48,6 +49,7 @@ block content
 							td
 								a(href='/user?userId=#{user._id}')
 									span=user.user
+							td=user.nss
 							td=user.name
 							td=user.role
 							td(id='td-room-'+user._id)
@@ -56,7 +58,7 @@ block content
 										|Active
 									else
 										|No
-							td=moment(user.creation).format('DD MM YYYY')
+							td=user.creation.format('DD/MM/YYYY HH:mm')
 	include modals/modal
 
 block scripts

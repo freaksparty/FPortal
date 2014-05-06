@@ -11,6 +11,7 @@ drop table if exists Users, Events; --,table1,table2...
 CREATE TABLE Users (
 	_id INT(9) NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	user VARCHAR(20) NOT NULL UNIQUE,
+	nss INT(12) UNSIGNED,
 	name VARCHAR(75),
 	email VARCHAR(50) UNIQUE,
 	role ENUM('Medic', 'Patient', 'Admin', 'Familiar') NOT NULL DEFAULT 'Patient',
@@ -35,5 +36,5 @@ CREATE TABLE Events (
 CREATE TABLE EventParticipants (
 	event INT(9) NOT NULL REFERENCES Events(_id),
 	user INT(9) NOT NULL REFERENCES Users(_id),
-	PRIMARY(event,user)
+	PRIMARY KEY(event,user)
 ) ENGINE = InnoDB;

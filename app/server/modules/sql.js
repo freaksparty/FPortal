@@ -29,7 +29,10 @@ function filtersToWhere(filters, joiner){
 		val = filters[key];
 		key = c.escape(key);
 		if(typeof val == "string")
-			where.push(key+"='"+c.escape(val)+"'");
+			if(val.length > 0)
+				where.push(key+"='"+c.escape(val)+"'");
+			else
+				where.push(key+"IS NULL");
 		else if(typeof val == "number")
 			where.push(key+"="+val);
 		else if(val == null)
@@ -43,7 +46,10 @@ function filtersToSet(filters) {
 		val = filters[key];
 		key = c.escape(key);
 		if(typeof val == "string")
-			set.push(key+"='"+c.escape(val)+"'");
+			if(val.length > 0)
+				set.push(key+"='"+c.escape(val)+"'");
+			else
+				set.push(key+"=NULL");
 		else if(typeof val == "number")
 			set.push(key+"="+val);
 		else if(val == null)
@@ -142,7 +148,7 @@ function Entity(table, checkData, columns) {
 		var column;
 		for(i in columns){
 			column = columns[i];
-			if((data[column] == undefined) || (data[column] == null))
+			if((data[column] == undefined) || (data[column] == null) || (data[column].length === 0))
 				rtn[column] = null;
 			else
 				rtn[column] = data[column];
@@ -151,15 +157,19 @@ function Entity(table, checkData, columns) {
 	};
 	
 	this.insert = function(data, options, callback){
-		data = checkData(data);
+		data = this.entityFromData(data);
 		insertQuery("INSERT INTO "+this.table+" (user, name, role, email, pass) VALUES (:user, :name, :role, :email, :pass)",
-		user, function(err, id){
-			if(err)
-				callback(null, err);
-			else if(typeof callback == 'function'){
-				user._id = id;
-				callback(null,user);
-			}					
+		data, function(err, id){
+			if(typeof callback == 'function')
+				if(err)
+					callback(null, err);
+				else if(typeof callback == 'function'){
+					data._id = id;
+					callback(null,data);
+				}
+			else if(err) {
+				console.log("[Error] Inserting on"+this.table, err);
+			}
 		});
 	};
 	
@@ -212,4 +222,4 @@ function Entity(table, checkData, columns) {
 exports.users = new Entity("Users", function(user){
 	user.user = user.user?user.user:null;
 	user.email = user.email?user.email:null;
-	}, 	["_id", "user", "name", "role", "email", "pass", "room"]);
+	}, 	["_id", "user", "name", "role", "email", "pass", "room", "nss"]);

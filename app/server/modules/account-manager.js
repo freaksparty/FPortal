@@ -130,6 +130,7 @@ exports.updateUser = function(newData, callback)
 						o.name		= newData.name;
 						o.email		= newData.email;
 						o.role		= newData.role;
+						o.nss		= newData.nss;
 						if (newData.pass === ''){
 							users.save(o, {safe: true}, function(err) {
 								if (err) callback(err);
@@ -270,12 +271,23 @@ exports.listUsers = function(callback, size, skip)
 		options['size'] = size;
 	if(skip != null)
 		options['skip'] = skip;
-	db.queryToList("SELECT _id, user, name, email, role, room FROM Users",{}, options, callback);
+	db.queryToList("SELECT _id, user, nss, name, email, role, room, creation FROM Users",{}, options, 
+	function(err,list){
+		if(err)
+			callback(err,list);
+		else { 
+			list.forEach(function(user){
+				user.creation = moment(user.creation, 'YYYY-MM-DD HH:mm:ss');
+			});
+			callback(null, list);
+		}
+			
+	});
 };
 
 exports.listUsersSmall = function(callback)
 {
-	db.queryToList("SELECT _id, user, name, role FROM Users",{}, {},callback);
+	db.queryToList("SELECT _id, user, nss, name, role FROM Users",{}, {},callback);
 };
 
 exports.findById = function(id, callback)

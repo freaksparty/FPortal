@@ -19,10 +19,13 @@ block content
 			hr
 			.form-input
 				label.control-label(for='name-tf') Name
-				input#name-tf.input-xlarge(type='text', name='name', value= user.name)
+				input#name-tf.input-xlarge(type='text', name='name', value= user.name, placeholder='Full name')
 			.form-input
 				label.control-label(for='email-tf') Email
 				input#email-tf.input-xlarge(type='text', name='email', value= user.email)
+			.form-input
+				label.control-label(for='nss-tf') SSN
+				input#nss-tf.input-xlarge(type='text', name='nss', value=user.nss, maxlength='12', placeholder='Social Security Number')
 			hr
 			p#sub2.subheading
 			.form-input
@@ -30,7 +33,7 @@ block content
 				input#user-tf.input-xlarge(type='text', name='user', value= user.user, disabled= authUser.role!='Admin')
 			.form-input
 				label.control-label(for='pass-tf') Password
-				input#pass-tf.input-xlarge(type='password', name='pass', value='')
+				input#pass-tf.input-xlarge(type='password', name='pass', value='', placeholder='If empty, sends user an email to set it')
 			.form-input
 				label.control-label(for='pass-tf') Role
 				select#role-list.input-xlarge(name='role', disabled= authUser.role!='Admin')

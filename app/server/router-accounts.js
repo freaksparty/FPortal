@@ -144,7 +144,8 @@ module.exports = function(app) {
 		var data = {
 			name		: req.param('name'),
 			email		: req.param('email'),
-			pass		: req.param('pass')
+			pass		: req.param('pass'),
+			nss			: req.param('nss')
 		};
 		if(AM.isAdmin(req.session.user)){
 			data.user	= req.param('user');

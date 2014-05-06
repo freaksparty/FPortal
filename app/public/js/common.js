@@ -56,5 +56,5 @@ function showSucess(text) {
 	$('#response-panel').text(text).fadeIn();				
 }
 /**/
-function isEmpty(s){return(!s||0===s.length);
-}
+function isEmpty(s){return(!s||0===s.length);}
+function numericInput(s){s.keyup(function(){s.val(s.val().replace(/\D/g,''));});}

@@ -54,4 +54,5 @@ $(document).ready(function(){
 			showError('Fail: '+xhr.responseText);
 		}
 	});
+	numericInput($('#nss-tf'));
 });
