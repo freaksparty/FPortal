@@ -36,7 +36,7 @@ function showJoin(){
 	$('.form-actions').fadeIn();	
 }
 function checkStatus(){
-	$.ajax('status', {
+	$.ajax('./status', {
 		cache	: false,
 		statusCode : {
 			404	: function(xhr){

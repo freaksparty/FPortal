@@ -1,14 +1,17 @@
+var dbconfig = {
+	  host: '127.0.0.1',
+	  user: 'PIAMAD',
+	  password: 'piamadpass',
+	  db: 'PIAMAD'
+	};
+
 var inspect = require('util').inspect;
 var Client = require('mariasql');
 var sprintf = require('sprintf').sprintf;
+var moment = require('moment');
 
-var c = new Client();
-c.connect({
-  host: '127.0.0.1',
-  user: 'PIAMAD',
-  password: 'piamadpass',
-  db: 'PIAMAD'
-});
+var c = new Client(dbconfig);
+c.connect();
 
 exports.sql = c;
 
@@ -23,6 +26,10 @@ c.on('connect', function() {
 	 });
 
 /* Aux functions */
+function momentToString(m){
+	return m.format('YYYY-MM-DD HH:mm:ss');
+}
+
 function filtersToWhere(filters, joiner){
 	var where = [];
 	for (key in filters){
@@ -35,11 +42,15 @@ function filtersToWhere(filters, joiner){
 				where.push(key+"IS NULL");
 		else if(typeof val == "number")
 			where.push(key+"="+val);
+		else if(moment.isMoment(val))
+			where.push(key+"'"+momentToString(val)+"'");
 		else if(val == null)
 			where.push(key+" IS NULL");
 	}
 	return where.join(" AND ");
 }
+exports.filtersToWhere = filtersToWhere;
+
 function filtersToSet(filters) {
 	var set = [];
 	for (key in filters){
@@ -52,11 +63,14 @@ function filtersToSet(filters) {
 				set.push(key+"=NULL");
 		else if(typeof val == "number")
 			set.push(key+"="+val);
+		else if(moment.isMoment(val))
+			set.push(key+"'"+momentToString(val)+"'");
 		else if(val == null)
 			set.push(key+"= NULL");
 	}
 	return set.join(", ");
 }
+exports.filtersToSet = filtersToSet;
 
 /* Basic CRUD */
 function queryToObject(query, values, callback){
@@ -69,6 +83,7 @@ function queryToObject(query, values, callback){
 		})
 		.on('error', function(err) {
 			console.log('[Error] Database queryToObject() Error in row: ' + inspect(err));
+			console.log('[Error] [SQL] ', query);
 		    callback(err);
 		});
 	}).on('end', function(err) {
@@ -93,8 +108,10 @@ function queryToList(query,values, options, callback) {
 		    error = err;
 		});
 	}).on('end', function(info){
-		if(error)
-			callback(err, result);
+		if(error) {
+			console.log("[Error] [SQL] ",query);
+			callback("Error in datasource", result);
+		}
 		else
 			callback(null, result);
 	});
@@ -137,10 +154,14 @@ function updateQuery(query, values, callback){
 };
 
 //** Simple ORM **//
-function Entity(table, checkData, columns) {
+function Entity(table, checkData, columns, momentColumns) {
 
 	this.table = table;
 	this.columns = columns;
+	if(!momentColumns)
+		this.momentCols = [];
+	else
+		this.momentCols = momentColumns;
 	
 	this.entityFromData = function(data){
 		var rtn = {};
@@ -148,18 +169,35 @@ function Entity(table, checkData, columns) {
 		var column;
 		for(i in columns){
 			column = columns[i];
-			if((data[column] == undefined) || (data[column] == null) || (data[column].length === 0))
-				rtn[column] = null;
-			else
-				rtn[column] = data[column];
+			if(data[column] != undefined)
+				if((data[column] == null) || (data[column].length === 0))
+					rtn[column] = null;
+				else if(moment.isMoment(data[column]))
+					rtn[column] = momentToString(data[column]);
+				else
+					rtn[column] = data[column];
 		}
 		return rtn;
 	};
 	
+	this.parseRow = function(row){
+		var col;
+		for(i in this.momentCols){
+			col = this.momentCols[i];
+			if(row[col])
+				row[col]=moment(row[col], 'YYYY-MM-DD HH:mm:ss');
+		}
+		return row;
+	};
+	
 	this.insert = function(data, options, callback){
 		data = this.entityFromData(data);
-		insertQuery("INSERT INTO "+this.table+" (user, name, role, email, pass) VALUES (:user, :name, :role, :email, :pass)",
-		data, function(err, id){
+		var query = sprintf("INSERT INTO %s (%s) VALUES (:%s)", 
+				this.table, 
+				Object.keys(data).join(','), 
+				Object.keys(data).join(',:'));
+		insertQuery(query,data, 
+		function(err, id){
 			if(typeof callback == 'function')
 				if(err)
 					callback(null, err);
@@ -174,9 +212,10 @@ function Entity(table, checkData, columns) {
 	};
 	
 	this.findOne = function(filters, callback){
+		var me = this;
 		var query = sprintf("SELECT * FROM "+this.table+" WHERE %s", filtersToWhere(filters));
 		queryToObject(query, null, function(e, o){
-			if(o && o._id) o._id = parseInt(o._id);
+			if(o) o = me.parseRow(o);
 			callback(e,o);
 		});
 	};
@@ -223,3 +262,7 @@ exports.users = new Entity("Users", function(user){
 	user.user = user.user?user.user:null;
 	user.email = user.email?user.email:null;
 	}, 	["_id", "user", "name", "role", "email", "pass", "room", "nss"]);
+
+exports.events = new Entity("Events", function(e){
+	e.comments = e.comments?e.comments:null;
+	}, ["_id", "owner", "patient", "start", "duration", "comments", "status"], ["start"]);

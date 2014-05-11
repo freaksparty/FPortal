@@ -26,7 +26,7 @@ block content
 							-event.participants = []
 							tr
 								td
-									a(href='/event/#{event._id}')
+									a(href='/event/#{event._id}/')
 										span=event.start
 								td=event.duration+' min'
 								td=event.participants.join(', ')
@@ -46,7 +46,7 @@ block content
 					each event in guestEventList
 						tr
 							td
-								a(href='/event/#{event._id}')
+								a(href='/event/#{event._id}/')
 								span=event.start
 							td=event.duration+' min'
 							td

@@ -80,7 +80,7 @@ module.exports = function (app){
 			});			
 		}
 	});
-	app.get('/event/:eventId', function(req, res) {
+	app.get('/event/:eventId/', function(req, res) {
 		if ((req.session.user == null)){
 			req.session.redirect = req.protocol + '://' + req.get('host') + req.originalUrl;
 			res.redirect('/');
@@ -153,7 +153,7 @@ module.exports = function (app){
 				if(req.param('eventId') === undefined) { //Create
 					var event = {
 							owner : req.session.user._id,
-							start : moment(req.param('date')+ ' ' +req.param('hour'), "DD/MM/YYYY H:mm").toDate(),
+							start : moment(req.param('date')+ ' ' +req.param('hour'), "DD/MM/YYYY H:mm"),
 							duration : req.param('duration'),
 							patient : req.param('patient'),
 							collaborators : req.param('collaborators'),
@@ -182,7 +182,7 @@ module.exports = function (app){
 						ev.relatives = req.param('relatives');
 						ev.collaborators = req.param('collaborators');
 						ev.comments = req.param('comments');
-						ev.start = moment(req.param('date')+ ' ' +req.param('hour'), "DD/MM/YYYY H:mm").toDate(),
+						ev.start = moment(req.param('date')+ ' ' +req.param('hour'), "DD/MM/YYYY H:mm"),
 						ev.duration = req.param('duration');
 						EM.updateEvent(ev, function(er, upevent){
 							if(er) {

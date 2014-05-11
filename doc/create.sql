@@ -24,12 +24,13 @@ CREATE TABLE Users (
 CREATE TRIGGER insUser BEFORE INSERT ON Users 
 FOR EACH ROW SET NEW.creation = NOW();
 
+--	duration TIME NOT NULL,
 CREATE TABLE Events (
 	_id INT(9) NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	owner INT(9) NOT NULL REFERENCES Users(_id),
 	patient INT(9) NOT NULL REFERENCES Users(_id),
 	start DATETIME NOT NULL,
-	duration TIME NOT NULL,
+	duration INTEGER UNSIGNED NOT NULL,
 	comments VARCHAR(150),
 	status ENUM('Created', 'MedicIn', 'Closed') DEFAULT 'Created'	
 ) ENGINE = InnoDB;

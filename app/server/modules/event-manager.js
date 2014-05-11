@@ -2,21 +2,37 @@
  * @license: MIT
  * @copyright: 2014 Siro González Rodríguez
  */
-var db = require('./database');
-var events = db.collection('events');
+var db = require('./sql');
+//var events = db.collection('events');
+var events = db.events;
 var N = require('./../../../nuve');
-var ObjectId = require('mongodb').ObjectID;
+//var ObjectId = require('mongodb').ObjectID;
+var ObjectId = parseInt;
 
 exports.listEventsCreatedBy = function(user,callback){
-	events.find({owner:user._id}).toArray(callback);
+	var query = "SELECT e._id, o.name, p.name, start, duration, comments FROM Events e "+
+	"JOIN Users o ON o._id=owner JOIN Users p ON p._id=patient WHERE owner="+user._id;
+	db.queryToList(query, {}, {}, function(err, events){
+	if(err)
+		callback(err, []);
+	else {
+		callback(null, events);
+	}
+});
 };
 
 exports.listEventsByParticipant = function(user, callback){
-	events.find({$or: 
-		[{participants: user._id},
-		 {patient: user._id}, 
-		 {collaborators: user._id}]}
-	).toArray(callback);
+	var query = "SELECT e._id, o.name, p.name, start, duration, comments " +
+			"FROM Events e JOIN Users o ON o._id=owner JOIN Users p ON p._id=patient " +
+			"WHERE e._id IN (SELECT event FROM EventParticipants WHERE user="+ user._id + ") " +
+			"OR patient="+user._id;
+	db.queryToList(query, {}, {}, function(err, events){
+		if(err)
+			callback(err, []);
+		else {
+			callback(null, events);
+		}
+	});
 };
 
 exports.findEventById = function(eventId, callback) {
@@ -47,9 +63,9 @@ exports.updateEvent = function(newData, callback) {
 exports.createEvent = function(data, callback) {
 	if(data._id) {
 		console.log('[Error] event-manager createEvent: event._id is set');
-		callback('_id is set');
+		callback('Id is set ¿The event already exists?');
 	} else {
-		events.save(data, {safe:true}, function(err, o){
+		events.insert(data, {safe:true}, function(err, o){
 			if(err){
 				console.log('[Error] event-manager createEvent: saving new data: ',err);
 				callback('Error saving data');
