@@ -13,7 +13,10 @@ var N			= require('./../../../nuve');
 var ObjectId = parseInt;
 
 //var users	= db.collection('users');
-var users = db.users;
+var users = new db.Entity("Users", function(user){
+	user.user = user.user?user.user:null;
+	user.email = user.email?user.email:null;
+	}, 	["_id", "user", "name", "role", "email", "pass", "room", "nss"]);
 
 var roles = ['Medic', 'Patient', 'Admin', 'Familiar'];
 

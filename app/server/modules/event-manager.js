@@ -3,11 +3,17 @@
  * @copyright: 2014 Siro González Rodríguez
  */
 var db = require('./sql');
-//var events = db.collection('events');
-var events = db.events;
+var sprintf = require('sprintf').sprintf;
 var N = require('./../../../nuve');
-//var ObjectId = require('mongodb').ObjectID;
 var ObjectId = parseInt;
+
+function getEntity(sql) {
+	return new sql.Entity("Events", function(e){
+		e.comments = e.comments?e.comments:null;
+	}, ["_id", "owner", "patient", "start", "duration", "comments", "status"], ["start"]);
+}
+
+var events = getEntity(db);
 
 exports.listEventsCreatedBy = function(user,callback){
 	var query = "SELECT e._id, o.name, p.name, start, duration, comments FROM Events e "+
@@ -65,12 +71,45 @@ exports.createEvent = function(data, callback) {
 		console.log('[Error] event-manager createEvent: event._id is set');
 		callback('Id is set ¿The event already exists?');
 	} else {
-		events.insert(data, {safe:true}, function(err, o){
+		if(data.collaborators === undefined) data.collaborators = [];
+		if(data.relatives === undefined) data.relatives = [];
+		var sql = require('./sql');
+		sql.startTransaction();
+		tEvents = getEntity(sql);
+		tEvents.insert(data, {safe:true}, function(err, o){
 			if(err){
 				console.log('[Error] event-manager createEvent: saving new data: ',err);
+				sql.close();
 				callback('Error saving data');
-			} else 
-				callback(null, o);
+				return;
+			} else { 
+				
+				var participants = data.relatives.concat(data.collaborators);
+				var length = participants.length;
+				if(length > 0) {
+					var values = [];
+					for(var i = 0; i < length; i++)
+						values.push(sprintf("(%d,%d)", o._id, ObjectId(participants[i])));
+
+					var query = "INSERT INTO EventParticipants (event,user) VALUES" +
+						values.join(',');
+					sql.updateQuery(query, {}, function(err, affected){
+						if(err)
+							callback(err);
+						else if(affected != length) {						
+							console.log(sprintf("[ERROR] Inserting participants, there are %d but only %d where inserted", length, affected));
+							callback("Error inserting participants");
+							sql.close();
+						} else {
+							sql.commit();
+							callback(null, o);	
+						}
+					});
+				} else {
+					sql.commit();
+					callback(null,o);
+				}
+			}
 		});
 	}
 };
