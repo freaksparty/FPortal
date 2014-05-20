@@ -23,13 +23,15 @@ block content
 							th Comments/Subject
 					tbody.autolink
 						each event in ownEventList
-							-event.participants = []
 							tr
 								td
 									a(href='/event/#{event._id}/')
 										span=event.start
 								td=event.duration+' min'
-								td=event.participants.join(', ')
+								td
+									p=event.patient +' (Patient)'
+									each p in event.participants
+										p=p
 								td=event.comments
 								
 		h3 Events you are invited
@@ -50,7 +52,10 @@ block content
 								span=event.start
 							td=event.duration+' min'
 							td
-							//td=event.participants.join(', ')
+								p=event.patient+' (Patient)'
+								p=event.medic+' (Medic)'
+								each p in event.participants
+									p=p
 							td=event.comments
 
 	include modals/modal

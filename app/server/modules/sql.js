@@ -28,7 +28,7 @@ if(mainClient == null) {
 	mainClient.connect(dbconfig);
 	mainClient.on('connect', function() {
 		   console.log('[OK] SQL datasource connected');
-		   c.query("SET autocommit=0;");
+		   mainClient.query("SET autocommit=0;");
 		 })
 		 .on('error', function(err) {
 		   console.log('[ERROR] Connecting to SQL: ' + err);
@@ -96,6 +96,25 @@ function Sql(){
 				callback(null, result);
 		});
 	};
+	this.queryToArray = function(query, values, callback) {
+		var result = [];
+		var error = null;
+		this.c.query(query, values, true)
+		.on('result', function(res){
+			res.on("row", function(row){result.push(row[0]);})
+			.on("error", function(err) {
+				error = err;
+				console.log("[Error] In row: ", err);
+			});
+		}).on("end", function(info) {
+			if(error){
+				console.log("[Error] [SQL] ", query);
+				callback("Error in datasource", result);
+			}
+			else
+				callback(null, result);
+		});
+	};
 	
 	//**Common for insert and update **//*
 	this.saveQuery = function (query, values, callback){
@@ -144,6 +163,7 @@ function Sql(){
 			this.momentCols = momentColumns;
 		
 		this.entityFromData = function(data){
+			checkData(data);
 			var rtn = {};
 			var columns = this.columns;
 			var column;
@@ -204,14 +224,17 @@ function Sql(){
 				callback(table+' update needs the _id');
 			else {
 				var entity = this.entityFromData(data);
+				var that = this;
 				var query = sprintf("UPDATE "+this.table+" SET %s WHERE _id=?", filtersToSet(entity));
 				sql.updateQuery(query, [data._id], function(error, affected){
 					if(error){
 						callback(error);
-					} else if(affected == 1)
+					} else if(affected <= 1)
 						callback(null, entity);
-					else
-						callback("updating "+this.table+": unexpected affected rows number="+affected);
+					else {
+						console.log("[Warning] [SQL] "+query);
+						callback("updating "+that.table+": unexpected affected rows number="+affected);
+					}
 				});
 			}
 		};
@@ -249,15 +272,15 @@ function Sql(){
 		var c = this.c;
 		//this.hasErrors = hasErrors;
 		this.c.on('connect', function() {
-			   c.query("SET autocommit=0;");
-			   c.query("START TRANSACTION;");
+			   /*c.query("SET autocommit=0;");
+			   c.query("START TRANSACTION;");*/
 			   //console.log("Transaction start");
 		 })
 		 .on('error', function(err) {
 		   console.log('[ERROR] Creating transaction client on SQL: ' + err);
 		 })
 		 .on('close', function(hadError) {
-			 c.query("ROLLBACK;");
+			 //c.query("ROLLBACK;");
 			 //console.log('[ !! ] SQL client closed');
 		 });
 		this.c.connect(dbconfig);
@@ -267,7 +290,7 @@ function Sql(){
 		this.c.query("COMMIT;");
 	};
 	this.rollback = function() {
-		this.c.query("ROLLBACK;");
+		//this.c.query("ROLLBACK;");
 		//console.log("[SQL] ROLLBACK");
 	};
 }

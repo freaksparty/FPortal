@@ -118,9 +118,6 @@ module.exports = function (app){
 							if(ev.owner === req.session.user._id){
 								ev.date = moment(ev.start).format('DD/MM/YYYY');
 								ev.hour = moment(ev.start).format('HH:mm');
-								if(!ev.collaborators) ev.collaborators = [];
-								if(!ev.relatives) ev.relatives = [];
-								ev.participants = ev.collaborators.concat(ev.relatives);
 								res.render('eventform', {
 									title		: 'Edit event',
 									sessionUser	: req.session.user,
@@ -156,8 +153,9 @@ module.exports = function (app){
 							start : moment(req.param('date')+ ' ' +req.param('hour'), "DD/MM/YYYY H:mm"),
 							duration : req.param('duration'),
 							patient : req.param('patient'),
-							collaborators : req.param('collaborators'),
-							relatives : req.param('relatives'),
+							//collaborators : req.param('collaborators'),
+							//relatives : req.param('relatives'),
+							participants : req.param('participants')
 					};
 					if(req.param('comments') !== '')
 						event.comments = req.param('comments');
@@ -179,8 +177,9 @@ module.exports = function (app){
 						res.send('Permission denied', 403);
 					} else {
 						ev.patient = req.param('patient');
-						ev.relatives = req.param('relatives');
-						ev.collaborators = req.param('collaborators');
+						/*ev.relatives = req.param('relatives');
+						ev.collaborators = req.param('collaborators');*/
+						ev.participants = req.param('participants');
 						ev.comments = req.param('comments');
 						ev.start = moment(req.param('date')+ ' ' +req.param('hour'), "DD/MM/YYYY H:mm"),
 						ev.duration = req.param('duration');

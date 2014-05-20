@@ -1,5 +1,6 @@
-var relatives = [];
-var collaborators = [];
+/*var relatives = [];
+var collaborators = [];*/
+var participants = [];
 
 $(document).ready(function(){
 	$('#txt-date').datepicker({
@@ -26,7 +27,17 @@ $(document).ready(function(){
 			var usId = idOfName(txt.val());
 			if(!usId)
 				tooltip_error(txt,'User not found, please check speeling');
-			else if(($.inArray(usId, relatives) > -1) || ($.inArray(usId, collaborators) > -1)) {
+			else if(($.inArray(usId, participants) > -1) ) {
+				txt.val('');//already added
+				$('#'+usId).fadeOut(200).fadeIn(200);
+			} else {
+				participants.push(usId);
+				$('#table-participants').append('<tr id="'+usId+'"><td>'+nameOfId(usId)+'</td></tr>');
+				$('#'+usId).hide().fadeIn(200);
+				txt.val('');
+				bindTable();
+			}
+			/*else if(($.inArray(usId, relatives) > -1) || ($.inArray(usId, collaborators) > -1)) {
 				txt.val('');//already added
 				$('#'+usId).fadeOut(200).fadeIn(200);
 			} else {
@@ -35,14 +46,15 @@ $(document).ready(function(){
 				$('#'+usId).hide().fadeIn(200);
 				txt.val('');
 				bindTable();
-			}
+			}*/
 		}
 	});
 
 	$('#event-form').ajaxForm({
 		beforeSubmit	: function (formData, formObject, formOptions){
-			$.each(relatives, function(i,p){formData.push({name:"relatives[]", value:p});});
-			$.each(collaborators, function(i,p){formData.push({name:"collaborators[]", value:p});});
+			/*$.each(relatives, function(i,p){formData.push({name:"relatives[]", value:p});});
+			$.each(collaborators, function(i,p){formData.push({name:"collaborators[]", value:p});});*/
+			$.each(participants, function(i,p){formData.push({name:"participants[]", value:p});});
 			formData.push({name:"patient", value:idOfName($('#txt-patient').val())});
 			return validEvent();
 		},
@@ -85,8 +97,9 @@ function isMedic(id){
 function bindTable() {
 	$('#table-participants>tr').unbind("click").click(function(){
 		that = $(this);
-		collaborators = $.grep(collaborators, function(value) {return value != that.prop('id');});
-		relatives = $.grep(relatives, function(value) {return value != that.prop('id');});
+		/*collaborators = $.grep(collaborators, function(value) {return value != that.prop('id');});
+		relatives = $.grep(relatives, function(value) {return value != that.prop('id');});*/
+		participants = $.grep(participants, function(value) {return value != that.prop('id');});
 		that.remove();
 	});
 }

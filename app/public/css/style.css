@@ -119,6 +119,9 @@ body {
   color: #fff;
   cursor: pointer;
 }
+.table p {
+  margin: 0;
+}
 .ui-datepicker select {
   padding: 1px;
   height: auto;
