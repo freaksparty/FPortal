@@ -24,6 +24,8 @@ exports.listEventsCreatedBy = function(user,callback){
 	db.queryToList(query, {}, {}, function(err, events){
 	if(err)
 		callback(err, []);
+	else if(events.length === 0)
+		callback(null, events);
 	else {
 		var ids = [];
 		var assEvents = {};
@@ -35,6 +37,7 @@ exports.listEventsCreatedBy = function(user,callback){
 			
 		query = "SELECT name user, event FROM EventParticipants p JOIN Users u ON u._id = p.user " +
 				"WHERE event IN ("+ids.join(',')+")";
+		console.log(query);
 		db.queryToList(query, {}, {}, function(err, participants){
 			if(err)
 				callback(err, events);
@@ -50,15 +53,36 @@ exports.listEventsCreatedBy = function(user,callback){
 };
 
 exports.listEventsByParticipant = function(user, callback){
-	var query = "SELECT e._id, o.name, p.name, start, duration, comments " +
+	var query = "SELECT e._id, o.name medic, p.name patient, start, duration, comments " +
 			"FROM Events e JOIN Users o ON o._id=owner JOIN Users p ON p._id=patient " +
 			"WHERE e._id IN (SELECT event FROM EventParticipants WHERE user="+ user._id + ") " +
 			"OR patient="+user._id;
 	db.queryToList(query, {}, {}, function(err, events){
 		if(err)
 			callback(err, []);
-		else {
+		else if(events.length === 0)
 			callback(null, events);
+		else {
+			var ids = [];
+			var assEvents = {};
+			for(var i = 0; i<events.length; i++) {
+				ids.push(events[i]._id);
+				assEvents[events[i]._id] = events[i];
+				events[i].participants = [];
+			}
+				
+			query = "SELECT name user, event FROM EventParticipants p JOIN Users u ON u._id = p.user " +
+					"WHERE event IN ("+ids.join(',')+")";
+			db.queryToList(query, {}, {}, function(err, participants){
+				if(err)
+					callback(err, events);
+				else {
+					for(var i = 0; i<participants.length; i++)
+						assEvents[participants[i].event].participants.push(participants[i].user);
+					callback(null, events);
+				}
+			});
+			
 		}
 	});
 };
@@ -68,7 +92,7 @@ exports.findEventById = function(eventId, callback) {
 	events.findOne({_id:eventId}, function(e, o){
 		if(e) callback(e);
 		else {
-			db.queryToArray("SELECT user FROM EventParticipants WHERE event=:event", {event:eventId}, function(e,arr){
+			getEventParticipants(eventId, function(err, arr){
 				if(e) callback(e);
 				else {
 					o.participants = arr;
@@ -220,3 +244,12 @@ exports.getTokenForMedic = function(user, event, callback) {
 		callback('Internal error');
 	});
 };
+
+function getEventParticipants(eventId, callback) {
+	db.queryToArray("SELECT user FROM EventParticipants WHERE event=:event", {event:eventId}, function(e,arr){
+		if(e) callback(e);
+		else {
+			callback(null, arr);
+		}
+	});	
+}

@@ -7,7 +7,7 @@ grant all privileges on PIAMAD.* to 'PIAMAD'@'localhost';
 
 use PIAMAD
 
-drop table if exists Users, Events; --,table1,table2...
+drop table if exists Users, Events, EventParticipants;
 CREATE TABLE Users (
 	_id INT(9) NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	user VARCHAR(20) NOT NULL UNIQUE,
@@ -32,10 +32,11 @@ CREATE TABLE Events (
 	start DATETIME NOT NULL,
 	duration INTEGER UNSIGNED NOT NULL,
 	comments VARCHAR(150),
-	status ENUM('Created', 'MedicIn', 'Closed') DEFAULT 'Created'	
+	status ENUM('Created', 'MedicIn', 'Closed') NOT NULL DEFAULT 'Created'	
 ) ENGINE = InnoDB;
 CREATE TABLE EventParticipants (
 	event INT(9) NOT NULL REFERENCES Events(_id),
 	user INT(9) NOT NULL REFERENCES Users(_id),
+	status ENUM('Invited', 'WontCome', 'Confirmed') NOT NULL DEFAULT 'Invited',
 	PRIMARY KEY(event,user)
 ) ENGINE = InnoDB;

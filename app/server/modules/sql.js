@@ -47,9 +47,9 @@ function Sql(){
 	this.transaction = false;
 	
 	this.close = function() {
-		if(this.transaction)
+		/*if(this.transaction)
 			this.rollback();
-		this.c.end();
+		this.c.end();*/
 	};
 	
 	/* Basic CRUD */
