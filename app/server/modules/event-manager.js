@@ -2,7 +2,8 @@
  * @license: MIT
  * @copyright: 2014 Siro González Rodríguez
  */
-var db = require('./sql');
+var DbClass = require('./sql');
+var db = new DbClass();
 var sprintf = require('sprintf').sprintf;
 var N = require('./../../../nuve');
 var ObjectId = parseInt;
@@ -37,7 +38,6 @@ exports.listEventsCreatedBy = function(user,callback){
 			
 		query = "SELECT name user, event FROM EventParticipants p JOIN Users u ON u._id = p.user " +
 				"WHERE event IN ("+ids.join(',')+")";
-		console.log(query);
 		db.queryToList(query, {}, {}, function(err, participants){
 			if(err)
 				callback(err, events);
@@ -110,7 +110,7 @@ exports.updateEvent = function(newData, callback) {
 			console.log('[Error] event-manager updateEvent: ',e);
 			callback('Event not found');
 		} else {
-			var sql = require('./sql');
+			var sql = new DbClass();
 			sql.startTransaction();
 			tEvents = getEntity(sql);
 			tEvents.save(newData, {safe:true}, function(err){
@@ -178,7 +178,7 @@ exports.createEvent = function(data, callback) {
 	} else {
 		if(data.collaborators === undefined) data.collaborators = [];
 		if(data.relatives === undefined) data.relatives = [];
-		var sql = require('./sql');
+		var sql = new DbClass();
 		sql.startTransaction();
 		tEvents = getEntity(sql);
 		tEvents.insert(data, {safe:true}, function(err, o){
@@ -211,7 +211,8 @@ exports.createEvent = function(data, callback) {
 						}
 					});
 				} else {
-					sql.commit();
+					//sql.commit();
+					sql.rollback();
 					callback(null,o);
 				}
 			}

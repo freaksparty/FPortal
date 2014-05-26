@@ -10,10 +10,6 @@ var dbconfig = {
 		  queryCache: false
 		};
 
-/*
- * NOTE: Entity is always out of transactions
- */
-
 var inspect = require('util').inspect;
 var Client = require('mariasql');
 var sprintf = require('sprintf').sprintf;
@@ -21,25 +17,25 @@ var moment = require('moment');
 
 /*Common for not transactional queries*/
 var mainClient;
-var sql;
+//var sql;
 if(mainClient == null) {
 	console.log("[INFO] Connecting to SQL...");
 	mainClient = new Client();
 	mainClient.connect(dbconfig);
 	mainClient.on('connect', function() {
 		   console.log('[OK] SQL datasource connected');
-		   mainClient.query("SET autocommit=0;");
+		   mainClient.query("SET autocommit=1;");
 		 })
 		 .on('error', function(err) {
 		   console.log('[ERROR] Connecting to SQL: ' + err);
 		 })
 		 .on('close', function(hadError) {
+			 mainClient.query("COMMIT;");
 		   console.log('[!!] SQL client closed');
 		 });
-	sql = new Sql();
 }
-
-module.exports = sql;
+//sql = new Sql();
+module.exports = Sql;
 
 function Sql(){
 	
@@ -47,9 +43,9 @@ function Sql(){
 	this.transaction = false;
 	
 	this.close = function() {
-		/*if(this.transaction)
+		if(this.transaction)
 			this.rollback();
-		this.c.end();*/
+		this.c.end();
 	};
 	
 	/* Basic CRUD */
@@ -191,12 +187,13 @@ function Sql(){
 		};
 		
 		this.insert = function(data, options, callback){
+			console.log("Insert");
 			data = this.entityFromData(data);
 			var query = sprintf("INSERT INTO %s (%s) VALUES (:%s)", 
 					this.table, 
 					Object.keys(data).join(','), 
 					Object.keys(data).join(',:'));
-			sql.insertQuery(query,data, 
+			this.sql.insertQuery(query,data, 
 			function(err, id){
 				if(typeof callback == 'function')
 					if(err)
@@ -214,7 +211,7 @@ function Sql(){
 		this.findOne = function(filters, callback){
 			var me = this;
 			var query = sprintf("SELECT * FROM "+this.table+" WHERE %s", filtersToWhere(filters));
-			sql.queryToObject(query, null, function(e, o){
+			this.sql.queryToObject(query, null, function(e, o){
 				if(o) o = me.parseRow(o);
 				callback(e,o);
 			});
@@ -226,7 +223,7 @@ function Sql(){
 				var entity = this.entityFromData(data);
 				var that = this;
 				var query = sprintf("UPDATE "+this.table+" SET %s WHERE _id=?", filtersToSet(entity));
-				sql.updateQuery(query, [data._id], function(error, affected){
+				this.sql.updateQuery(query, [data._id], function(error, affected){
 					if(error){
 						callback(error);
 					} else if(affected <= 1)
@@ -240,15 +237,15 @@ function Sql(){
 		};
 		this.remove = function(filters, callback){
 			var query = sprintf("DELETE FROM "+this.table+" WHERE %s", filtersToWhere(filters));
-			sql.insertQuery(query, {}, callback);
+			this.sql.insertQuery(query, {}, callback);
 		};
 		this.update = function(filters, sets, callback){
 			var query = sprintf("UPDATE "+this.table+" SET %s WHERE %s", filtersToSet(sets), filtersToWhere(filters),callback);
-			sql.updateQuery(query, {}, callback);
+			this.sql.updateQuery(query, {}, callback);
 		};
 		this.howMany = function(filters, callback){
 			var query = sprintf("SELECT COUNT(*) FROM %s WHERE %s", this.table, filtersToWhere(filters));
-			sql.c.query(query, null, true)
+			this.sql.c.query(query, null, true)
 			.on('result', function(res) {
 				res.on('row', function(row) {
 					callback(null, row[0]);
@@ -261,7 +258,7 @@ function Sql(){
 		};
 	};
 	//this.Entity.prototype.c = this.c;
-	this.Entity.sql = this;
+	this.Entity.prototype.sql = this;
 	
 	this.filtersToWhere = filtersToWhere;
 	this.filtersToSet = filtersToSet;
@@ -269,11 +266,11 @@ function Sql(){
 	/*Transaction support*/
 	this.startTransaction = function() {
 		this.c = new Client();
-		var c = this.c;
-		//this.hasErrors = hasErrors;
+		//var that = this;
 		this.c.on('connect', function() {
-			   /*c.query("SET autocommit=0;");
-			   c.query("START TRANSACTION;");*/
+			//This will run _AFTER_ the first query, so I don't get the point for this event (?)
+			   /*that.c.query("SET autocommit=0;");
+			   that.c.query("START TRANSACTION;");*/
 			   //console.log("Transaction start");
 		 })
 		 .on('error', function(err) {
@@ -284,14 +281,19 @@ function Sql(){
 			 //console.log('[ !! ] SQL client closed');
 		 });
 		this.c.connect(dbconfig);
+		this.c.query("SET autocommit=0;");
+		this.c.query("START TRANSACTION;");
 		this.transaction = true;
 	};
 	this.commit = function() {
 		this.c.query("COMMIT;");
+		console.log("[SQL] COMMIT;");
+		this.transaction = false;
+		this.close();
 	};
 	this.rollback = function() {
-		//this.c.query("ROLLBACK;");
-		//console.log("[SQL] ROLLBACK");
+		this.c.query("ROLLBACK;");
+		console.log("[SQL] ROLLBACK;");
 	};
 }
 
@@ -339,58 +341,3 @@ function filtersToSet(filters) {
 	}
 	return set.join(", ");
 }
-
-/*function Transaction() {
-	var c = new Client(dbconfig);
-	var hasErrors = false;
-	this.hasErrors = hasErrors;
-	
-	c.on('connect', function() {
-		   c.query("SET autocommit=0;");
-		   c.query("START TRANSACTION;");
-	 })
-	 .on('error', function(err) {
-	   console.log('[ERROR] Creating transaction client on SQL: ' + err);
-	 })
-	 .on('close', function(hadError) {
-	   console.log('[!!] SQL client closed');
-	 });
-	c.connect();
-	this.commit = function() {
-		c.query("COMMIT;");
-	};
-	this.rollback = function() {
-		c.query("ROLLBACK;");
-	};
-	this.close = function() {
-		if(!this.hasErrors)
-			c.query("COMMIT;");
-		c.close();
-		c = null;
-	};
-	this.alterQuery = function(query, values, callback){
-		c.query(query, values)
-		.on('result', function(res){
-			res.on('end', function(info){
-				callback(null, info);
-			}).on('error', function(err){
-				console.log("[Error] saving", inspect(err));
-				callback(err);
-			});
-		}).on('error', function(err){
-			hadErrors = true;
-			callback(err);
-		});
-	};
-
-}
-exports.transaction = Transaction;*/
-
-/*exports.users = new Entity("Users", function(user){
-	user.user = user.user?user.user:null;
-	user.email = user.email?user.email:null;
-	}, 	["_id", "user", "name", "role", "email", "pass", "room", "nss"]);
-
-exports.events = new Entity("Events", function(e){
-	e.comments = e.comments?e.comments:null;
-	}, ["_id", "owner", "patient", "start", "duration", "comments", "status"], ["start"]);*/

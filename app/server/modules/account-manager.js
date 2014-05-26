@@ -5,7 +5,8 @@
  * @Copyright: 2014 Siro González Rodríguez
  */
 var mongo		= require('./database');
-var db			= require('./sql');
+var DbClass 	= require('./sql');
+var db 			= new DbClass();
 var crypto		= require('crypto');
 var moment		= require('moment');
 var N			= require('./../../../nuve');
