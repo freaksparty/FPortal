@@ -85,7 +85,7 @@ module.exports = function (app){
 			req.session.redirect = req.protocol + '://' + req.get('host') + req.originalUrl;
 			res.redirect('/');
 		} else {
-			var route = 'router-events /event/'+req.params.eventId+' ';			
+			var route = 'router-events /event/'+req.params.eventId+' ';
 			EM.findEventById(req.params.eventId, function(e, ev){
 				if(e || !ev) {
 					console.log('[Error] '+route+'findEventById() says:', e);
@@ -95,12 +95,13 @@ module.exports = function (app){
 						backUrl	: '/events'
 					});
 				} else {
-					if(!ev.collaborators) ev.collaborators = [];
-					if(!ev.relatives) ev.relatives = [];
+					/*if(!ev.collaborators) ev.collaborators = [];
+					if(!ev.relatives) ev.relatives = [];*/
 					if ((ev.owner != req.session.user._id) &&
 							(ev.patient != req.session.user._id) &&
-							(ev.collaborators.indexOf(String(req.session.user._id)) === -1) &&
-							(ev.relatives.indexOf(String(req.session.user._id)) === -1)) {
+							/*(ev.collaborators.indexOf(String(req.session.user._id)) === -1) &&
+							(ev.relatives.indexOf(String(req.session.user._id)) === -1)*/
+							(ev.participants.indexOf(String(req.session.user._id)) === -1)) {
 						console.log('[Error] '+route+' permission denied to '+req.session.user._id+
 								' to event '+ev._id, e);
 						res.render('error', {
@@ -243,34 +244,45 @@ module.exports = function (app){
 };
 
 function eventStatus(eventId, user, callback){
-	EM.findEventById(eventId, function(err, ev){
-		if(!ev.relatives) ev.relatives = [];
-		if(!ev.collaborators) ev.collaborators = [];
-		ev.start = moment(ev.start);
-		if(err || !ev){
+	EM.findEventById(eventId, function(err, ev) {
+		if(err || ! ev) {
 			callback('The event does not exists', 404, ev);
-			console.log('[Error] router-events eventStatus('+eventId+') finding: ',err);
-		} else if((ev.owner != user._id) && (ev.patient != user._id) &&
-				(ev.relatives.indexOf(user._id) == -1) && (ev.collaborators.indexOf(user._id) == -1)){
-			console.log('[Error] router-events POST/event: user ('+user.user+') is not invited to event ('+eventId+')');
-			callback('The event does not exists', 404, ev);
-		} else if(ev.closed) {
-			callback('The event is closed', 410, ev);
-		} else if(moment().isBefore(ev.start)) {
-			callback('The event will open in '+ev.start.from(moment(),true), 200, ev);					
-		} else if(moment().isAfter(ev.start.add('m',ev.duration))) {
-			callback('The event is closed',410, ev);
-		} else if(!ev.mediconline) {
-			callback('Waiting for medic to enter', 202, ev);
-		} else
-			AM.findById(ev.owner, function(e, medic){
-				if(e || !medic){
-					callback('Internal error', 500);
-					console.log('[Error] router-events eventStatus('+eventId+') retrieving event owner: ',err);
-				} else {
-					callback('Open', 201, ev, medic.room);
-				}			
-			});
+			console.log('[Error] eventStatus(): eventStatus('+eventId+') getStatusByIds() says: ',err);
+		} else {
+			var end = moment(ev.start).add('m',ev.duration);
+			if( (ev.patient != user._id) && (ev.owner != user._id) && 
+				(ev.participants.indexOf(user._id) == -1) ) { 
+					callback('The event does not exists', 404, ev);
+					console.log("[Error] eventStatus(): user("+user.user+") is not invited to event: "+eventId);
+					
+			} else if((ev.status === 'Closed') ||
+					moment().isAfter(end)) {
+				callback('The event is closed', 410, ev);
+				
+			} else if(moment().isBefore(ev.start)) {
+				console.log(ev.start);
+				callback('The event will open in '+ev.start.from(moment(),true), 200, ev);
+				
+			} else if(!ev.status !== 'MedicIn') {
+				callback('Waiting for medic to enter', 202, ev);
+				
+				EM.getStatusByIds(eventId, user._id, function(err, ev){
+					if(err || !ev){
+						callback('The invitation does not exists', 404, ev);
+						console.log('[Error] eventStatus('+eventId+') getStatusByIds() says: ',err);
+						
+					} else
+						AM.findById(ev.owner, function(e, medic){
+							if(e || !medic){
+								callback('Internal error', 500);
+								console.log('[Error] router-events eventStatus('+eventId+') retrieving event owner: ',err);
+							} else {
+								callback('Open', 201, ev, medic.room);
+							}			
+						});
+				});
+			}
+		}
 	});
 }
 

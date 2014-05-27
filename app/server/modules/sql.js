@@ -48,6 +48,10 @@ function Sql(){
 		this.c.end();
 	};
 	
+	this.parseMoment = function(date) {
+		return moment(date, 'YYYY-MM-DD HH:mm:ss');
+	};
+	
 	/* Basic CRUD */
 	this.queryToObject = function(query, values, callback){
 		var found = false;
@@ -181,13 +185,12 @@ function Sql(){
 			for(i in this.momentCols){
 				col = this.momentCols[i];
 				if(row[col])
-					row[col]=moment(row[col], 'YYYY-MM-DD HH:mm:ss');
+					row[col] = this.sql.parseMoment(row[col]);
 			}
 			return row;
 		};
 		
 		this.insert = function(data, options, callback){
-			console.log("Insert");
 			data = this.entityFromData(data);
 			var query = sprintf("INSERT INTO %s (%s) VALUES (:%s)", 
 					this.table, 
@@ -287,13 +290,13 @@ function Sql(){
 	};
 	this.commit = function() {
 		this.c.query("COMMIT;");
-		console.log("[SQL] COMMIT;");
+		//console.log("[SQL] COMMIT;");
 		this.transaction = false;
 		this.close();
 	};
 	this.rollback = function() {
 		this.c.query("ROLLBACK;");
-		console.log("[SQL] ROLLBACK;");
+		//console.log("[SQL] ROLLBACK;");
 	};
 }
 

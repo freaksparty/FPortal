@@ -105,6 +105,7 @@ exports.findEventById = function(eventId, callback) {
 
 exports.updateEvent = function(newData, callback) {
 	newData._id = ObjectId(newData._id);
+	if(newData.participants == undefined) newData.participants = [];
 	events.findOne({_id : newData._id}, function(e,o){
 		if(e) {
 			console.log('[Error] event-manager updateEvent: ',e);
@@ -121,8 +122,9 @@ exports.updateEvent = function(newData, callback) {
 				} else {
 					//Deleted participants
 					var ids = newData.participants;
-					var query = "DELETE FROM EventParticipants WHERE event=:event " +
-							"AND user NOT IN ("+ids.join(',')+")";
+					var query = "DELETE FROM EventParticipants WHERE event=:event";
+					if(ids.length > 0)
+						query += " AND user NOT IN ("+ids.join(',')+")";
 					sql.updateQuery(query, {event:newData._id}, function(err, affected){
 						if(err) {							
 							sql.close();
@@ -171,6 +173,25 @@ exports.updateEvent = function(newData, callback) {
 	});
 };
 
+exports.getStatusByIds = function(evId, usId, callback) {
+	var query = "SELECT event, user, p.status invitationStatus, e.status eventStatus, start, owner " +
+			"FROM EventParticipants p JOIN Events e ON p.event=e._id " +
+			"WHERE event=:event AND user=:user";
+	db.queryToObject(query, {event:evId, user:usId}, function(err, res) {
+		if(err)
+			callback(err);
+		else if(!res)
+			callback('The event does not exists');
+		else {
+			res.event = parseInt(res.event);
+			res.user = parseInt(res.user);
+			res.start = db.parseMoment(res.start);
+			res.owner = parseInt(res.owner);
+			callback(null, res);
+		}
+	});
+};
+
 exports.createEvent = function(data, callback) {
 	if(data._id) {
 		console.log('[Error] event-manager createEvent: event._id is set');
@@ -189,30 +210,32 @@ exports.createEvent = function(data, callback) {
 				return;
 			} else { 
 				
-				var participants = data.relatives.concat(data.collaborators);
-				var length = participants.length;
-				if(length > 0) {
-					var values = [];
-					for(var i = 0; i < length; i++)
-						values.push(sprintf("(%d,%d)", o._id, ObjectId(participants[i])));
-
-					var query = "INSERT INTO EventParticipants (event,user) VALUES" +
-						values.join(',');
-					sql.updateQuery(query, {}, function(err, affected){
-						if(err)
-							callback(err);
-						else if(affected != length) {						
-							console.log(sprintf("[ERROR] Inserting participants, there are %d but only %d where inserted", length, affected));
-							callback("Error inserting participants");
-							sql.close();
-						} else {
-							sql.commit();
-							callback(null, o);	
-						}
-					});
+				//var participants = data.relatives.concat(data.collaborators);
+				if(data.participants.length > 0){
+					var participants = data.participants;
+					var length = participants.length;
+					if(length > 0) {
+						var values = [];
+						for(var i = 0; i < length; i++)
+							values.push(sprintf("(%d,%d)", o._id, ObjectId(participants[i])));
+	
+						var query = "INSERT INTO EventParticipants (event,user) VALUES" +
+							values.join(',');
+						sql.updateQuery(query, {}, function(err, affected){
+							if(err)
+								callback(err);
+							else if(affected != length) {						
+								console.log(sprintf("[ERROR] Inserting participants, there are %d but only %d where inserted", length, affected));
+								callback("Error inserting participants");
+								sql.close();
+							} else {
+								sql.commit();
+								callback(null, o);	
+							}
+						});
+					}
 				} else {
-					//sql.commit();
-					sql.rollback();
+					sql.commit();
 					callback(null,o);
 				}
 			}
