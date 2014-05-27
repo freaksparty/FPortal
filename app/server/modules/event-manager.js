@@ -252,6 +252,18 @@ exports.getToken = function(user, roomId, callback) {
 	});
 };
 
+exports.setEventStatus = function(eventId, status) {
+	var query = "UPDATE Events SET status = :status WHERE _id=:event";
+	db.updateQuery(query, {status:status, event:parseInt(eventId)}, function(err, affected) {
+		if(err) {
+			console.log("[Error] event-manager: setEventStatus, updateQuery says:", err);
+		} if (affected !== 1) {
+			console.log("[Error] event-manager: setEventStatus, updateQuery updated "+affected+" rows!");
+		}
+		
+	});
+};
+
 exports.getTokenForMedic = function(user, event, callback) {
 	N.API.createToken(user.room, user.user, 'presenter', function(token) {
 		event.mediconline = true;

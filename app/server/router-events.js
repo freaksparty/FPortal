@@ -232,6 +232,7 @@ module.exports = function (app){
 						res.send('Internal error', 500);
 						console.log('[Error] router-events get/event/'+req.params.eventId+'/status retrieving event token: ',err);
 					} else {
+						EM.setEventStatus(event._id,'MedicIn');
 						res.send(token, 201);
 					}
 				});
@@ -263,25 +264,27 @@ function eventStatus(eventId, user, callback){
 				console.log(ev.start);
 				callback('The event will open in '+ev.start.from(moment(),true), 200, ev);
 				
-			} else if(!ev.status !== 'MedicIn') {
+			} else if(ev.status !== 'MedicIn') {
 				callback('Waiting for medic to enter', 202, ev);
 				
-				EM.getStatusByIds(eventId, user._id, function(err, ev){
+			} else
+				AM.findById(ev.owner, function(e, medic){
+					if(e || !medic){
+						callback('Internal error', 500);
+						console.log('[Error] router-events eventStatus('+eventId+') retrieving event owner: ',err);
+					} else {
+						callback('Open', 201, ev, medic.room);
+					}			
+				});
+				
+				/*EM.getStatusByIds(eventId, user._id, function(err, ev){
 					if(err || !ev){
 						callback('The invitation does not exists', 404, ev);
 						console.log('[Error] eventStatus('+eventId+') getStatusByIds() says: ',err);
 						
-					} else
-						AM.findById(ev.owner, function(e, medic){
-							if(e || !medic){
-								callback('Internal error', 500);
-								console.log('[Error] router-events eventStatus('+eventId+') retrieving event owner: ',err);
-							} else {
-								callback('Open', 201, ev, medic.room);
-							}			
-						});
+					
 				});
-			}
+			}*/
 		}
 	});
 }
