@@ -197,8 +197,9 @@ exports.createEvent = function(data, callback) {
 		console.log('[Error] event-manager createEvent: event._id is set');
 		callback('Id is set ¿The event already exists?');
 	} else {
-		if(data.collaborators === undefined) data.collaborators = [];
-		if(data.relatives === undefined) data.relatives = [];
+		/*if(data.collaborators === undefined) data.collaborators = [];
+		if(data.relatives === undefined) data.relatives = [];*/
+		if(data.participants === undefined) data.participants = [];
 		var sql = new DbClass();
 		sql.startTransaction();
 		tEvents = getEntity(sql);

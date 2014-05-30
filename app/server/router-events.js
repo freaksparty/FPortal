@@ -261,7 +261,6 @@ function eventStatus(eventId, user, callback){
 				callback('The event is closed', 410, ev);
 				
 			} else if(moment().isBefore(ev.start)) {
-				console.log(ev.start);
 				callback('The event will open in '+ev.start.from(moment(),true), 200, ev);
 				
 			} else if(ev.status !== 'MedicIn') {
@@ -292,13 +291,17 @@ function eventStatus(eventId, user, callback){
 /*Validation*/
 function validEventForm(req, callback){
 	var patient = req.param('patient');
+	var date = moment(req.param('date'), "DD/MM/YYYY");
+	var hour = moment(req.param('hour'), "H:mm");
 	//TODO: check patient and medic ids
 	if(!patient || patient.length === 0)
 		callback('Patient is mandatory');
-	else if(!moment(req.param('date'), "DD/MM/YYYY").isValid())
+	else if(!date.isValid())
 		callback('Incorrect date format');
-	else if(!moment(req.param('hour'), "H:mm").isValid())
+	else if(!hour.isValid())
 		callback('Incorrect hour format');
+	else if(date.add(hour).isBefore(moment()))
+		callback('The event start is in the past');
 	else if(!req.param('duration') || req.param('duration').length === 0)
 		callback('Duration is mandatory');
 	else callback(null);

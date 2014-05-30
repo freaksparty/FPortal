@@ -36,6 +36,25 @@ function hideModal() {
 	$('#modal-background').slideUp();
 	$('#modal').fadeOut();
 }
+function modalConfirmAction(text, yesAction, urlNo) {
+	if(yesAction)
+		if(typeof yesAction == 'string')
+			$('#modal #modalSubmit').click(function(){window.location = yesAction;});
+		else if (typeof yesAction == 'function')
+			$('#modal #modalSubmit').click(yesAction);
+	else
+		$('#modal #modalSubmit').click(hideModal);
+	$('#modal #modalSubmit').text('Yes');
+	if(urlNo)
+		$('#modal .cancel').click(function(){window.location = urlNo;});
+	else
+		$('#modal .cancel').click(hideModal);
+	$('#modal .cancel').text('Cancel');
+	$('#modal #modalSubmit').show();
+	$('#modal p').text(text);
+	$('#modal-background').slideDown();
+	$('#modal').fadeIn();		
+}
 function modalError(text, url){
 	if(url)
 		$('#modal .cancel').click(function(){window.location = url;});
@@ -45,7 +64,6 @@ function modalError(text, url){
 	$('#modal p').text(text);
 	$('#modal-background').slideDown();
 	$('#modal').fadeIn();
-
 }
 function showError(text){
 	$('#response-panel').css({'border-color' : 'red', 'color': 'red'});

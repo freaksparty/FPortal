@@ -3,6 +3,8 @@ var collaborators = [];*/
 var participants = [];
 
 $(document).ready(function(){
+	if($('#eventId').length > 0)
+		checkStatus();
 	$('#txt-date').datepicker({
 		changeMonth: true,
 		changeYear: true,
@@ -127,4 +129,29 @@ function validEvent(){
 		tooltip_error('#txt-hour','Specified hour is not valid');
 	}		
 	return rtn;
+}
+function confirmJoin(){
+	$('#btn-cancel').hide();
+	modalConfirmAction('The event is being rigth now, would you like to enter?','./join');
+}
+function checkStatus(){
+	$.ajax('./status', {
+		cache	: false,
+		statusCode : {
+			404	: function(xhr){
+				modalError(xhr.responseText, '/events');
+			},
+			410 : function(xhr){
+				modalError(xhr.responseText, '/events');
+			},
+			500 : function() {
+				modalError('A critical error has occurred', '/events');
+			},
+			200 : function(xhr) {
+				setTimeout(checkStatus, 1000*60);
+			},
+			201 : confirmJoin,
+			202 : confirmJoin			
+		}
+	});
 }
