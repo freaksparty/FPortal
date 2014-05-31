@@ -238,8 +238,7 @@ module.exports = function (app){
 				});
 			} else {
 				res.send(text,status);
-			}
-			
+			}			
 		});
 	});
 };

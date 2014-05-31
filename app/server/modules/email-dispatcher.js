@@ -1,5 +1,6 @@
 
 var ES = require('./email-settings');
+var AM = require('./account-manager');
 var EM = {};
 module.exports = EM;
 
@@ -11,7 +12,7 @@ EM.server = require("emailjs/email").server.connect({
 	ssl			: true
 });
 
-EM.dispatchResetPasswordLink = function(account, callback)
+/*EM.dispatchResetPasswordLink = function(account, callback)
 {
 	EM.server.send({
 		from         : ES.sender,
@@ -28,18 +29,42 @@ EM.forgotPasswordEmail = function(o)
 	var link = 'http://node-login.braitsch.io/reset-password?e='+o.email+'&p='+o.pass;
 	var html = "<html><body>";
 		html += "Hi "+o.name+",<br><br>";
-		html += "Your username is :: <b>"+o.user+"</b><br><br>";
+		html += "Your username is : <b>"+o.user+"</b><br><br>";
 		html += "<a href='"+link+"'>Please click here to reset your password</a><br><br>";
 		html += "Cheers,<br>";
 		html += "<a href='http://twitter.com/braitsch'>braitsch</a><br><br>";
 		html += "</body></html>";
 	return  [{data:html, alternative:true}];
-}
+}*/
 
-EM.eventInviteEmail = function(event, user, medic) {
-	//TODO: alll!! :(
+EM.eventInviteEmail = function(eventLink, user, medic) {
 	var html = '<html><body>Hello '+user.name+', <br><br>';
 		html +='You have a new appointment with medic '+medic.name+'.<br>';
-		html +='Please, confirm your assistance with the following link:';
-	return [{data:html, alternative:true}];
+		html +='Please, confirm your assistance with the following link:<br>';
+		html +="<a href='"+eventLink+"'></body></html>";
+	//doSend(html, 'New Medical Appointment', user.email, EM.sender, function(){});
+	console.log(html);
+};
+
+EM.sendInvitation = function(user, event) {
+	if(typeof(user != 'object'))
+		AM.findById(user, function(err, u){
+			if(err){
+				console.log("[Error] email-dispatcher sendInvitation(), user not found");
+			} else
+				EM.sendInvitation(u, event);
+		});
+	else {
+		
+	}		
+}
+
+function doSend(html, subject, email, sender, callback){
+	EM.server.send({
+		from         : sender,
+		to           : email,
+		subject      : subject,
+		text         : html,
+		attachment   : {data:html, alternative:true}
+	}, callback );
 }

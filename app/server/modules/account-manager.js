@@ -254,20 +254,6 @@ exports.validateResetLink = function(email, passHash, callback)
 	});
 }
 
-/*exports.getAllRecords = function(callback)
-{
-	users.find().toArray(
-		function(e, res) {
-		if (e) callback(e)
-		else callback(null, res)
-	});
-};
-
-exports.delAllRecords = function(callback)
-{
-	users.remove({}, callback); // reset users collection for testing //
-};*/
-
 exports.listUsers = function(callback, size, skip)
 {
 	var options = {};

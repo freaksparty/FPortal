@@ -6,6 +6,7 @@ var DbClass = require('./sql');
 var db = new DbClass();
 var sprintf = require('sprintf').sprintf;
 var N = require('./../../../nuve');
+var email = require('./email-dispatcher');
 var ObjectId = parseInt;
 
 function getEntity(sql) {
@@ -21,7 +22,7 @@ var events = getEntity(db);
 
 exports.listEventsCreatedBy = function(user,callback){
 	var query = "SELECT e._id, o.name medic, p.name patient, start, duration, comments FROM Events e "+
-	"JOIN Users o ON o._id=owner JOIN Users p ON p._id=patient WHERE owner="+user._id;
+	"JOIN Users o ON o._id=owner JOIN Users p ON p._id=patient WHERE status != 'Closed' AND owner="+user._id;
 	db.queryToList(query, {}, {}, function(err, events){
 	if(err)
 		callback(err, []);
@@ -104,6 +105,54 @@ exports.findEventById = function(eventId, callback) {
 };
 
 exports.updateEvent = function(newData, callback) {
+	function deleteParticipants(sql, ids, eventId, callback){
+		if(ids.length > 0) {
+			var query = "DELETE FROM EventParticipants WHERE event=:event";
+			if(ids.length > 0)
+				query += " AND user IN ("+ids.join(',')+")";
+			sql.updateQuery(query, {event:eventId}, function(err, affected){
+				if(err) {							
+					callback(err);
+				} else {
+					if(affected != ids.length)			
+						console.log('[Warning] event-manager updateEvent deleteParticipants deleting: '+ids.length+' but deleted: '+affected);
+
+					for(var i=0; i<ids; i++){
+						//email.sendCancellation()
+					}
+					callback();
+				}
+			});
+		} else {
+			callback();
+		}
+	}
+	
+	function addParticipants(sql, ids, eventId, callback) {
+		if(ids.length > 0) {
+			var add = [];
+			for(var i=0; i<ids.length; i++)
+				add.push(sprintf("(%d,%s)", eventId, ids[i]));
+
+			var query = "INSERT INTO EventParticipants (event, user) VALUES "+add.join(',');
+			sql.updateQuery(query, {}, function(err, added){
+				if(err) {
+					console.log('[Error] event-manager adding users to event: ',err);
+					callback("Error adding participants");
+				} else if (added !== add.length){
+					console.log('[Error] event-manager adding users to event, adding: '+add.length+' but only added:'+added);
+					callback("Not all participants added");												
+				} else {
+					for(var i=0; i<ids.length; i++)
+						email.sendInvitation(parseInt(usId),newData);
+					callback();		
+				}											
+			});
+		} else 
+			callback();
+	}
+	
+	
 	newData._id = ObjectId(newData._id);
 	if(newData.participants == undefined) newData.participants = [];
 	events.findOne({_id : newData._id}, function(e,o){
@@ -111,64 +160,59 @@ exports.updateEvent = function(newData, callback) {
 			console.log('[Error] event-manager updateEvent: ',e);
 			callback('Event not found');
 		} else {
-			var sql = new DbClass();
-			sql.startTransaction();
-			tEvents = getEntity(sql);
-			tEvents.save(newData, {safe:true}, function(err){
-				if(err){
-					console.log('[Error] event-manager saving new data: ',err);
-					sql.close();
-					callback('Error saving data');
+			getEventParticipants(newData._id, function(e, oldParticipants){
+				if(e) {
+					console.log('[Error] event-manager updateEvent, getting event particpants:'+e);
+					callback('Internal error');
 				} else {
-					//Deleted participants
-					var ids = newData.participants;
-					var query = "DELETE FROM EventParticipants WHERE event=:event";
-					if(ids.length > 0)
-						query += " AND user NOT IN ("+ids.join(',')+")";
-					sql.updateQuery(query, {event:newData._id}, function(err, affected){
-						if(err) {							
+					var sql = new DbClass();
+					sql.startTransaction();
+					tEvents = getEntity(sql);
+					tEvents.save(newData, {safe:true}, function(err){
+						if(err){
+							console.log('[Error] event-manager saving new data: ',err);
 							sql.close();
-							callback(err);
+							callback('Error saving data');
 						} else {
-							query = "SELECT user FROM EventParticipants WHERE event=:event";
-							sql.queryToArray(query, {event:newData._id}, function(err, arr){
-								if(err){
+							var deletedP = [];
+							var addedP = [];
+							var persistP = [];
+							for(var i=0; i<oldParticipants.length; i++){
+								if(newData.participants.indexOf(oldParticipants[i]) === -1)
+									deletedP.push(oldParticipants[i]);
+								else
+									persistP.push(oldParticipants[i]);
+							}
+							for(var i=0; i<newData.participants.length; i++){
+								if(oldParticipants.indexOf(newData.participants[i]) === -1)
+									addedP.push(newData.participants[i]);
+							}
+							deleteParticipants(sql, deletedP, newData._id, function(err){
+								if(err) {
 									sql.close();
-									callback(err);
-								} else {
-									var add = [];
-									for(var i = 0; i<ids.length; i++) {
-										if(arr.indexOf(ids[i]) === -1) 
-											add.push(
-												sprintf("(%d,%s)",newData._id,ids[i])
-											);
-									}
-									if(add.length > 0) {
-										query = "INSERT INTO EventParticipants (event, user) VALUES "+add.join(',');
-										sql.updateQuery(query, {}, function(err, added){
-											if(e) {
-												console.log('[Error] event-manager adding users to event: ',err);
-												sql.close();
-												callback("Error adding participants");
-											} else if (added !== add.length){
-												console.log('[Error] event-manager adding users to event, adding: '+add.length+' but only added:'+added);
-												sql.close();
-												callback("Not all users added adding participants");												
-											} else {
-												sql.commit();
-												callback(null, newData);		
-											}											
-										});
+									callback(err);									
+								}
+									
+								else addParticipants(sql, addedP, newData._id, function(err){
+									if(err) {
+										sql.close();
+										callback(err);
 									} else {
 										sql.commit();
 										callback(null, newData);
+										for(var i=0; i<persistP.length; i++){
+											//email.sendModification()
+										}
 									}
-								}
+										
+								});
 							});
 						}
-					});			
+					});
 				}
+				
 			});
+			
 		}			
 	});
 };
