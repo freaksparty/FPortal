@@ -3,10 +3,10 @@
  * @copyright: 2014 Siro González Rodríguez
  */
 var DbClass = require('./sql');
+var email = require('./email-dispatcher');
 var db = new DbClass();
 var sprintf = require('sprintf').sprintf;
 var N = require('./../../../nuve');
-var email = require('./email-dispatcher');
 var ObjectId = parseInt;
 
 function getEntity(sql) {
@@ -144,7 +144,7 @@ exports.updateEvent = function(newData, callback) {
 					callback("Not all participants added");												
 				} else {
 					for(var i=0; i<ids.length; i++)
-						email.sendInvitation(parseInt(usId),newData);
+						email.sendInvitation(parseInt(ids[i]),newData);
 					callback();		
 				}											
 			});

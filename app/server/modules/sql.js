@@ -23,8 +23,7 @@ if(mainClient == null) {
 	mainClient = new Client();
 	mainClient.connect(dbconfig);
 	mainClient.on('connect', function() {
-		   console.log('[OK] SQL datasource connected');
-		   mainClient.query("SET autocommit=1;");
+		   console.log('[OK] SQL datasource connected');   
 		 })
 		 .on('error', function(err) {
 		   console.log('[ERROR] Connecting to SQL: ' + err);
@@ -33,6 +32,7 @@ if(mainClient == null) {
 			 mainClient.query("COMMIT;");
 		   console.log('[!!] SQL client closed');
 		 });
+	mainClient.query("SET autocommit=1;"); //Forces connection
 }
 //sql = new Sql();
 module.exports = Sql;
@@ -219,6 +219,7 @@ function Sql(){
 				callback(e,o);
 			});
 		};
+		
 		this.save = function(data, options, callback){
 			if(!data._id)
 				callback(table+' update needs the _id');

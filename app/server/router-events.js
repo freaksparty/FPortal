@@ -156,7 +156,10 @@ module.exports = function (app){
 							patient : req.param('patient'),
 							//collaborators : req.param('collaborators'),
 							//relatives : req.param('relatives'),
-							participants : req.param('participants')
+							participants : req.param('participants'),
+							meta : {
+								medic : req.session.user.name,
+							}							
 					};
 					if(req.param('comments') !== '')
 						event.comments = req.param('comments');
@@ -184,6 +187,9 @@ module.exports = function (app){
 						ev.comments = req.param('comments');
 						ev.start = moment(req.param('date')+ ' ' +req.param('hour'), "DD/MM/YYYY H:mm"),
 						ev.duration = req.param('duration');
+						ev.meta = {
+								medic : req.session.user.name,
+						};
 						EM.updateEvent(ev, function(er, upevent){
 							if(er) {
 								console.log('[Error] router-events POST/event updating: '+er);

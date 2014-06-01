@@ -1,6 +1,37 @@
-
+var emailTemplates 	= require('email-templates');
 var ES = require('./email-settings');
 var AM = require('./account-manager');
+var render;
+
+emailTemplates('./app/server/email', function(err, templateFunction) {
+
+  if (err) {
+    console.log(err);
+  } else {
+	  render = templateFunction;
+  }
+});
+
+function doSend(template, variables, subject, email){
+	if(typeof render != 'function')
+		console.log("[Error] email-dispatcher templates were not loaded, the email will not be sent");
+	else render(template, variables, function(err, html, text) {
+		if(err)
+			console.log("[Error email-dispatcher render says: ", err);
+		else {
+			/*EM.server.send({
+				from         : sender,
+				to           : email,
+				subject      : subject,
+				text         : text,
+				html		 : html
+			}, callback );*/
+			console.log("[EMAIL]", html);
+		}			
+	});	
+}
+
+
 var EM = {};
 module.exports = EM;
 
@@ -47,7 +78,7 @@ EM.eventInviteEmail = function(eventLink, user, medic) {
 };
 
 EM.sendInvitation = function(user, event) {
-	if(typeof(user != 'object'))
+	if(typeof user != 'object')
 		AM.findById(user, function(err, u){
 			if(err){
 				console.log("[Error] email-dispatcher sendInvitation(), user not found");
@@ -55,16 +86,7 @@ EM.sendInvitation = function(user, event) {
 				EM.sendInvitation(u, event);
 		});
 	else {
-		
+		var url = ES.baseUrl + '/event/' + event._id + '/';
+		doSend('invitation', {user:user, event:event, url:url}, 'New Medical appointment', user.email);
 	}		
-}
-
-function doSend(html, subject, email, sender, callback){
-	EM.server.send({
-		from         : sender,
-		to           : email,
-		subject      : subject,
-		text         : html,
-		attachment   : {data:html, alternative:true}
-	}, callback );
-}
+};

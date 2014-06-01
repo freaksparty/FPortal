@@ -1,6 +1,10 @@
 .content-block
 	h2 New medical appointement
-	p
-		| Dear
-		user.name
-		| you have an appointment blablablah
+	p Dear #{user.name} you have an appointment.
+	if(user._id != event.patient)
+		p The patient is #{event.patient}
+	
+	p Medic: #{event.meta.medic}
+	
+	Please confirm your assistance or contact the medic in the following link:
+	a(href=url)=url

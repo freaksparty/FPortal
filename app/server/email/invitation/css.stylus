@@ -1,0 +1,18 @@
+roundedBox()
+	background-color: #F5F5F5;
+	border 1px solid #393C3F
+	border-radius: 4px;	
+	padding 20px
+
+a
+	color: #08C;
+	text-decoration: none;
+body
+	background-color: #A2A9B2
+.content-block
+	overflow: hidden
+	background-color: #F5F5F5;
+	roundedBox()
+	text-align left
+	margin-top: 0.5em
+	color: #000
