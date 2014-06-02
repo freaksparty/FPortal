@@ -93,7 +93,7 @@ exports.findEventById = function(eventId, callback) {
 	events.findOne({_id:eventId}, function(e, o){
 		if(e) callback(e);
 		else {
-			getEventParticipants(eventId, function(err, arr){
+			getEventParticipantsArray(eventId, function(err, arr){
 				if(e) callback(e);
 				else {
 					o.participants = arr;
@@ -160,7 +160,7 @@ exports.updateEvent = function(newData, callback) {
 			console.log('[Error] event-manager updateEvent: ',e);
 			callback('Event not found');
 		} else {
-			getEventParticipants(newData._id, function(e, oldParticipants){
+			getEventParticipantsArray(newData._id, function(e, oldParticipants){
 				if(e) {
 					console.log('[Error] event-manager updateEvent, getting event particpants:'+e);
 					callback('Internal error');
@@ -297,15 +297,20 @@ exports.getToken = function(user, roomId, callback) {
 	});
 };
 
-exports.setEventStatus = function(eventId, status) {
+exports.setEventStatus = function(eventId, status, callback) {
+	eventId = ObjectId(eventId);
+	console.log(sprintf("%d = %s", eventId, status));
 	var query = "UPDATE Events SET status = :status WHERE _id=:event";
 	db.updateQuery(query, {status:status, event:parseInt(eventId)}, function(err, affected) {
 		if(err) {
 			console.log("[Error] event-manager: setEventStatus, updateQuery says:", err);
+			callback(err);
 		} if (affected !== 1) {
 			console.log("[Error] event-manager: setEventStatus, updateQuery updated "+affected+" rows!");
-		}
-		
+			callback(affected+' events changed');
+		} else {
+			callback();
+		}		
 	});
 };
 
@@ -326,11 +331,15 @@ exports.getTokenForMedic = function(user, event, callback) {
 	});
 };
 
-function getEventParticipants(eventId, callback) {
+function getEventParticipantsArray(eventId, callback) {
 	db.queryToArray("SELECT user FROM EventParticipants WHERE event=:event", {event:eventId}, function(e,arr){
 		if(e) callback(e);
 		else {
 			callback(null, arr);
 		}
 	});	
+}
+
+function getEventParticipants(eventId, callback) {
+	db.queryToList("SELECT _id, name, status FROM Users JOIN EventParticipants ", callback);
 }

@@ -4,7 +4,7 @@
  * @Copyright: 2013 Stephen Braitsch
  * @Copyright: 2014 Siro González Rodríguez
  */
-var mongo		= require('./database');
+//var mongo		= require('./database');
 var DbClass 	= require('./sql');
 var db 			= new DbClass();
 var crypto		= require('crypto');

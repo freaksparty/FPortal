@@ -74,6 +74,18 @@ $(document).ready(function(){
 		$(this).find('td').html(nameOfId(id));
 		participants.push(id);
 	});
+	
+	$('#btn-cancel').click(function() {
+		modalConfirmAction('The event will be deactivated and every participant will be uninvited, are you sure?',function(){
+			$.ajax({
+				  type: "POST",
+				  url: "./cancel",
+				  data: {},
+				  success: checkStatus,
+				  error: function(xhr, response){showError('Fail: '+xhr.responseText);}
+				});
+		});
+	});
 });
 
 function idOfName(n){
@@ -138,6 +150,10 @@ function checkStatus(){
 	$.ajax('./status', {
 		cache	: false,
 		statusCode : {
+			403 : function() {
+				modalError('This event is cancelled');
+				$('#account-form-container .form-actions').hide();
+			},
 			404	: function(xhr){
 				modalError(xhr.responseText, '/events');
 			},

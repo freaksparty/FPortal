@@ -1,7 +1,5 @@
 Visible unique (nss?) ID for picking up patients
-disable room before medic (owner) enters
 event "status" and logic
-event invitations
 position elements on room
 /check if users can enter room two times
 configure for free speech or moderation

@@ -216,12 +216,31 @@ module.exports = function (app){
 			});
 		}
 	});
+	app.post('/event/:eventId/cancel', function(req, res) {
+		if ((req.session.user == null)){
+			res.send('Permission denied', 403);
+		} else {
+			EM.findEventById(req.params.eventId, function(e, ev){
+				if(e || !ev) {
+					console.log('[Error] /event/'+req.params.eventId+'/cancel findEventById() says:', e);
+					res.send('Not found', 404);
+				} else {
+					EM.setEventStatus(req.params.eventId, 'Cancelled', function(err){
+						if(err) {
+							console.log("[Error] /event/"+req.params.eventId+"/cancel setEventStatus() says:", err);
+							res.send("Internal error", 500);
+						} else 
+							res.send("Event cancelled", 200);
+					});
+				}
+			});
+		}
+	});
 	
 	
 	app.get('/event/:eventId/status', function(req, res) {
 		if ((req.session.user == null)){
-			req.session.redirect = req.protocol + '://' + req.get('host') + req.originalUrl;
-			res.redirect('/');
+			res.send("Permission denied", 403);
 		} else eventStatus(req.param('eventId'), req.session.user, function(text, status, event, room){
 			if(status == 201){
 				EM.getToken(req.session.user, room, function(er,token){
@@ -238,8 +257,14 @@ module.exports = function (app){
 						res.send('Internal error', 500);
 						console.log('[Error] router-events get/event/'+req.params.eventId+'/status retrieving event token: ',err);
 					} else {
-						EM.setEventStatus(event._id,'MedicIn');
-						res.send(token, 201);
+						EM.setEventStatus(event._id,'MedicIn', function(err){
+							if(err) {
+								console.log("[Error] router-events GET /events/"+req.param.eventId+"/status setting status to 'MedicIn':", err);
+								res.send("Internal error", 500);
+							} else
+								res.send(token, 201);
+						});
+						
 					}
 				});
 			} else {
@@ -256,13 +281,27 @@ function eventStatus(eventId, user, callback){
 			console.log('[Error] eventStatus(): eventStatus('+eventId+') getStatusByIds() says: ',err);
 		} else {
 			var end = moment(ev.start).add('m',ev.duration);
-			if( (ev.patient != user._id) && (ev.owner != user._id) && 
-				(ev.participants.indexOf(user._id) == -1) ) { 
-					callback('The event does not exists', 404, ev);
+			if( ( (ev.patient != user._id) && (ev.owner != user._id) && 
+				(ev.participants.indexOf(user._id) == -1) ) ) { 
+					callback('The event does not exists or is cancelled', 404);
 					console.log("[Error] eventStatus(): user("+user.user+") is not invited to event: "+eventId);
 					
-			} else if((ev.status === 'Closed') ||
-					moment().isAfter(end)) {
+			} else if( (ev.status === 'Cancelled')) {
+				if(ev.owner == user._id)
+					callback('The event is cancelled', 403);
+				else
+					callback('The event does not exists or is cancelled', 404);
+					
+			} else if(moment().isAfter(end)) {
+				EM.setEventStatus(eventId, 'Closed', function(err){
+					if(err)
+						console.log("[Error] router-events eventStatus() unable to change status to 'Closed' for event "+eventId, err);
+					else
+						console.log("[!!] router-events eventStatus() closing event "+eventId+" past end time");
+				});				
+				callback('The event is closed', 410, ev);
+				
+			} else if(ev.status === 'Closed') {
 				callback('The event is closed', 410, ev);
 				
 			} else if(moment().isBefore(ev.start)) {
