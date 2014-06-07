@@ -18,7 +18,7 @@ block content
 			|"#{user.user}":"#{user._id}",
 		|"":""};var medics = [#{medics.join()}];
 	
-	#account-form-container.content-block
+	#form-container.content-block
 		form(method="post", action="/event")#event-form
 			if event._id
 				h1 Editing event

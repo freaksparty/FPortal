@@ -16,7 +16,6 @@ block content
 				table.table.table-bordered.table-striped#table1
 					thead
 						tr
-							//(style='width:40px')
 							th(style='width:110px') Start
 							th Duration
 							th Participants
@@ -25,13 +24,14 @@ block content
 						each event in ownEventList
 							tr
 								td
-									a(href='/event/#{event._id}/')
+									a(href='/eventform/#{event._id}/')
 										span=event.start
 								td=event.duration+' min'
 								td
 									p=event.patient +' (Patient)'
 									each p in event.participants
-										p=p
+										if(p != event.patient)
+											p=p
 								td=event.comments
 								
 		h3 Events you are invited
@@ -55,7 +55,8 @@ block content
 								p=event.patient+' (Patient)'
 								p=event.medic+' (Medic)'
 								each p in event.participants
-									p=p
+									if(p != event.patient)
+										p=p
 							td=event.comments
 
 	include modals/modal

@@ -7,7 +7,7 @@ var dbconfig = {
 		  user: 'PIAMAD',
 		  password: 'piamadpass',
 		  db: 'PIAMAD',
-		  queryCache: false
+		  queryCache: true
 		};
 
 var inspect = require('util').inspect;
@@ -21,7 +21,6 @@ var mainClient;
 if(mainClient == null) {
 	console.log("[INFO] Connecting to SQL...");
 	mainClient = new Client();
-	mainClient.connect(dbconfig);
 	mainClient.on('connect', function() {
 		   console.log('[OK] SQL datasource connected');   
 		 })
@@ -32,6 +31,7 @@ if(mainClient == null) {
 			 mainClient.query("COMMIT;");
 		   console.log('[!!] SQL client closed');
 		 });
+	mainClient.connect(dbconfig);
 	mainClient.query("SET autocommit=1;"); //Forces connection
 }
 //sql = new Sql();

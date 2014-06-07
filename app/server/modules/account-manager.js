@@ -30,6 +30,17 @@ exports.isAdmin = function(user){
 		return user.role === 'Admin';
 };
 
+exports.isMedic = function(user) {
+	if(!user)
+		return false;
+	else
+		return user.role === 'Medic';
+};
+
+exports.logUser = function(user) {
+	return user.user+"(id="+user._id+")";
+};
+
 /* if no admin user, create default */
 setTimeout(function(){
 	users.howMany({role:'Admin'}, function(err, num){

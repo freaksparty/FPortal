@@ -8,6 +8,32 @@ $(document).ready(function(){
 		$(this).text(nameOfId($(this).text()));	
 	});
 	checkStatus();
+	$('#btn-wontcome').click(function() {
+		$.ajax({
+			  type: "POST",
+			  url: "./assistance",
+			  data: {setStatus: "WontCome"},
+			  success: function(){
+				  $('#btn-wontcome').attr('disabled',"");
+				  $('#btn-confirm').removeAttr('disabled');
+				  $('#participation-status').text('You have checked you are not comming');
+			  },
+			  error: function(xhr, response){showError('Fail: '+xhr.responseText);}
+			});
+	});
+	$('#btn-confirm').click(function() {
+		$.ajax({
+			  type: "POST",
+			  url: "./assistance",
+			  data: {setStatus: "Confirmed"},
+			  success: function(){
+				  $('#btn-wontcome').removeAttr('disabled');
+				  $('#btn-confirm').attr('disabled',"");
+				  $('#participation-status').text('Assistance confirmed');
+			  },
+			  error: function(xhr, response){showError('Fail: '+xhr.responseText);}
+			});
+	});
 });
 
 function idOfName(n){
@@ -30,7 +56,7 @@ function isMedic(id){
 	return (rtn !== -1);
 }
 function showJoin(){
-	$('#status').text('Please, click on the Join button to start the event');
+	$('#event-status').text('Please, click on the Join button to start the event');
 	$('.form-actions').fadeOut();
 	$('#btn-join').show();
 	$('.form-actions').fadeIn();	
@@ -39,17 +65,22 @@ function checkStatus(){
 	$.ajax('./status', {
 		cache	: false,
 		statusCode : {
+			403 : function() {
+				$('#event-status').text('The event was cancelled');
+				$('#form-container .form-actions').hide();
+			},
 			404	: function(xhr){
 				modalError(xhr.responseText, '/events');
 			},
 			410 : function(xhr){
-				$('#status').text(xhr.responseText);
+				$('#event-status').text(xhr.responseText);
+				$('#form-container .form-actions').hide();
 			},
 			500 : function() {
 				modalError('A critical error has occurred', '/events');
 			},
 			200 : function(xhr) {
-				$('#status').text(xhr);
+				$('#event-status').text(xhr);
 				setTimeout(checkStatus, 1000*60);
 			},
 			201 : showJoin,

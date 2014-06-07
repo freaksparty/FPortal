@@ -39,23 +39,11 @@ $(document).ready(function(){
 				txt.val('');
 				bindTable();
 			}
-			/*else if(($.inArray(usId, relatives) > -1) || ($.inArray(usId, collaborators) > -1)) {
-				txt.val('');//already added
-				$('#'+usId).fadeOut(200).fadeIn(200);
-			} else {
-				isMedic(usId) ? collaborators.push(usId):relatives.push(usId);
-				$('#table-participants').append('<tr id="'+usId+'"><td>'+nameOfId(usId)+'</td></tr>');
-				$('#'+usId).hide().fadeIn(200);
-				txt.val('');
-				bindTable();
-			}*/
 		}
 	});
 
 	$('#event-form').ajaxForm({
 		beforeSubmit	: function (formData, formObject, formOptions){
-			/*$.each(relatives, function(i,p){formData.push({name:"relatives[]", value:p});});
-			$.each(collaborators, function(i,p){formData.push({name:"collaborators[]", value:p});});*/
 			$.each(participants, function(i,p){formData.push({name:"participants[]", value:p});});
 			formData.push({name:"patient", value:idOfName($('#txt-patient').val())});
 			return validEvent();
@@ -152,7 +140,7 @@ function checkStatus(){
 		statusCode : {
 			403 : function() {
 				modalError('This event is cancelled');
-				$('#account-form-container .form-actions').hide();
+				$('#form-container .form-actions').hide();
 			},
 			404	: function(xhr){
 				modalError(xhr.responseText, '/events');

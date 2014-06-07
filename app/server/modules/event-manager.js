@@ -88,13 +88,28 @@ exports.listEventsByParticipant = function(user, callback){
 	});
 };
 
-exports.findEventById = function(eventId, callback) {
+//with 3 args, arg1=userId & arg2=callback the participation status will be included
+//with 2 args, arg1=callback so no participation status can be included
+exports.findEventById = function(eventId, arg1, arg2) {
+	var userId = null, callback, query;
+	if(arg2 === undefined){
+		callback = arg1;
+		query = "SELECT _id, owner, patient, start, duration, comments, status FROM Events WHERE _id=:event";
+	} else {
+		userId = ObjectId(arg1);
+		callback = arg2;
+		query = "SELECT _id, owner, patient, start, duration, comments, e.status, p.status participationstatus " +
+				"FROM Events e JOIN EventParticipants p WHERE _id=:event AND user=:user";
+	}
+	
 	eventId = ObjectId(eventId);
-	events.findOne({_id:eventId}, function(e, o){
+	db.queryToObject(query, {event:eventId, user:userId}, function(e, o){
 		if(e) callback(e);
+		else if(!o) callback("Not found");
 		else {
+			o.start = db.parseMoment(o.start);
 			getEventParticipantsArray(eventId, function(err, arr){
-				if(e) callback(e);
+				if(err) callback(err);
 				else {
 					o.participants = arr;
 					callback(null, o);
@@ -241,9 +256,6 @@ exports.createEvent = function(data, callback) {
 		console.log('[Error] event-manager createEvent: event._id is set');
 		callback('Id is set ¿The event already exists?');
 	} else {
-		/*if(data.collaborators === undefined) data.collaborators = [];
-		if(data.relatives === undefined) data.relatives = [];*/
-		if(data.participants === undefined) data.participants = [];
 		var sql = new DbClass();
 		sql.startTransaction();
 		tEvents = getEntity(sql);
@@ -254,32 +266,28 @@ exports.createEvent = function(data, callback) {
 				callback('Error saving data');
 				return;
 			} else { 
-				
-				//var participants = data.relatives.concat(data.collaborators);
-				if(data.participants.length > 0){
-					var participants = data.participants;
-					var length = participants.length;
-					if(length > 0) {
-						var values = [];
-						for(var i = 0; i < length; i++)
-							values.push(sprintf("(%d,%d)", o._id, ObjectId(participants[i])));
-	
-						var query = "INSERT INTO EventParticipants (event,user) VALUES" +
-							values.join(',');
-						sql.updateQuery(query, {}, function(err, affected){
-							if(err)
-								callback(err);
-							else if(affected != length) {						
-								console.log(sprintf("[ERROR] Inserting participants, there are %d but only %d where inserted", length, affected));
-								callback("Error inserting participants");
-								sql.close();
-							} else {
-								sql.commit();
-								callback(null, o);	
-							}
-						});
-					}
-				} else {
+				var participants = data.participants;
+				var length = participants.length;
+				if(length > 0) {
+					var values = [];
+					for(var i = 0; i < length; i++)
+						values.push(sprintf("(%d,%d)", o._id, ObjectId(participants[i])));
+
+					var query = "INSERT INTO EventParticipants (event,user) VALUES" +
+						values.join(',');
+					sql.updateQuery(query, {}, function(err, affected){
+						if(err)
+							callback(err);
+						else if(affected != length) {						
+							console.log(sprintf("[ERROR] Inserting participants, there are %d but only %d where inserted", length, affected));
+							callback("Error inserting participants");
+							sql.close();
+						} else {
+							sql.commit();
+							callback(null, o);	
+						}
+					});
+				} else { //This won't be as long patient is one participant, but this can change in the future
 					sql.commit();
 					callback(null,o);
 				}
@@ -299,7 +307,6 @@ exports.getToken = function(user, roomId, callback) {
 
 exports.setEventStatus = function(eventId, status, callback) {
 	eventId = ObjectId(eventId);
-	console.log(sprintf("%d = %s", eventId, status));
 	var query = "UPDATE Events SET status = :status WHERE _id=:event";
 	db.updateQuery(query, {status:status, event:parseInt(eventId)}, function(err, affected) {
 		if(err) {
@@ -329,6 +336,36 @@ exports.getTokenForMedic = function(user, event, callback) {
 		console.log('[Error] event-manager getTokenForMedic unable to create token: '+e);
 		callback('Internal error');
 	});
+};
+
+exports.setParticipationStatus = function(eventId, userId, newStatus, callback) {
+	console.log(userId);
+	eventId = ObjectId(eventId);
+	userId = ObjectId(userId);
+	if((newStatus != 'WontCome') && (newStatus != 'Confirmed'))
+		callback('Invalid state');
+	else {
+		var query = "SELECT COUNT(*) FROM EventParticipants WHERE event=:event AND user=:user";
+		db.queryToArray(query, {event:eventId, user:userId}, function(e, arr){
+			if(e) {
+				console.log("[Error] event-manager setParticipationStatus error in DB", e);
+				callback("Internal error");
+			} else if(arr[0] == 0) {
+				console.log("[Error] event-manager setParticipationStatus, no participation found for event "+eventId+" & user "+userId);
+				callback(null,null);
+			} else if(arr[0] != 1) {
+				console.log("[Error] event-manager setParticipationStatus, "+arr[0]+" rows match the participation");
+				callback("Internal error");
+			} else db.updateQuery("UPDATE EventParticipants SET status=:newStatus WHERE event=:event AND user=:user",
+					{newStatus:newStatus, user:userId, event:eventId}, function(err, affected){
+						if(e){
+							console.log("[Error] event-manager setParticipantStatus(): updateQuery() says:", e);
+							callback("Internal error");
+						} else
+							callback(null, newStatus);							
+					});
+		});
+	}		
 };
 
 function getEventParticipantsArray(eventId, callback) {

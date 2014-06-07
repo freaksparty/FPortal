@@ -19,7 +19,7 @@ block content
 		|"":""};var medics = [#{medics.join()}];
 		
 	
-	#account-form-container.content-block
+	#form-container.content-block
 		h1 Appointment panel
 		hr
 		.form-input
@@ -41,22 +41,26 @@ block content
 		.form-input
 			label.control-label Other assistants
 			div.data: table
-				if(event.collaborators)
-					each c in event.collaborators
-						tr: td.user=c
-				if(event.relatives)
-					each r in event.relatives
-						tr: td.user=r
+				each par in event.participants
+					if(par != event.patient)
+						tr: td.user=par
 		.form-input
 			label.control-label Comments
 			label.data=event.comments
 		.form-input
 			label.control-label Status
-			label#status.data Retrieving...
-		
+			label#event-status.data Retrieving...
+			label#participation-status.data
+				if(event.participationstatus==='Invited')
+					| Waiting assistance confirmation
+				else if(event.participationstatus==='WontCome')
+					| You have checked you are not comming
+				else if(event.participationstatus==='Confirmed')
+					| You have confirmed your assistance
+			
 		.form-actions
-			a.btn.btn-danger Cancellations/modifications
-			a.btn Confirm assistance
+			a#btn-wontcome.btn.btn-danger(disabled=(event.participationstatus==='WontCome')) Cancellations/modifications
+			a#btn-confirm.btn(disabled=(event.participationstatus==='Confirmed')) Confirm assistance
 			a#btn-join.hide.btn.btn-success(href="join") Join
 
 	include modals/modal
