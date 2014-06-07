@@ -90,7 +90,7 @@ exports.listEventsByParticipant = function(user, callback){
 
 //with 3 args, arg1=userId & arg2=callback the participation status will be included
 //with 2 args, arg1=callback so no participation status can be included
-exports.findEventById = function(eventId, arg1, arg2) {
+function findEventById(eventId, arg1, arg2) {
 	var userId = null, callback, query;
 	if(arg2 === undefined){
 		callback = arg1;
@@ -118,6 +118,7 @@ exports.findEventById = function(eventId, arg1, arg2) {
 		}
 	});
 };
+exports.findEventById = findEventById;
 
 exports.updateEvent = function(newData, callback) {
 	function deleteParticipants(sql, ids, eventId, callback){
@@ -133,7 +134,7 @@ exports.updateEvent = function(newData, callback) {
 						console.log('[Warning] event-manager updateEvent deleteParticipants deleting: '+ids.length+' but deleted: '+affected);
 
 					for(var i=0; i<ids; i++){
-						//email.sendCancellation()
+						email.sendCancellation(ids, newData);
 					}
 					callback();
 				}
@@ -283,6 +284,8 @@ exports.createEvent = function(data, callback) {
 							callback("Error inserting participants");
 							sql.close();
 						} else {
+							for(var i = 0; i < length; i++)
+								email.sendInvitation(ObjectId(participants[i]), o);
 							sql.commit();
 							callback(null, o);	
 						}
@@ -316,6 +319,14 @@ exports.setEventStatus = function(eventId, status, callback) {
 			console.log("[Error] event-manager: setEventStatus, updateQuery updated "+affected+" rows!");
 			callback(affected+' events changed');
 		} else {
+			//Send cancellation email
+			if(status === 'Cancelled') {
+				findEventById(eventId, function(err, event){
+					if(err) console.log("[Error] event-manager setEventStatus(id="+eventId+") findEventById() says", err);
+					else for(var i = 0; i < event.participants.length; i++)
+						email.sendCancellation(ObjectId(event.participants[i]), event);
+				});
+			}
 			callback();
 		}		
 	});

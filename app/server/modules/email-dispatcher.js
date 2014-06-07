@@ -1,21 +1,27 @@
 var emailTemplates 	= require('email-templates');
 var ES = require('./email-settings');
 var AM = require('./account-manager');
-var render;
+var app = require('../../../app.js');
+//var render;
 
-emailTemplates('./app/server/email', function(err, templateFunction) {
+/*email-templates code
+ * emailTemplates('./app/server/email', function(err, templateFunction) {
 
   if (err) {
     console.log(err);
   } else {
 	  render = templateFunction;
   }
-});
+});*/
+
+function render(template, variables, callback){
+	app.render('email/'+template, variables, callback);
+}
 
 function doSend(template, variables, subject, email){
 	if(typeof render != 'function')
 		console.log("[Error] email-dispatcher templates were not loaded, the email will not be sent");
-	else render(template, variables, function(err, html, text) {
+	else render(template, variables, function(err, html) {
 		if(err)
 			console.log("[Error email-dispatcher render says: ", err);
 		else {
@@ -66,7 +72,7 @@ EM.forgotPasswordEmail = function(o)
 		html += "<a href='http://twitter.com/braitsch'>braitsch</a><br><br>";
 		html += "</body></html>";
 	return  [{data:html, alternative:true}];
-}*/
+}
 
 EM.eventInviteEmail = function(eventLink, user, medic) {
 	var html = '<html><body>Hello '+user.name+', <br><br>';
@@ -75,18 +81,29 @@ EM.eventInviteEmail = function(eventLink, user, medic) {
 		html +="<a href='"+eventLink+"'></body></html>";
 	//doSend(html, 'New Medical Appointment', user.email, EM.sender, function(){});
 	console.log(html);
-};
+};*/
+function getUser(uid, event, callback) {
+	AM.findById(uid, function(err, u){
+		if(err){
+			console.log("[Error] email-dispatcher getUser(), user not found");
+		} else
+			callback(u, event);
+	});
+}
 
 EM.sendInvitation = function(user, event) {
 	if(typeof user != 'object')
-		AM.findById(user, function(err, u){
-			if(err){
-				console.log("[Error] email-dispatcher sendInvitation(), user not found");
-			} else
-				EM.sendInvitation(u, event);
-		});
+		getUser(user, event, EM.sendInvitation);
 	else {
 		var url = ES.baseUrl + '/event/' + event._id + '/';
 		doSend('invitation', {user:user, event:event, url:url}, 'New Medical appointment', user.email);
 	}		
 };
+
+EM.sendCancellation = function(user, event) {
+	if(typeof user != 'object')
+		getUser(user, event, EM.sendCancellation);
+	else {
+		doSend('cancellation', {user:user, event:event}, 'Medical appointment was cancelled', user.email);
+	}		
+}

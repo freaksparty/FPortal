@@ -17,6 +17,8 @@ process.env.TZ = 'Europe/Madrid'; //TODO config file
 app.locals.moment = require('moment');
 app.locals.sprintf = require('sprintf').sprintf;
 
+module.exports = app;
+
 app.configure(function(){
 	app.set('port', 8888);
 	app.set('views', __dirname + '/app/server/views');

@@ -47,14 +47,15 @@ block content
 				input#txt-patient.input-xlarge(type='text', name='patient-name', value=event.patient)
 			.form-input
 				label.control-label(for='pass-tf') Participant
-				input#add-participant.input-xlarge(type='text', name='add-participant', placeholder="Inser name or user and click the plus button")
+				input#add-participant.input-xlarge(type='text', name='add-participant', placeholder="Insert name or user and click the plus button")
 				i#btn-add-participant.float-right.icon-plus.icon-black
 			table.table
 				thead
 					th Participants (click to remove)
 				tbody#table-participants
 					each participant in event.participants
-						tr(id=participant): td=participant
+						if(participant != event.patient)
+							tr(id=participant): td=participant
 				
 			.form-actions
 				span#response-panel

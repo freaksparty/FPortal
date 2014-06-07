@@ -320,6 +320,9 @@ textarea {
 .hide {
   display: none;
 }
+.red {
+  color: #f00;
+}
 /**ROOM*/
 #leftbar {
   position: absolute;

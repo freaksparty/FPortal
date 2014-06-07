@@ -25,6 +25,8 @@ $(document).ready(function(){
 		var txt = $('#add-participant');
 		if(txt.val() === '')
 			tooltip_error(txt,'Please, write the name or user of the participant');
+		else if(txt.val() === $('#txt-patient').val())
+			tooltip_error(txt,'This is already the patient');
 		else {
 			var usId = idOfName(txt.val());
 			if(!usId)

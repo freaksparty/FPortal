@@ -130,6 +130,29 @@ module.exports = function (app){
 			});	
 		}
 	});
+	app.post('/eventform/:eventId/cancel', function(req, res) {
+		if ((req.session.user == null)){
+			res.send('Permission denied', 403);
+		} else {
+			EM.findEventById(req.params.eventId, function(e, ev){
+				if(e || !ev) {
+					console.log('[Error] /event/'+req.params.eventId+'/cancel findEventById() says:', e);
+					res.send('Not found', 404);
+				} else {
+					EM.setEventStatus(req.params.eventId, 'Cancelled', function(err){
+						if(err) {
+							console.log("[Error] /event/"+req.params.eventId+"/cancel setEventStatus() says:", err);
+							res.send("Internal error", 500);
+						} else 
+							res.send("Event cancelled", 200);
+					});
+				}
+			});
+		}
+	});
+	app.get('/eventform/:eventId/status', function(req, res){
+		res.redirect('/event/'+req.params.eventId+'/status');
+	});
 	app.get('/event/:eventId/', function(req, res) {
 		if ((req.session.user == null)){
 			req.session.redirect = req.protocol + '://' + req.get('host') + req.originalUrl;
@@ -240,26 +263,6 @@ module.exports = function (app){
 				sessionUser	: req.session.user
 				//userList	: ul,
 				//event		: ev
-			});
-		}
-	});
-	app.post('/event/:eventId/cancel', function(req, res) {
-		if ((req.session.user == null)){
-			res.send('Permission denied', 403);
-		} else {
-			EM.findEventById(req.params.eventId, function(e, ev){
-				if(e || !ev) {
-					console.log('[Error] /event/'+req.params.eventId+'/cancel findEventById() says:', e);
-					res.send('Not found', 404);
-				} else {
-					EM.setEventStatus(req.params.eventId, 'Cancelled', function(err){
-						if(err) {
-							console.log("[Error] /event/"+req.params.eventId+"/cancel setEventStatus() says:", err);
-							res.send("Internal error", 500);
-						} else 
-							res.send("Event cancelled", 200);
-					});
-				}
 			});
 		}
 	});
