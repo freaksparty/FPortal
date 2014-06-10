@@ -79,13 +79,18 @@ function joinRoom(token){
 		});
 
 		room.connect();
-		localStream.show("vidYourself");		
+		localStream.show("vidYourself");
+		localStream.show("mini-video-5");
+		$("#tab-"+yourId).addClass('connected');
 		
 	});
 	localStream.init();
 }
 
 function onResize(){
+	$('.tab').each(function(i, o){
+		$(o).width($(o).height()*2.1);
+	});
 	$('.video').each(function(i, o){
 		o=$(o);
 		var rat = o.height()/o.width();
@@ -93,6 +98,11 @@ function onResize(){
 		var h = Math.round(w*rat);
 		o.width(w);
 		o.height(h);
+	});
+	$('.mini-video').each(function(i, o){
+		o=$(o);
+		var p = o.parent();
+		o.height(p.height());
 	});
 }
 

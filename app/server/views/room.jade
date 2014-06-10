@@ -1,11 +1,15 @@
 extends layout
 
+block head
+	link(rel='stylesheet', href='/css/room.css')
 
 block sessionvars
 	- var authUser = sessionUser;
 	- var pageTitle = title;
 	
 block content
+	script
+		| var yourId = #{authUser._id};
 	include navigation
 	
 	div#loader
@@ -17,7 +21,21 @@ block content
 			div#vidYourself.video(style='width:320px; height: 240px;')
 			h2 (You)
 		div#vidMain
-		div#online
+		div#participants
+			.tab(id='tab-'+event.owner._id).tab-medic
+				.name #{event.owner.name} (Medic)
+				div(id='mini-video-'+event.owner._id).mini-video
+			.tab(id='tab-'+event.patient._id).tab-patient
+				.name #{event.patient.name} (Patient)
+				div(id='mini-video-'+event.patient._id).mini-video
+			each p in participants
+				if((p._id != event.owner._id) && (p._id != event.patient._id))
+					.tab(id='tab-'+p._id)
+						if(p.role === 'Medic')
+							.name #{p.name} (Collaborator)
+						else
+							.name #{p.name} (Familiar)
+						div(id='mini-video-'+p._id).mini-video
 	
 	include modals/modal
 

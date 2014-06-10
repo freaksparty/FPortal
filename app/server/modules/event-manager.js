@@ -285,7 +285,7 @@ exports.createEvent = function(data, callback) {
 							sql.close();
 						} else {
 							for(var i = 0; i < length; i++)
-								email.sendInvitation(ObjectId(participants[i]), o);
+								email.sendInvitation(ObjectId(participants[i]), data);
 							sql.commit();
 							callback(null, o);	
 						}

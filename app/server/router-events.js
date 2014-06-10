@@ -153,6 +153,10 @@ module.exports = function (app){
 	app.get('/eventform/:eventId/status', function(req, res){
 		res.redirect('/event/'+req.params.eventId+'/status');
 	});
+	app.get('/eventform/:eventId/join', function(req,res){
+		res.redirect('/event/'+req.params.eventId+'/join');
+	});
+	
 	app.get('/event/:eventId/', function(req, res) {
 		if ((req.session.user == null)){
 			req.session.redirect = req.protocol + '://' + req.get('host') + req.originalUrl;
@@ -219,8 +223,8 @@ module.exports = function (app){
 				};
 				if(event.participants === undefined) event.participants = [event.patient];
 				else event.participants.push(event.patient);
-				
-				if(req.param('eventId') === undefined) { //Create
+				//Create
+				if(req.param('eventId') === undefined) { 
 					
 					EM.createEvent(event, function(e, ev){
 						if(e){
@@ -257,14 +261,43 @@ module.exports = function (app){
 		if ((req.session.user == null)){
 			req.session.redirect = req.protocol + '://' + req.get('host') + req.originalUrl;
 			res.redirect('/');
-		} else {
-			res.render('room', {
-				title		: 'Event room',
-				sessionUser	: req.session.user
-				//userList	: ul,
-				//event		: ev
-			});
-		}
+		} else EM.findEventById(req.params.eventId, function(err, ev){
+			if(err || !ev) {
+				console.log('[Error] '+req.originalUrl+' findEventById() says:', e);
+				res.render('error', {
+					title	: 'Event not found',
+					error	: ['The event you tried to open does not exist.','Maybe it was cancelled er edited.'],
+					backUrl	: '/events'
+				});
+			} else {
+				var participants = ev.participants.concat(); //copy array
+				participants.push(ev.owner);
+				AM.listUsersByIds(participants, function(err, array){
+					if(err || !array) {
+						console.log('[Error] '+req.originalUrl+' participants('+participants.join(',')+') says:', e);
+						res.render('error', {
+							title	: 'Internal error',
+							error	: ['The event you tried to open has inconsistent data',"It will not be possible to join this event while the error is present","Sorry for the inconvenience"]
+						});
+					} else {
+						ev.participants = array;
+						for(var i = 0; i<array.length; i++){
+							if(array[i]._id == ev.owner)
+								ev.owner = array[i];
+							else if(array[i]._id == ev.patient)
+								ev.patient = array[i];
+						}							
+						res.render('room', {
+							title		: 'Event room',
+							sessionUser	: req.session.user,
+							participants: array,
+							event		: ev
+						});
+					}
+				});
+					
+			}
+		});
 	});
 	app.post('/event/:eventId/assistance', function(req, res){
 		if((req.session.user == null)){

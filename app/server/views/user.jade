@@ -10,7 +10,7 @@ block content
 	// store the userId on the client side in a hidden input field //
 	input(type='hidden', value= user._id)#userId
 	
-	#account-form-container.content-block
+	#form-container.content-block
 		form(method="post")#user-form
 			if user.user
 				h1 Editing #{user.user} profile

@@ -291,6 +291,11 @@ exports.listUsersSmall = function(callback)
 	db.queryToList("SELECT _id, user, nss, name, role FROM Users",{}, {},callback);
 };
 
+exports.listUsersByIds = function(array, callback){
+	var ids = "("+array.join(",")+")";
+	db.queryToList("SELECT _id, user, nss, name, role FROM Users WHERE _id IN "+ids, {}, {}, callback);
+};
+
 exports.findById = function(id, callback)
 {
 	users.findOne({_id: getObjectId(id)},
