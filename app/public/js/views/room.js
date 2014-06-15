@@ -1,5 +1,6 @@
 var eventStatus = 'unknown';
-var localStream = Erizo.Stream({audio: true, video: true, data: false});
+var localStream = Erizo.Stream({audio: true, video: true, data: false, attributes: {uid:yourId}});
+var userStreams = {};
 var room;
 
 function checkStatus(){
@@ -51,16 +52,21 @@ function joinRoom(token){
 		room.addEventListener("room-connected", function (roomEvent) {
 			room.publish(localStream);
 			subscribeToStreams(roomEvent.streams);
+			$("#tab-"+yourId).addClass('connected');
 		});
 
 		room.addEventListener("stream-subscribed", function(streamEvent) {
 			var stream = streamEvent.stream;
-			var div = document.createElement('div');
+			var uid = stream.getAttributes().uid;
+			stream.uid = stream;
+			stream.show("mini-video-"+uid);
+			$("#tab-"+uid).addClass("connected");
+			//var div = document.createElement('div');
 			//div.setAttribute("style", "width: 320px; height: 240px;");
-			div.setAttribute("id", "test" + stream.getID());
+			//div.setAttribute("id", "test" + stream.getID());
 
-			document.body.appendChild(div);
-			stream.show("test" + stream.getID());
+			//document.body.appendChild(div);
+			//stream.show("test" + stream.getID());
 		});
 
 		room.addEventListener("stream-added", function (streamEvent) {
@@ -72,6 +78,8 @@ function joinRoom(token){
 		room.addEventListener("stream-removed", function (streamEvent) {
 			// Remove stream from DOM
 			var stream = streamEvent.stream;
+			var uid = stream.getAttributes().uid;
+			$("#tab-"+uid).removeClass("connected");
 			if (stream.elementID !== undefined) {
 				var element = document.getElementById(stream.elementID);
 				document.body.removeChild(element);
@@ -80,8 +88,7 @@ function joinRoom(token){
 
 		room.connect();
 		localStream.show("vidYourself");
-		localStream.show("mini-video-5");
-		$("#tab-"+yourId).addClass('connected');
+		localStream.show("mini-video-"+yourId);
 		
 	});
 	localStream.init();
@@ -89,7 +96,7 @@ function joinRoom(token){
 
 function onResize(){
 	$('.tab').each(function(i, o){
-		$(o).width($(o).height()*2.1);
+		$(o).width($(o).height()*1.5);
 	});
 	$('.video').each(function(i, o){
 		o=$(o);

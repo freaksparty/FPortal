@@ -111,6 +111,7 @@ exports.addNewUser = function(newData, callback)
 				if (o){
 					callback('Email is already in use');
 				}	else{
+					//TODO send pasword set email if password is empty
 					saltAndHash(newData.pass, function(hash){
 						newData.pass = hash;
 					// append date stamp when record was created //

@@ -3,3 +3,5 @@ Visible unique (nss?) ID for picking up patients
 position elements on room
 /check if users can enter room two times
 configure for free speech or moderation
+
+send change password email and set password when creating users
