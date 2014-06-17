@@ -9,7 +9,7 @@ block sessionvars
 	
 block content
 	script
-		| var yourId = #{authUser._id};
+		| var yourId=#{authUser._id},medicId=#{event.owner._id},patientId=#{event.patient._id};
 	include navigation
 	
 	div#loader
@@ -20,7 +20,15 @@ block content
 		div#leftbar
 			div#vidYourself.video(style='width:320px; height: 240px;')
 			h2 (You)
-		div#vidMain
+			if(event.owner._id == authUser._id)
+				| Medic controls
+			else
+				| Non medic controls
+		#mainVideo
+			div#vidMainLeft.video
+				label
+			div#vidMainRight.video
+				label
 		div#participants
 			.tab(id='tab-'+event.owner._id).tab-medic
 				.name #{event.owner.name} (Medic)

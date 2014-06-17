@@ -34,6 +34,35 @@ function checkStatus(){
 	});
 }
 
+function changeMainVideo(div, stream) {
+	//Clear previous video if present
+	$("#"+div+">div").hide(); //TODO: fix workarround
+	
+	/*var parent = document.getElementById(div);	
+    var newDiv = document.createElement('div');
+    var newLab = document.createElement('label');
+    newDiv.appendChild(newLab);
+    newDiv.setAttribute("id", div + '_container');
+    parent.appendChild(newDiv);*/
+
+	var uid = stream.getAttributes().uid;
+	stream.show(div);
+	$("#"+div+">label").text($("#tab-"+uid+">.name").text());
+}
+
+function participantSuscribed(stream){
+	var uid = stream.getAttributes().uid;
+	userStreams[uid] = stream;
+	$("#tab-"+uid).addClass('connected');
+	stream.show("mini-video-"+uid);
+	$("#tab-"+uid).addClass("connected");
+	if(uid==medicId) {
+		changeMainVideo("vidMainLeft", stream);
+	} else if(uid==patientId) {
+		changeMainVideo("vidMainRigth", stream);
+	}
+}
+
 function joinRoom(token){
 	room = Erizo.Room({token:token});
 	onResize();//initial
@@ -52,21 +81,12 @@ function joinRoom(token){
 		room.addEventListener("room-connected", function (roomEvent) {
 			room.publish(localStream);
 			subscribeToStreams(roomEvent.streams);
-			$("#tab-"+yourId).addClass('connected');
+			participantSuscribed(localStream);
 		});
 
 		room.addEventListener("stream-subscribed", function(streamEvent) {
 			var stream = streamEvent.stream;
-			var uid = stream.getAttributes().uid;
-			stream.uid = stream;
-			stream.show("mini-video-"+uid);
-			$("#tab-"+uid).addClass("connected");
-			//var div = document.createElement('div');
-			//div.setAttribute("style", "width: 320px; height: 240px;");
-			//div.setAttribute("id", "test" + stream.getID());
-
-			//document.body.appendChild(div);
-			//stream.show("test" + stream.getID());
+			participantSuscribed(stream);
 		});
 
 		room.addEventListener("stream-added", function (streamEvent) {
@@ -80,6 +100,9 @@ function joinRoom(token){
 			var stream = streamEvent.stream;
 			var uid = stream.getAttributes().uid;
 			$("#tab-"+uid).removeClass("connected");
+			stream.close();
+			$("#mini-video-"+uid+">div").remove();
+			userStreams[uid] = undefined;
 			if (stream.elementID !== undefined) {
 				var element = document.getElementById(stream.elementID);
 				document.body.removeChild(element);
@@ -96,9 +119,16 @@ function joinRoom(token){
 
 function onResize(){
 	$('.tab').each(function(i, o){
-		$(o).width($(o).height()*1.5);
+		o=$(o);
+		o.width(o.height()*1.5);
+		var uid=parseInt(o.attr('id').substring(4));
+		o.click(function(){
+			if(userStreams[uid] !== undefined){
+				changeMainVideo("vidMainRight", userStreams[uid]);
+			}
+		});
 	});
-	$('.video').each(function(i, o){
+	$('#vidYourself').each(function(i, o){
 		o=$(o);
 		var rat = o.height()/o.width();
 		var w = o.parent().width();
