@@ -173,6 +173,8 @@ padding-left: 8px;
 .icon-user {background-position: -168px 0;}
 .icon-plus{background-position:0 -96px;}
 .icon-remove{background-position:-312px 0;}
+.icon-volume-off{background-position:-360px -24px;}
+.icon-volume-on{background-position:-408px -24px;}
 
 hr{margin:20px 0;border:0;border-top:1px solid #eeeeee;border-bottom:1px solid #ffffff;}
 select,textarea,input[type="text"],input[type="password"],input[type="datetime"],input[type="datetime-local"],input[type="date"],input[type="month"],input[type="time"],input[type="week"],input[type="number"],input[type="email"],input[type="url"],input[type="search"],input[type="tel"],input[type="color"],.uneditable-input{/*display:inline-block;*/height:20px;padding:4px 6px;margin-bottom:10px;font-size:14px;line-height:20px;color:#555555;-webkit-border-radius:4px;-moz-border-radius:4px;border-radius:4px;vertical-align:middle;}

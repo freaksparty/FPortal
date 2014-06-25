@@ -1,5 +1,5 @@
 var eventStatus = 'unknown';
-var localStream = Erizo.Stream({audio: true, video: true, data: false, attributes: {uid:yourId}});
+var localStream = Erizo.Stream({audio: true, video: true, data: (yourId==medicId), attributes: {uid:yourId}});
 var userStreams = {};
 var room;
 
@@ -32,35 +32,6 @@ function checkStatus(){
 			}
 		}
 	});
-}
-
-function changeMainVideo(div, stream) {
-	//Clear previous video if present
-	$("#"+div+">div").hide(); //TODO: fix workarround
-	
-	/*var parent = document.getElementById(div);	
-    var newDiv = document.createElement('div');
-    var newLab = document.createElement('label');
-    newDiv.appendChild(newLab);
-    newDiv.setAttribute("id", div + '_container');
-    parent.appendChild(newDiv);*/
-
-	var uid = stream.getAttributes().uid;
-	stream.show(div);
-	$("#"+div+">label").text($("#tab-"+uid+">.name").text());
-}
-
-function participantSuscribed(stream){
-	var uid = stream.getAttributes().uid;
-	userStreams[uid] = stream;
-	$("#tab-"+uid).addClass('connected');
-	stream.show("mini-video-"+uid);
-	$("#tab-"+uid).addClass("connected");
-	if(uid==medicId) {
-		changeMainVideo("vidMainLeft", stream);
-	} else if(uid==patientId) {
-		changeMainVideo("vidMainRigth", stream);
-	}
 }
 
 function joinRoom(token){
@@ -100,6 +71,7 @@ function joinRoom(token){
 			var stream = streamEvent.stream;
 			var uid = stream.getAttributes().uid;
 			$("#tab-"+uid).removeClass("connected");
+			$("#controls-"+uid).fadeOut();
 			stream.close();
 			$("#mini-video-"+uid+">div").remove();
 			userStreams[uid] = undefined;
@@ -108,10 +80,12 @@ function joinRoom(token){
 				document.body.removeChild(element);
 			}
 		});
+		
+		//room.addEventListener("stream-data", receiveData);
 
 		room.connect();
 		localStream.show("vidYourself");
-		localStream.show("mini-video-"+yourId);
+		//localStream.show("mini-video-"+yourId);
 		
 	});
 	localStream.init();
@@ -122,11 +96,6 @@ function onResize(){
 		o=$(o);
 		o.width(o.height()*1.5);
 		var uid=parseInt(o.attr('id').substring(4));
-		o.click(function(){
-			if(userStreams[uid] !== undefined){
-				changeMainVideo("vidMainRight", userStreams[uid]);
-			}
-		});
 	});
 	$('#vidYourself').each(function(i, o){
 		o=$(o);
@@ -142,8 +111,3 @@ function onResize(){
 		o.height(p.height());
 	});
 }
-
-$(document).ready(function(){
-	checkStatus();
-	window.onresize = onResize;
-});

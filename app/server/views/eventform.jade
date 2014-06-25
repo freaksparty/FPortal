@@ -49,6 +49,9 @@ block content
 				label.control-label(for='pass-tf') Participant
 				input#add-participant.input-xlarge(type='text', name='add-participant', placeholder="Insert name or user and click the plus button")
 				i#btn-add-participant.float-right.icon-plus.icon-black
+			.form-input
+				label.control-label(for='chk-moderated') Moderation
+				input#chk-moderated(type='checkbox', name='moderated', checked=event.moderated)
 			table.table
 				thead
 					th Participants (click to remove)

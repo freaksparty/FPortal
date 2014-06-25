@@ -20,10 +20,16 @@ block content
 		div#leftbar
 			div#vidYourself.video(style='width:320px; height: 240px;')
 			h2 (You)
-			if(event.owner._id == authUser._id)
-				| Medic controls
-			else
-				| Non medic controls
+			//if(event.owner._id == authUser._id)
+			table#table-moderation.table.table-bordered.table-striped: tbody
+				each p in participants
+					tr(id='controls-'+p._id).controls
+						td #{p.name}
+						td
+							i(id='control-volume-'+p._id).icon-volume-on.icon-black
+							i(id='control-kick-'+p._id).hide.icon-remove.icon-black
+			//else
+			//	| Non medic controls
 		#mainVideo
 			div#vidMainLeft.video
 				label
@@ -49,4 +55,8 @@ block content
 
 block scripts
 	script(src='/js/erizo.js')
+	if(event.moderated == 1)
+		script(src='/js/views/moderated-room.js')
+	else
+		script(src='/js/views/freewill-room.js')
 	script(src='/js/views/room.js')

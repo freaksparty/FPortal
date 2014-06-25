@@ -1,4 +1,4 @@
-var emailTemplates 	= require('email-templates');
+//var emailTemplates 	= require('email-templates');
 var ES = require('./email-settings');
 var AM = require('./account-manager');
 var app = require('../../../app.js');

@@ -1,0 +1,16 @@
+Here is the control (moderation) protocol definition.
+All commands will be packed in the data object as a string called "cmd", optionally a "msg" can be implemented later to send messages to the other participants.
+
+
+VIEW (RIGTH|LEFT) n
+ Change the RIGHT or LEFT main image frame to show stream of user n
+
+KICK n
+ User n must leave the room, note this is an unsecure command as the user is not forced to leave and/or close the streams
+ subscription.
+ 
+VOLUME n (ON|OFF)
+ Mute or unmute the sound from the stream of user n, if the client is user n it mutes audio on the local stream.
+ Note the clients mute also the receiving stream so no malicious or comunication failure will take practical effects.
+ The use of command VOLUME instead of 'MUTE' allows future implementation to add the option of numerical setting instead
+ of ON/OFF switch.  

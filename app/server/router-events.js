@@ -118,6 +118,7 @@ module.exports = function (app){
 						} else {
 							ev.date = moment(ev.start).format('DD/MM/YYYY');
 							ev.hour = moment(ev.start).format('HH:mm');
+							ev.moderated = ev.moderated==1;
 							res.render('eventform', {
 								title		: 'Edit event',
 								sessionUser	: req.session.user,
@@ -209,7 +210,6 @@ module.exports = function (app){
 			if(error) {
 				res.send(error, 400);
 			} else {
-				
 				var event = {
 						owner : req.session.user._id,
 						start : moment(req.param('date')+ ' ' +req.param('hour'), "DD/MM/YYYY H:mm"),
@@ -217,6 +217,7 @@ module.exports = function (app){
 						patient : req.param('patient'),
 						participants : req.param('participants'),
 						comments : req.param('comments'),
+						moderated : (req.param('moderated')=='on'?1:0),
 						meta : {
 							medic : req.session.user.name,
 						}							

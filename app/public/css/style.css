@@ -210,6 +210,11 @@ label
   display: block;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
+.form-input input[type="checkbox"] {
+  width: auto;
+  display: block;
+  height: 20px;
+}
 .modal {
   width: 30%;
   position: fixed;

@@ -32,6 +32,7 @@ CREATE TABLE Events (
 	start DATETIME NOT NULL,
 	duration INTEGER UNSIGNED NOT NULL,
 	comments VARCHAR(150),
+	moderated BOOL NOT NULL DEFAULT 0,
 	status ENUM('Created', 'MedicIn', 'Closed', 'Cancelled') NOT NULL DEFAULT 'Created'	
 ) ENGINE = InnoDB;
 CREATE TABLE EventParticipants (

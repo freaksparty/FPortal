@@ -15,7 +15,7 @@ function getEntity(sql) {
 		e.owner = e.owner?parseInt(e.owner):null;
 		e.patient = e.patient?parseInt(e.patient):null;
 		e.duration = e.duration?parseInt(e.duration):null;
-	}, ["_id", "owner", "patient", "start", "duration", "comments", "status"], ["start"]);
+	}, ["_id", "owner", "patient", "start", "duration", "comments", "status", "moderated"], ["start"]);
 }
 
 var events = getEntity(db);
@@ -94,11 +94,11 @@ function findEventById(eventId, arg1, arg2) {
 	var userId = null, callback, query;
 	if(arg2 === undefined){
 		callback = arg1;
-		query = "SELECT _id, owner, patient, start, duration, comments, status FROM Events WHERE _id=:event";
+		query = "SELECT _id, owner, patient, start, duration, comments, moderated, status FROM Events WHERE _id=:event";
 	} else {
 		userId = ObjectId(arg1);
 		callback = arg2;
-		query = "SELECT _id, owner, patient, start, duration, comments, e.status, p.status participationstatus " +
+		query = "SELECT _id, owner, patient, start, duration, moderated, comments, e.status, p.status participationstatus " +
 				"FROM Events e JOIN EventParticipants p WHERE _id=:event AND user=:user";
 	}
 	
