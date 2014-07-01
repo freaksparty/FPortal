@@ -106,4 +106,9 @@ EM.sendCancellation = function(user, event) {
 	else {
 		doSend('cancellation', {user:user, event:event}, 'Medical appointment was cancelled', user.email);
 	}		
-}
+};
+
+EM.sendPasswordSet = function(user, newUser, token) {
+	var url = ES.baseUrl + '/passwordset/'+ user.user + '/' + token + '/';
+	doSend('setpassword', {user:user, newUser:newUser, url:url});
+};

@@ -339,7 +339,7 @@ function filtersToSet(filters) {
 		else if(typeof val == "number")
 			set.push(key+"="+val);
 		else if(moment.isMoment(val))
-			set.push(key+"'"+momentToString(val)+"'");
+			set.push(key+"='"+momentToString(val)+"'");
 		else if(val == null)
 			set.push(key+"= NULL");
 	}

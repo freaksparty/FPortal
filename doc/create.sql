@@ -17,7 +17,9 @@ CREATE TABLE Users (
 	role ENUM('Medic', 'Patient', 'Admin', 'Familiar') NOT NULL DEFAULT 'Patient',
 	pass VARCHAR(43),
 	creation DATETIME NOT NULL,
-	room VARCHAR(25) DEFAULT NULL
+	room VARCHAR(25) DEFAULT NULL,
+	tokenDate DATETIME DEFAULT NULL,
+	passToken VARCHAR(12) DEFAULT NULL
 ) ENGINE = InnoDB;
 
 --Mysql/Mariadb lacks default now()

@@ -208,56 +208,46 @@ module.exports = function(app) {
 	
 
 // password reset //
-
-	app.post('/lost-password', function(req, res){
-	// look up the user's account via their email //
-		AM.getUserByEmail(req.param('email'), function(o){
-			if (o){
-				res.send('ok', 200);
-				email.dispatchResetPasswordLink(o, function(e, m){
-				// this callback takes a moment to return //
-				// should add an ajax loader to give user feedback //
-					if (!e) {
-					//	res.send('ok', 200);
-					}	else{
-						res.send('email-server-error', 400);
-						for (k in e) console.log('error : ', k, e[k]);
+	app.get('/passwordset/:username/:token', function(req,res){
+		res.render('passwordsetform');
+	});
+	
+	app.post('/passwordset/:username/:token', function(req, res){
+		AM.checkChangePasswordToken(req.params.token, req.params.username, function(e, user){
+			if(e)
+				res.send(e, 404);
+			else if(req.param('password') == undefined)
+				res.send('Invalid data', 400);
+			else if(req.param('password').length < 6)
+				res.send('Password length not enought', 400);
+			else {
+				user.pass = req.param('password');
+				AM.updateUser(user, function(e, u){
+					if(e) {
+						console.log('[Error] router-accounts POST /passwordset/'+req.params.token+'/'+req.params.username+' updating user password '+e);
+						res.send('Internal error', 500);
+					} else {
+						res.send('ok',200);
 					}
 				});
-			}	else{
-				res.send('email-not-found', 400);
 			}
 		});
 	});
 
-	app.get('/reset-password', function(req, res) {
-		var email = req.query["e"];
-		var passH = req.query["p"];
-		AM.validateResetLink(email, passH, function(e){
-			if (e != 'ok'){
-				res.redirect('/');
-			} else{
-	// save the user's email in a session instead of sending to the client //
-				req.session.reset = { email:email, passHash:passH };
-				res.render('reset', { title : 'Reset Password' });
+	app.post('/passwordset', function(req, res){
+	// look up the user's account via their email //
+		AM.getChangePasswordToken(req.param('email'), function(e, token, user) {
+			if(e)
+				res.send(e,400);
+			else {
+				email.sendPasswordSet(user, false, token);
+				res.send('ok',200);
 			}
-		})
+		});
 	});
-	
-	app.post('/reset-password', function(req, res) {
-		var nPass = req.param('pass');
-	// retrieve the user's email from the session to lookup their account and reset password //
-		var email = req.session.reset.email;
-	// destory the session immediately after retrieving the stored email //
-		req.session.destroy();
-		AM.updatePassword(email, nPass, function(e, o){
-			if (o){
-				res.send('ok', 200);
-			}	else{
-				res.send('unable to update password', 400);
-			}
-		})
-	});
-	
+
+	app.get('/passwordset', function(req, res) {
+		res.render('passwordset');
+	});	
 
 };

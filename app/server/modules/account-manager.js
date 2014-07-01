@@ -259,13 +259,6 @@ exports.getUserByEmail = function(email, callback)
 	users.findOne({email:email}, function(e, o){ callback(o); });
 }
 
-exports.validateResetLink = function(email, passHash, callback)
-{
-	users.find({ $and: [{email:email, pass:passHash}] }, function(e, o){
-		callback(o ? 'ok' : null);
-	});
-}
-
 exports.listUsers = function(callback, size, skip)
 {
 	var options = {};
@@ -306,6 +299,15 @@ exports.findById = function(id, callback)
 	});
 };
 
+exports.checkChangePasswordToken = function(token, user, callback) {
+	users.findOne({user:user, passToken:token}, function(e, user){
+		if(e || !user)
+			callback('Not found');
+		else
+			callback(null,user);
+	});
+};
+
 exports.defaultUser = function() {
 	return {
 		'user' : '',
@@ -313,6 +315,29 @@ exports.defaultUser = function() {
 		'email': '',
 		'role' : 'Patient',
 	};
+};
+
+exports.getChangePasswordToken = function(email, callback) {
+	users.findOne({email:email}, function(e, user){
+		if(e || !user) {
+			callback('Email not found');
+		} else {
+			var token='AB5927C1145E'; //fallback token
+			require('crypto').randomBytes(6, function(ex, buff){
+				if(!ex)
+					token = buff.toString('hex');
+				
+				users.update({email:email},{tokenDate:moment(), passToken:token}, function(e, count){
+					if(e){
+						console.log('[Error] account-manager.getChangePasswordToken(): setting token', e);
+						callback('Error setting token in DB');
+					} else
+						callback(null,token,user);
+				});
+			});
+			
+		}
+	});	
 };
 
 /* private encryption & validation methods */
@@ -354,7 +379,7 @@ var getObjectId = function(id)
 }
 
 
-var findByMultipleFields = function(a, callback)
+/*var findByMultipleFields = function(a, callback)
 {
 // this takes an array of name/val pairs to search against {fieldName : 'value'} //
 	users.find( { $or : a } ).toArray(
@@ -362,4 +387,4 @@ var findByMultipleFields = function(a, callback)
 		if (e) callback(e)
 		else callback(null, results)
 	});
-};
+};*/
