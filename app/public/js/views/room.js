@@ -1,5 +1,10 @@
 var eventStatus = 'unknown';
-var localStream = Erizo.Stream({audio: true, video: true, data: (yourId==medicId), attributes: {uid:yourId}});
+var video_constraints = {mandatory: {
+	maxFrameRate:30
+	},
+	optional: [ ]
+};
+var localStream = Erizo.Stream({audio: true, video: video_constraints, data: (yourId==medicId), attributes: {uid:yourId}});
 var userStreams = {};
 var room;
 
@@ -35,6 +40,8 @@ function checkStatus(){
 }
 
 function joinRoom(token){
+	room1 = Erizo.Room({token:token});
+	room1.connect();
 	room = Erizo.Room({token:token});
 	onResize();//initial
 	
@@ -50,7 +57,7 @@ function joinRoom(token){
 		};
 
 		room.addEventListener("room-connected", function (roomEvent) {
-			room.publish(localStream);
+			room.publish(localStream, {maxVideoBW: 150});
 			subscribeToStreams(roomEvent.streams);
 			participantSuscribed(localStream);
 		});

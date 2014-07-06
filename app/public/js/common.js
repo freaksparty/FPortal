@@ -65,6 +65,14 @@ function modalError(text, url){
 	$('#modal-background').slideDown();
 	$('#modal').fadeIn();
 }
+function modalRedirection(text, url){
+	$('#modal .cancel').click(function(){window.location = url;})
+		.text('Continue');
+	$('#modal #modalSubmit').hide();
+	$('#modal p').text(text);
+	$('#modal-background').slideDown();
+	$('#modal').fadeIn();
+}
 function showError(text){
 	$('#response-panel').css({'border-color' : 'red', 'color': 'red'});
 	$('#response-panel').text(text).fadeIn(200).fadeOut(150).fadeIn();				

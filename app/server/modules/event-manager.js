@@ -284,6 +284,8 @@ exports.createEvent = function(data, callback) {
 							callback("Error inserting participants");
 							sql.close();
 						} else {
+							data._id = o._id;
+							console.log(o);
 							for(var i = 0; i < length; i++)
 								email.sendInvitation(ObjectId(participants[i]), data);
 							sql.commit();

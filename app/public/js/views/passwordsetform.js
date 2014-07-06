@@ -5,13 +5,16 @@ $(document).ready(function(){
 				tooltip_error('#txt-pass','The password must have at least 6 characters');
 				return false;
 			} if($('#txt-pass').val() !== $('#txt-passRetype').val()){
-				tooltip_error('#txt-passRetype','Both passwords are differente, please, type them again to prevent typos')
+				tooltip_error('#txt-passRetype','Both passwords are differente, please, type them again to prevent typos');
 				return false;
 			} else {
 				return true;
 			}
 		},
-		success	: function(){ modalError('The password was set, you can try to log into your account now.', '/'); },
-		error : function(e){modalError('Error updating your password, please contact the administtation');}
+		success	: function(){modalRedirection('The password was set, you can try to log into your account now.', '/'); },
+		error : function(e){
+			console.log(e);
+			modalError('Error updating your password, please contact the administtation');
+		}
 	});
 });

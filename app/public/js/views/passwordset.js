@@ -8,7 +8,7 @@ $(document).ready(function(){
 				return true;
 			}
 		},
-		success	: function(){ modalError('The email was sent, check your inbox to get the change password instructions.', '/'); },
+		success	: function(){ modalRedirection('The email was sent, check your inbox to get the change password instructions.', '/'); },
 		error : function(e){modalError('Email not found in our database');}
 	});
 });

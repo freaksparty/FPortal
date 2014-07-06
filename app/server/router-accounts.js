@@ -14,8 +14,22 @@ module.exports = function(app) {
 // main login page //
 
 	app.get('/', function(req, res){
+		if(req.session.user == null){
+			res.render('login', {title: 'Hello - Please Login To Your Account' });
+		} else {
+			console.log("User already logged");
+			if(req.session.redirect){
+				var url = req.session.redirect;
+				delete req.session.redirect;
+				res.redirect(url);
+			} else if(AM.isAdmin(req.session.user))
+				res.redirect('/admin');
+			else
+				res.redirect('/events');
+		}
+		
 		// check if the user's credentials are saved in a cookie //
-		if (req.cookies.user === undefined || req.cookies.pass === undefined){
+		/*if (req.cookies.user === undefined || req.cookies.pass === undefined){
 			res.render('login', { title: 'Hello - Please Login To Your Account' });
 		}	else{
 			// attempt automatic login //
@@ -34,7 +48,7 @@ module.exports = function(app) {
 					res.render('login', { title: 'Hello - Please Login To Your Account' });
 				}
 			});
-		}
+		}*/
 	});
 	
 	app.post('/', function(req, res){
@@ -43,11 +57,11 @@ module.exports = function(app) {
 				res.send(e, 400);
 			}	else{
 				req.session.user = o;
-				if (req.param('remember-me') == 'true'){
+				/*if (req.param('remember-me') == 'true'){
 					res.cookie('user', o.user, { maxAge: 900000 });
 					res.cookie('pass', o.pass, { maxAge: 900000 });
-				}
-				res.send(o, 200);
+				}*/
+				res.send('Logged in', 200);
 			}
 		});
 	});
@@ -176,7 +190,7 @@ module.exports = function(app) {
 			}
 		} else {
 			if(AM.isAdmin(req.session.user)){
-				AM.addNewUser(data, function(e){
+				AM.addNewUser(data, function(e, user){
 					if (e){
 						if(typeof e === 'string')
 							res.send(e, 400);
@@ -184,6 +198,11 @@ module.exports = function(app) {
 							res.send(e.toString(), 400);
 					} else {
 						res.send('created', 201);
+						if(data.pass === '')
+							AM.getChangePasswordToken(user.email, function(e, token, user) {
+								if(!e)
+									email.sendPasswordSet(user, true, token);
+							});
 					}
 				});
 			} else {
@@ -222,6 +241,8 @@ module.exports = function(app) {
 				res.send('Password length not enought', 400);
 			else {
 				user.pass = req.param('password');
+				//TODO: clean token and token date (while development it is useful to reuse links)
+				//user.token = null;
 				AM.updateUser(user, function(e, u){
 					if(e) {
 						console.log('[Error] router-accounts POST /passwordset/'+req.params.token+'/'+req.params.username+' updating user password '+e);

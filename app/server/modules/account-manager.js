@@ -10,6 +10,7 @@ var db 			= new DbClass();
 var crypto		= require('crypto');
 var moment		= require('moment');
 var N			= require('./../../../nuve');
+var email = require('./email-dispatcher');
 //var ObjectId = require('mongodb').ObjectID;
 var ObjectId = parseInt;
 
@@ -111,19 +112,19 @@ exports.addNewUser = function(newData, callback)
 				if (o){
 					callback('Email is already in use');
 				}	else{
-					//TODO send pasword set email if password is empty
-					saltAndHash(newData.pass, function(hash){
-						newData.pass = hash;
-					// append date stamp when record was created //
-						//newData.date = moment().format('MMMM Do YYYY, h:mm:ss a');
-						newData.creation = new Date();
+					newData.creation = new Date();
+					if(newData.pass === ''){
 						users.insert(newData, {safe: true}, callback);
-					});
+					} else
+						saltAndHash(newData.pass, function(hash){
+							newData.pass = hash;
+							users.insert(newData, {safe: true}, callback);
+						});
 				}
 			});
 		}
 	});
-}
+};
 
 exports.updateUser = function(newData, callback)
 {
@@ -317,7 +318,7 @@ exports.defaultUser = function() {
 	};
 };
 
-exports.getChangePasswordToken = function(email, callback) {
+function getChangePasswordToken(email, callback) {
 	users.findOne({email:email}, function(e, user){
 		if(e || !user) {
 			callback('Email not found');
@@ -336,9 +337,10 @@ exports.getChangePasswordToken = function(email, callback) {
 				});
 			});
 			
-		}
+		};
 	});	
 };
+exports.getChangePasswordToken = getChangePasswordToken;
 
 /* private encryption & validation methods */
 
