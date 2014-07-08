@@ -85,10 +85,3 @@ function changeMainVideo(div, stream) {
 		localStream.sendData({cmd:"VIEW RIGHT "+uid});
 	}
 }
-
-$(document).ready(function(){
-	checkStatus();
-	window.onresize = onResize;
-	imMedic = (medicId == yourId);
-	$('.controls').hide();
-});

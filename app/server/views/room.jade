@@ -9,7 +9,7 @@ block sessionvars
 	
 block content
 	script
-		| var yourId=#{authUser._id},medicId=#{event.owner._id},patientId=#{event.patient._id};
+		| var yourId=#{authUser._id},medicId=#{event.owner._id},patientId=#{event.patient._id},eventId=#{event._id};
 	include navigation
 	
 	div#loader
@@ -19,8 +19,7 @@ block content
 	div#room(style='display:none')
 		div#leftbar
 			div#vidYourself.video(style='width:320px; height: 240px;')
-			//h2 (You)
-			//if(event.owner._id == authUser._id)
+			
 			table#table-moderation.table.table-bordered.table-striped: tbody
 				each p in participants
 					tr(id='controls-'+p._id).controls
@@ -28,8 +27,19 @@ block content
 						td
 							i(id='control-volume-'+p._id).icon-volume-on.icon-black
 							i(id='control-kick-'+p._id).hide.icon-remove.icon-black
-			//else
-			//	| Non medic controls
+			
+			p High resolution:
+				input#chk-hires.switch-checkbox(type='checkbox',name='chk-hires',checked=true)
+				label.switch-label(for='chk-hires')
+					span.switch-inner
+					span.switch-switch
+				
+			
+			if(event.owner._id == authUser._id)
+				p Reserved time remaining: 
+					b: span#countdown=moment().add('m',event.duration).diff(event.start, 'm')
+					|  min
+				
 		#mainVideo
 			div#vidMainLeft.video
 				label

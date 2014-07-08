@@ -1,10 +1,23 @@
 var eventStatus = 'unknown';
-var video_constraints = {mandatory: {
-	maxFrameRate:30
-	},
-	optional: [ ]
-};
-var localStream = Erizo.Stream({audio: true, video: video_constraints, data: (yourId==medicId), attributes: {uid:yourId}});
+var video_constraints;
+//if(localStorage['hires']=='false')
+	video_constraints = {mandatory: {
+		/*maxFrameRate:30,
+		maxHeight: 240,*/
+	    maxWidth: 640 },
+		optional: [ ]
+	};	
+/*else
+	video_constraints = {mandatory: {
+		maxFrameRate:30
+		},
+		optional: [ ]};*/
+
+
+/*maxHeight: screen.height,
+maxWidth: screen.width,*/
+
+var localStream = Erizo.Stream({audio: true, video: video_constraints, data: (yourId==medicId), attributes: {uid:yourId, event:eventId}});
 var userStreams = {};
 var room;
 
@@ -40,8 +53,6 @@ function checkStatus(){
 }
 
 function joinRoom(token){
-	room1 = Erizo.Room({token:token});
-	room1.connect();
 	room = Erizo.Room({token:token});
 	onResize();//initial
 	
@@ -74,8 +85,10 @@ function joinRoom(token){
 		});
 
 		room.addEventListener("stream-removed", function (streamEvent) {
-			// Remove stream from DOM
 			var stream = streamEvent.stream;
+			if (typeof unpublishedCallback == 'function')
+			    unpublishedCallback(stream);
+
 			var uid = stream.getAttributes().uid;
 			$("#tab-"+uid).removeClass("connected");
 			$("#controls-"+uid).fadeOut();
@@ -87,12 +100,9 @@ function joinRoom(token){
 				document.body.removeChild(element);
 			}
 		});
-		
-		//room.addEventListener("stream-data", receiveData);
 
 		room.connect();
 		localStream.show("vidYourself");
-		//localStream.show("mini-video-"+yourId);
 		
 	});
 	localStream.init();
@@ -118,3 +128,21 @@ function onResize(){
 		o.height(p.height());
 	});
 }
+
+function changeLocalStream(hires) {
+	localStorage['hires']=hires;
+	window.location.reload();
+}
+
+$(document).ready(function(){
+	checkStatus();
+	window.onresize = onResize;
+	imMedic = (medicId == yourId);
+	$('.controls').hide();
+	if($('#countdown').length > 0 ){
+		setInterval(function(){$('#countdown').text($('#countdown').text()-1);}, 60000);
+	}
+	$('#chk-hires').click(function(){
+		changeLocalStream($('#chk-hires').prop('checked'));
+	});
+});

@@ -422,7 +422,7 @@ function validEventForm(req, callback){
 		callback('Incorrect date format');
 	else if(!hour.isValid())
 		callback('Incorrect hour format');
-	else if(date.add(hour).isBefore(moment()))
+	else if(date.add(hour).isBefore(moment().subtract('m',10)))
 		callback('The event start is in the past');
 	else if(!req.param('duration') || req.param('duration').length === 0)
 		callback('Duration is mandatory');

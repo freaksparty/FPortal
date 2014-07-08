@@ -2,8 +2,8 @@
 module.exports = {
 	
 	host		: 'smtp.gmail.com',
-	user 		: 'your-email-address@gmail.com',
-	password 	: 'your-email-password',
-	sender		: 'Your Name <your-email-address@gmail.com>',
-	baseUrl		: 'http://localhost:8888'	
+	user 		: 'PIAMADUDC@gmail.com',
+	password 	: 'piamadpass',
+	sender		: 'PIAMAD Project <PIAMADUDC@gmail.com>',
+	baseUrl		: 'http://10.51.1.243:8888'	
 };
