@@ -15,14 +15,16 @@ block content
 	div#loader
 		img(src="/img/loading.gif")
 		p#loader-message Loading the room
-	
-	div#room(style='display:none')
+		
+	#background.hide
+	#room.hide
 		div#leftbar
 			div#vidYourself.video(style='width:320px; height: 240px;')
 			
 			table#table-moderation.table.table-bordered.table-striped: tbody
 				each p in participants
 					tr(id='controls-'+p._id).controls
+						td: .circle
 						td #{p.name}
 						td
 							i(id='control-volume-'+p._id).icon-volume-on.icon-black
@@ -45,21 +47,23 @@ block content
 				label
 			div#vidMainRight.video
 				label
-		div#participants
-			.tab(id='tab-'+event.owner._id).tab-medic
-				.name #{event.owner.name} (Medic)
-				div(id='mini-video-'+event.owner._id).mini-video
-			.tab(id='tab-'+event.patient._id).tab-patient
-				.name #{event.patient.name} (Patient)
-				div(id='mini-video-'+event.patient._id).mini-video
-			each p in participants
-				if((p._id != event.owner._id) && (p._id != event.patient._id))
-					.tab(id='tab-'+p._id)
-						if(p.role === 'Medic')
-							.name #{p.name} (Collaborator)
-						else
-							.name #{p.name} (Familiar)
-						div(id='mini-video-'+p._id).mini-video
+
+		//-
+			div#participants
+				.tab(id='tab-'+event.owner._id).tab-medic
+					.name #{event.owner.name} (Medic)
+					div(id='mini-video-'+event.owner._id).mini-video
+				.tab(id='tab-'+event.patient._id).tab-patient
+					.name #{event.patient.name} (Patient)
+					div(id='mini-video-'+event.patient._id).mini-video
+				each p in participants
+					if((p._id != event.owner._id) && (p._id != event.patient._id))
+						.tab(id='tab-'+p._id)
+							if(p.role === 'Medic')
+								.name #{p.name} (Collaborator)
+							else
+								.name #{p.name} (Familiar)
+							div(id='mini-video-'+p._id).mini-video
 	
 	include modals/modal
 

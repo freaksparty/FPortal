@@ -15,6 +15,23 @@ var Client = require('mariasql');
 var sprintf = require('sprintf').sprintf;
 var moment = require('moment');
 
+/*
+ * This module exports:
+ * 
+ * Non Query execution
+ *  parseMoment(date): returns date formated for use in queries 
+ * 
+ * Basiq Query execution.
+ * this functions doew not use transactions and do NOT do rollbacks in case of error, this behaviour must release in higher levels)
+ *  queryToObject(query, values, callback): converts query into object, props named as columns.
+ *    Warning: Will call "callback" one time per result row, this can be as useful as dangerous.
+ *  queryToList(query,values, options, callback): callback(list with an object for each row)
+ *  queryToArray(query, values, callback): calls callback(a list with the first column)
+ *  saveQuery(query, values, callback): callback(query executation info) (as returned by the mariasql module)
+ *  insertQuery(query, values, callback): callback(inserted id) fails if affected rows != 1
+ * [...]
+ */
+
 /*Common for not transactional queries*/
 var mainClient;
 //var sql;

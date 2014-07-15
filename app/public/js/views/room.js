@@ -2,9 +2,9 @@ var eventStatus = 'unknown';
 var video_constraints;
 //if(localStorage['hires']=='false')
 	video_constraints = {mandatory: {
-		/*maxFrameRate:30,
-		maxHeight: 240,*/
-	    maxWidth: 640 },
+		maxFrameRate:30,
+		/*maxHeight: 240,*/
+	    maxWidth: 340 },
 		optional: [ ]
 	};	
 /*else
@@ -18,6 +18,7 @@ var video_constraints;
 maxWidth: screen.width,*/
 
 var localStream = Erizo.Stream({audio: true, video: video_constraints, data: (yourId==medicId), attributes: {uid:yourId, event:eventId}});
+var myselfVideo;
 var userStreams = {};
 var room;
 
@@ -43,9 +44,7 @@ function checkStatus(){
 				modalError('A critical error has occurred', '/events');
 			},
 			201 : function(xhr) {
-				$('#loader-message').text('Joining room...');
-				$('#loader').fadeOut();
-				$('#room').fadeIn();
+				$('#loader-message').text('Waiting video autorization...');
 				joinRoom(xhr);
 			}
 		}
@@ -54,9 +53,15 @@ function checkStatus(){
 
 function joinRoom(token){
 	room = Erizo.Room({token:token});
-	onResize();//initial
 	
 	localStream.addEventListener("access-accepted", function () {
+		/*myselfVideo = Erizo.Stream({audio: false, video: video_constraints, data: false, attributes: {}});
+		myselfVideo.init();*/
+		
+		$('#loader').fadeOut();
+		$('#room').delay(750).fadeIn();
+		$('#background').removeClass('hide');//¿not fadeIn()? Yes, whe are firing css3 transition :/
+		setTimeout(onResize,750);
 
 		var subscribeToStreams = function (streams) {
 			for (var index in streams) {
@@ -91,7 +96,8 @@ function joinRoom(token){
 
 			var uid = stream.getAttributes().uid;
 			$("#tab-"+uid).removeClass("connected");
-			$("#controls-"+uid).fadeOut();
+			//$("#controls-"+uid).fadeOut();
+			$("#controls-"+uid+" .circle").prop('class','circle red');
 			stream.close();
 			$("#mini-video-"+uid+">div").remove();
 			userStreams[uid] = undefined;
@@ -138,7 +144,7 @@ $(document).ready(function(){
 	checkStatus();
 	window.onresize = onResize;
 	imMedic = (medicId == yourId);
-	$('.controls').hide();
+	//$('.controls').hide();
 	if($('#countdown').length > 0 ){
 		setInterval(function(){$('#countdown').text($('#countdown').text()-1);}, 60000);
 	}

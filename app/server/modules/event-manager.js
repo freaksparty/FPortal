@@ -301,6 +301,14 @@ exports.createEvent = function(data, callback) {
 	}
 };
 
+exports.checkEventCollision = function(medic, start, duration) {
+	var startString = sql.parseMoment(start);
+	var endString = sql.parsemoment(start.add('minutes', duration));
+	/*SELECT * FROM tablename 
+WHERE columname BETWEEN '2012-12-25 00:00:00' AND '2012-12-25 23:59:59'*/
+	
+};
+
 exports.getToken = function(user, roomId, callback) {
 	N.API.createToken(roomId, user.user, 'presenter', function(token) {
 		callback(null, token);

@@ -321,8 +321,8 @@ module.exports = function (app){
 			res.send("Permission denied", 403);
 		} else eventStatus(req.param('eventId'), req.session.user, function(text, status, event, room){
 			if(status == 201){
-				EM.getToken(req.session.user, room, function(er,token){
-					if(er || !token){
+				EM.getToken(req.session.user, room, function(err,token){
+					if(err || !token){
 						res.send('Internal error', 500);
 						console.log('[Error] router-events get/event/'+req.params.eventId+'/status retrieving event token: ',err);
 					} else {
@@ -333,7 +333,7 @@ module.exports = function (app){
 				EM.getTokenForMedic(req.session.user, event, function(er,token){
 					if(er || !token){
 						res.send('Internal error', 500);
-						console.log('[Error] router-events get/event/'+req.params.eventId+'/status retrieving event token: ',err);
+						console.log('[Error] router-events get/event/'+req.params.eventId+'/status retrieving event token: ',er);
 					} else {
 						EM.setEventStatus(event._id,'MedicIn', function(err){
 							if(err) {

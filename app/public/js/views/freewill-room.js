@@ -53,8 +53,6 @@ function volumeUser(uid) {
 
 function participantSuscribed(stream){
 	var uid = stream.getAttributes().uid;
-	if(uid==yourId)
-		window.location='/';
 	if(imMedic){
 		if(userStreams[uid]!==undefined)
 			localStream.sendData({cmd:"KICKSTREAM "+userStreams[uid].getID()});
@@ -64,8 +62,9 @@ function participantSuscribed(stream){
 			
 	userStreams[uid] = stream;
 	$("#tab-"+uid).addClass('connected');
-	stream.show("mini-video-"+uid);
+	//stream.show("mini-video-"+uid);
 	$("#tab-"+uid).addClass("connected");
+	$("#controls-"+uid+" .circle").prop('class','circle green');
 	if(uid==medicId) {
 		changeMainVideo("vidMainLeft", stream);
 		stream.addEventListener("stream-data", receiveData);
