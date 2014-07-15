@@ -38,6 +38,7 @@ function hideModal() {
 }
 function modalConfirmAction(text, yesAction, urlNo) {
 	if(yesAction)
+		$('#modal #modalSubmit').unbind('click');
 		if(typeof yesAction == 'string')
 			$('#modal #modalSubmit').click(function(){window.location = yesAction;});
 		else if (typeof yesAction == 'function')

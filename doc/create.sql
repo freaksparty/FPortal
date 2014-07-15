@@ -32,6 +32,7 @@ CREATE TABLE Events (
 	patient INT(9) NOT NULL REFERENCES Users(_id),
 	start DATETIME NOT NULL,
 	duration INTEGER UNSIGNED NOT NULL,
+	end DATETIME AS (start + INTERVAL duration MINUTE) PERSISTENT, --helps with time interval selecting
 	comments VARCHAR(150),
 	moderated BOOL NOT NULL DEFAULT 0,
 	status ENUM('Created', 'MedicIn', 'Closed', 'Cancelled') NOT NULL DEFAULT 'Created'	

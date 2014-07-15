@@ -19,7 +19,8 @@ var moment = require('moment');
  * This module exports:
  * 
  * Non Query execution
- *  parseMoment(date): returns date formated for use in queries 
+ *  momentToString(date): returns date formated for use in queries
+ *  parseMoment(date): converts returning sql time to moment object
  * 
  * Basiq Query execution.
  * this functions doew not use transactions and do NOT do rollbacks in case of error, this behaviour must release in higher levels)
@@ -68,6 +69,7 @@ function Sql(){
 	this.parseMoment = function(date) {
 		return moment(date, 'YYYY-MM-DD HH:mm:ss');
 	};
+	this.momentToString = momentToString;
 	
 	/* Basic CRUD */
 	this.queryToObject = function(query, values, callback){

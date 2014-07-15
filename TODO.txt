@@ -1,7 +1,3 @@
-check conflict time when saving events
 Visible unique (nss?) ID for picking up patients
 position elements on room
-/check if users can enter room two times
-configure for free speech or moderation
-
-send change password email and set password when creating users
+configure for free speech or moderation (more configuration)

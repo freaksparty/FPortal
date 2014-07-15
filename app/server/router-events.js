@@ -80,6 +80,81 @@ module.exports = function (app){
 			});			
 		}
 	});
+	app.post('/event', function(req, res) {
+		if ((req.session.user == null) || (req.session.user.room == null)){
+			res.send('Permission denied', 403);
+		} else validEventForm(req, function(error){
+			if(error) {
+				res.send(error, 400);
+			} else {
+				var event = {
+						owner : req.session.user._id,
+						start : moment(req.param('date')+ ' ' +req.param('hour'), "DD/MM/YYYY H:mm"),
+						duration : req.param('duration'),
+						patient : req.param('patient'),
+						participants : req.param('participants'),
+						comments : req.param('comments'),
+						moderated : (req.param('moderated')=='on'?1:0),
+						meta : {
+							medic : req.session.user.name,
+						}							
+				};
+				if(event.participants === undefined) event.participants = [event.patient];
+				else event.participants.push(event.patient);
+				//Create
+				if(req.param('eventId') === undefined) { 
+					
+					EM.createEvent(event, function(e, ev){
+						if(e){
+							console.log('[Error] router-events POST/event creating: ',e);
+							res.send('Error getting event data', 400);
+						} else {
+							res.send(ev, 201);
+						}
+					});				
+				//Update
+				} else EM.findEventById(req.param('eventId'), function(err, ev){
+					if(err || !ev){
+						res.send('Error getting event data', 400);
+						console.log('[Error] router-events POST/event finding: ',err);
+					} else if(ev.owner != req.session.user._id){
+						console.log('[Error] router-events POST/event: user ('+req.session.user.user+') does not own event ('+ev._id+')');
+						res.send('Permission denied', 403);
+					} else {
+						event._id = ev._id;
+						EM.updateEvent(event, function(er, upevent){
+							if(er) {
+								console.log('[Error] router-events POST/event updating: '+er);
+								res.send('Error updating: '+er,400);
+							} else {
+								res.send(upevent,200);
+							}
+						});
+					}
+				});
+			}
+		});
+	});
+	app.post('/event/checkConflict', function(req, res){
+		if ((req.session.user == null) || (req.session.user.role !== 'Medic')){
+			res.send('403', 'Forbidden');
+		} else {
+			var start = moment(req.param('date')+ ' ' +req.param('hour'), "DD/MM/YYYY H:mm");
+			var eventId = null;
+			if(req.param('eventId') !== undefined)
+				eventId = req.param('eventId');
+			EM.checkEventCollision(req.session.user._id, eventId, start, req.param('duration'), function(err, conflicting){
+				if(err){
+					console.log("[Error] router-events checkEventConflict(), event-manager says", err);
+					res.send('500', 'Internal error');
+				} else if(conflicting == 0) {
+					res.send('200', '0');
+				} else 
+					res.send('409', conflicting);
+			});
+		}
+	});
+
 	app.get('/eventform/:eventId/', function(req, res) {
 		if ((req.session.user == null)){
 			req.session.redirect = req.protocol + '://' + req.get('host') + req.originalUrl;
@@ -202,61 +277,6 @@ module.exports = function (app){
 				}
 			});	
 		}
-	});
-	app.post('/event', function(req, res) {
-		if ((req.session.user == null) || (req.session.user.room == null)){
-			res.send('Permission denied', 403);
-		} else validEventForm(req, function(error){
-			if(error) {
-				res.send(error, 400);
-			} else {
-				var event = {
-						owner : req.session.user._id,
-						start : moment(req.param('date')+ ' ' +req.param('hour'), "DD/MM/YYYY H:mm"),
-						duration : req.param('duration'),
-						patient : req.param('patient'),
-						participants : req.param('participants'),
-						comments : req.param('comments'),
-						moderated : (req.param('moderated')=='on'?1:0),
-						meta : {
-							medic : req.session.user.name,
-						}							
-				};
-				if(event.participants === undefined) event.participants = [event.patient];
-				else event.participants.push(event.patient);
-				//Create
-				if(req.param('eventId') === undefined) { 
-					
-					EM.createEvent(event, function(e, ev){
-						if(e){
-							console.log('[Error] router-events POST/event creating: ',e);
-							res.send('Error getting event data', 400);
-						} else {
-							res.send(ev, 201);
-						}
-					});				
-				//Update
-				} else EM.findEventById(req.param('eventId'), function(err, ev){
-					if(err || !ev){
-						res.send('Error getting event data', 400);
-						console.log('[Error] router-events POST/event finding: ',err);
-					} else if(ev.owner != req.session.user._id){
-						console.log('[Error] router-events POST/event: user ('+req.session.user.user+') does not own event ('+ev._id+')');
-						res.send('Permission denied', 403);
-					} else {
-						event._id = ev._id;
-						EM.updateEvent(event, function(er, upevent){
-							if(er) {
-								console.log('[Error] router-events POST/event updating: '+er);
-								res.send('Error updating: '+er,400);
-							} else {
-								res.send(upevent,200);
-							}
-						});
-					}
-				});
-			}
-		});
 	});
 	app.get('/event/:eventId/join', function(req, res) {
 		if ((req.session.user == null)){

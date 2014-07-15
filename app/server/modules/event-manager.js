@@ -15,7 +15,7 @@ function getEntity(sql) {
 		e.owner = e.owner?parseInt(e.owner):null;
 		e.patient = e.patient?parseInt(e.patient):null;
 		e.duration = e.duration?parseInt(e.duration):null;
-	}, ["_id", "owner", "patient", "start", "duration", "comments", "status", "moderated"], ["start"]);
+	}, ["_id", "owner", "patient", "start", "duration", "comments", "status", "moderated"], ["start", "end"]);
 }
 
 var events = getEntity(db);
@@ -301,11 +301,31 @@ exports.createEvent = function(data, callback) {
 	}
 };
 
-exports.checkEventCollision = function(medic, start, duration) {
-	var startString = sql.parseMoment(start);
-	var endString = sql.parsemoment(start.add('minutes', duration));
-	/*SELECT * FROM tablename 
-WHERE columname BETWEEN '2012-12-25 00:00:00' AND '2012-12-25 23:59:59'*/
+/* Returns number of conflicting events if any
+ * medic: medic _id
+ * eventId: null or an _id to ignore that event (your are testing an update for an already existing event)
+ */
+exports.checkEventCollision = function(medic, eventId, start, duration, callback) {
+	var startString = db.momentToString(start);
+	var endString = db.momentToString(start.add('minutes', duration));
+	var query = "SELECT COUNT(*) FROM Events " +
+			"WHERE ( (start BETWEEN '"+startString+"' AND '"+endString+"') " +
+			"OR (end BETWEEN '"+startString+"' AND '"+endString+"') " +
+			"OR ('"+startString+"' BETWEEN start AND end) " +
+			"OR ('"+endString+"' BETWEEN start AND end) ) " +
+			"AND owner = "+medic+" AND status IN ('Created', 'MedicIn')";
+	if(eventId !== null) 
+		query += " AND _id !="+eventId;
+
+	db.queryToArray(query, {}, function(err, result){
+		if(err || !result){
+			console.log("[SQL] ", query);
+			console.log("[Error] event-manager checkEventCollision, queryToArray says", err);
+			callback(err);
+		} else {
+			callback(null, result[0]);
+		}
+	});
 	
 };
 

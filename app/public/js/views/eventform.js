@@ -1,6 +1,7 @@
 /*var relatives = [];
 var collaborators = [];*/
 var participants = [];
+var careTime = true;
 
 $(document).ready(function(){
 	if($('#eventId').length > 0)
@@ -56,8 +57,10 @@ $(document).ready(function(){
 		},
 		error			: function(xhr, response) {
 			showError('Fail: '+xhr.responseText);
+			careTime = true;
 		}
 	});
+	
 	bindTable();
 	$('#table-participants>tr').each(function(){
 		var id = $(this).prop('id');
@@ -129,7 +132,35 @@ function validEvent(){
 	} else if(!(/^[0-5]?[0-9]\:[0-5][0-9]$/.test($('#txt-hour').val()))) {
 		rtn = false;
 		tooltip_error('#txt-hour','Specified hour is not valid');
-	}		
+	}
+	if(careTime)
+		$.ajax('/event/checkConflict', {
+			cache	: false,
+			data	: {
+				date:$('#txt-date').val(),
+				hour:$('#txt-hour').val(),
+				duration:$('#duration').val()},
+			type	: 'post',
+			async	: false,
+			statusCode : {
+				403 : function() {
+					modalError('Session expired or page error');
+					rtn = false;
+				},
+				500 : function() {
+					modalError('A critical error has occurred', '/events');
+					rtn = false;
+				},
+				409	: function() {
+					modalConfirmAction('Event time conflicts with another existing event ¿Save event anyway?', function(){
+						careTime = false;
+						$('#event-form').submit();
+						hideModal();
+					});
+					rtn = false;
+				}
+			}
+		});
 	return rtn;
 }
 function confirmJoin(){
