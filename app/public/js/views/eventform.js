@@ -133,13 +133,17 @@ function validEvent(){
 		rtn = false;
 		tooltip_error('#txt-hour','Specified hour is not valid');
 	}
-	if(careTime)
+	if(careTime) {
+		formData = {
+			date:$('#txt-date').val(),
+			hour:$('#txt-hour').val(),
+			duration:$('#duration').val()
+		};
+		if($('#eventId').length > 0)
+			formData.eventId = $('#eventId').val();
 		$.ajax('/event/checkConflict', {
 			cache	: false,
-			data	: {
-				date:$('#txt-date').val(),
-				hour:$('#txt-hour').val(),
-				duration:$('#duration').val()},
+			data	: formData,
 			type	: 'post',
 			async	: false,
 			statusCode : {
@@ -162,6 +166,7 @@ function validEvent(){
 			}
 		});
 	return rtn;
+	}
 }
 function confirmJoin(){
 	$('#btn-cancel').hide();

@@ -35,7 +35,6 @@ var moment = require('moment');
 
 /*Common for not transactional queries*/
 var mainClient;
-//var sql;
 if(mainClient == null) {
 	console.log("[INFO] Connecting to SQL...");
 	mainClient = new Client();
@@ -52,13 +51,13 @@ if(mainClient == null) {
 	mainClient.connect(dbconfig);
 	mainClient.query("SET autocommit=1;"); //Forces connection
 }
-//sql = new Sql();
 module.exports = Sql;
 
 function Sql(){
 	
 	this.c = mainClient;
 	this.transaction = false;
+	this.sanitize = sanitize;
 	
 	this.close = function() {
 		if(this.transaction)
@@ -363,4 +362,8 @@ function filtersToSet(filters) {
 			set.push(key+"= NULL");
 	}
 	return set.join(", ");
+}
+
+function sanitize(val) {
+	return mainClient.escape(val);
 }

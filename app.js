@@ -12,6 +12,7 @@ var express = require('express'),
     https = require("https"),
     config = require('./../licode/licode_config');
 var http = require('http');
+//var https = require('https');
 var app = express();
 process.env.TZ = 'Europe/Madrid'; //TODO config file
 app.locals.moment = require('moment');
@@ -50,23 +51,6 @@ app.use(function (req, res, next) {
 //Licode service init
 N.API.init(config.nuve.superserviceID, config.nuve.superserviceKey, 'http://localhost:3000/');
 
-/*var myRoom;
-
-N.API.getRooms(function (roomlist) {
-    "use strict";
-    var rooms = JSON.parse(roomlist);
-    console.log(rooms.length);
-    if (rooms.length === 0) {
-        N.API.createRoom('myRoom', function (roomID) {
-            myRoom = roomID._id;
-            console.log('Created room ', myRoom);
-        });
-    } else {
-        myRoom = rooms[0]._id;
-        console.log('Using room ', myRoom);
-    }
-});*/
-
 require('./app/server/router-accounts')(app);
 require('./app/server/router-events')(app);
 app.get('*', function(req, res) { res.render('404', { title: 'Page Not Found'}); });
@@ -75,32 +59,15 @@ app.configure('development', function(){
 	app.use(express.errorHandler());
 });
 
-/*app.post('/createToken/', function (req, res) {
-    "use strict";
-    var room = myRoom,
-        username = req.body.username,
-        role = req.body.role;
-    N.API.createToken(room, username, role, function (token) {
-        console.log(token);
-        res.send(token);
-    });
-});
-
-app.get('/getRooms/', function (req, res) {
-    "use strict";
-    N.API.getRooms(function (rooms) {
-        res.send(rooms);
-    });
-});
-
-app.get('/getUsers/:room', function (req, res) {
-    "use strict";
-    var room = req.params.room;
-    N.API.getUsers(room, function (users) {
-        res.send(users);
-    });
-});*/
-
 http.createServer(app).listen(app.get('port'), function(){
 	console.log("Express server listening on port " + app.get('port'));
 });
+
+/*var ssloptions = {
+		  key: fs.readFileSync('/home/siro/piamad.cert.key', 'utf8'),
+		  cert: fs.readFileSync('/home/siro/piamad.cert.cert', 'utf8')
+		  //ca: fs.readFileSync('/home/ec2-user/ca.pem')
+		};
+https.createServer(ssloptions, app).listen(app.get('port'), function(){
+	console.log("Express server listening on port " + app.get('port'));
+});*/

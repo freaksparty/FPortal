@@ -10,6 +10,13 @@ block content
 		if(authUser.room)
 			h3 Own Events
 			div.content-block
+				span#btn-filter-own
+					span#btn-filter-active.btn.btn-filter.active
+						| Active
+					span#btn-filter-closed.btn
+						| Closed
+					span#btn-filter-cancelled.btn
+						| Cancelled
 				a(href='/event')#btn-addevent.btn.float-right
 					i.icon-plus.icon-black
 					| New event
@@ -20,7 +27,7 @@ block content
 							th Duration
 							th Participants
 							th Comments/Subject
-					tbody.autolink
+					tbody#table-body-own.autolink
 						each event in ownEventList
 							tr
 								td
@@ -36,6 +43,13 @@ block content
 								
 		h3 Events you are invited
 		div.content-block
+			span#btn-filter
+					span#btn-filter-active.btn.btn-filter.active
+						| Active
+					span#btn-filter-closed.btn
+						| Closed
+					span#btn-filter-cancelled.btn
+						| Cancelled
 			table.table.table-bordered.table-striped#table1
 				thead
 					tr

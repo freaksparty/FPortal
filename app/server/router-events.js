@@ -49,7 +49,7 @@ module.exports = function (app){
 			res.redirect('/');
 		} else {
 			if(req.session.user.room) {
-				EM.listEventsCreatedBy(req.session.user, function(e, ownList){
+				EM.listEventsCreatedBy(req.session.user, 0, 10, ['Created','MedicIn'], function(e, ownList){
 					if(e){
 						console.log('[Error] router-events /events: failed to get own event list:',e);
 					} //continue with guest events ignoring the error ¿Better options?
@@ -60,6 +60,31 @@ module.exports = function (app){
 			}
 		}
 	});
+	app.get('/api/events/:page/:owner/:filter', function(req, res) {
+		var pageSize = 10, filter;
+		var offset = Math.min(0, req.params.page * pageSize);
+		switch(req.params.filter) {
+			case 'Closed': filter = ['Closed'];break;
+			case 'Cancelled': filter = ['Cancelled'];break;
+			default: filter = ['Created', 'MedicIn'];break;
+		}
+		if(req.params.owner === 'me')
+			req.params.owner = req.session.user._id;
+		if ((req.session.user == null)){
+			res.send('404', 'Not found');
+		} else if(req.params.owner != -1 && req.params.owner == req.session.user._id) {
+			EM.listEventsCreatedBy(req.session.user, offset, pageSize, filter, function(err, ownlist) {
+				if(err) {
+					console.log('[Error] router-events '+req.originalUrl+' listEventsCreatedBy says:', err);
+					res.send(500, err);
+				} else {
+					res.send(200, ownlist);
+				}
+			});
+		} else
+			res.send(500,'WTF');
+	});
+	
 	app.get('/event', function(req, res){
 		if ((req.session.user == null) || (req.session.user.role !== 'Medic')){
 			res.redirect('/');

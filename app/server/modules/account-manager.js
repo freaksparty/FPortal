@@ -66,7 +66,7 @@ setTimeout(function(){
 			}
 		}
 	});
-}, 1000);
+}, 2000);
 
 /* login validation methods */
 

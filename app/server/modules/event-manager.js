@@ -20,9 +20,12 @@ function getEntity(sql) {
 
 var events = getEntity(db);
 
-exports.listEventsCreatedBy = function(user,callback){
+exports.listEventsCreatedBy = function(user, start, count, status, callback){
+	for(var i=0; i<status.length; i++)
+		status[i] = "'"+db.sanitize(status[i])+"'";
 	var query = "SELECT e._id, o.name medic, p.name patient, start, duration, comments FROM Events e "+
-	"JOIN Users o ON o._id=owner JOIN Users p ON p._id=patient WHERE status != 'Closed' AND owner="+user._id;
+	"JOIN Users o ON o._id=owner JOIN Users p ON p._id=patient WHERE owner="+user._id+
+	" AND status IN("+status.join(',')+") ORDER BY start DESC LIMIT "+start+","+count;
 	db.queryToList(query, {}, {}, function(err, events){
 	if(err)
 		callback(err, []);
@@ -316,7 +319,7 @@ exports.checkEventCollision = function(medic, eventId, start, duration, callback
 			"AND owner = "+medic+" AND status IN ('Created', 'MedicIn')";
 	if(eventId !== null) 
 		query += " AND _id !="+eventId;
-
+	
 	db.queryToArray(query, {}, function(err, result){
 		if(err || !result){
 			console.log("[SQL] ", query);
