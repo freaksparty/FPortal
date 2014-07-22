@@ -66,8 +66,8 @@ block content
 								span=event.start
 							td=event.duration+' min'
 							td
-								p=event.patient+' (Patient)'
 								p=event.medic+' (Medic)'
+								p=event.patient+' (Patient)'
 								each p in event.participants
 									if(p != event.patient)
 										p=p

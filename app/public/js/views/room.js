@@ -1,3 +1,5 @@
+//This client is the medic (moderator)
+var imMedic = false;
 var eventStatus = 'unknown';
 var video_constraints;
 //if(localStorage['hires']=='false')
@@ -138,6 +140,66 @@ function onResize(){
 function changeLocalStream(hires) {
 	localStorage['hires']=hires;
 	window.location.reload();
+}
+
+//Receiving command
+function receiveData(evt){
+	var cmd = evt.msg.cmd;
+	if(cmd != undefined){
+		cmd = cmd.split(' ');
+		switch(cmd[0]){
+			case 'VIEW':
+				if(cmd[1]=='RIGHT')
+					changeMainVideo("vidMainRight", userStreams[parseInt(cmd[2])]);
+				else
+					changeMainVideo("vidMainLeft", userStreams[parseInt(cmd[2])]);
+				break;
+			case 'KICKUSER':
+				if(cmd[1]==yourId)
+					window.location='/';
+				break;
+			case 'KICKSTREAM':
+				if(cmd[1]==localStream.getID())
+					window.location='/';
+				break;
+			case 'VOLUME':
+				var uid = cmd[2];
+				if(cmd[1]=='ON') {
+					userStreams[parseInt(cmd[2])].stream.getAudioTracks()[0].enabled = true;
+					$('#control-volume-'+uid).removeClass('icon-volume-off').addClass('icon-volume-on');
+				} else {
+					userStreams[parseInt(cmd[2])].stream.getAudioTracks()[0].enabled = false;
+					$('#control-volume-'+uid).removeClass('icon-volume-on').addClass('icon-volume-off');
+				}
+		}
+	}
+}
+
+function volumeUser(uid) {
+	var audio = userStreams[uid].stream.getAudioTracks()[0];
+	if(audio.enabled) {
+		if(imMedic)
+			localStream.sendData({cmd : "VOLUME OFF "+uid});
+		audio.enabled = false;
+		$('#control-volume-'+uid).removeClass('icon-volume-on').addClass('icon-volume-off');
+	} else {
+		if(imMedic)
+			localStream.sendData({cmd : "VOLUME ON "+uid});
+		audio.enabled = true;
+		$('#control-volume-'+uid).removeClass('icon-volume-off').addClass('icon-volume-on');
+	}
+}
+
+function changeMainVideo(div, stream) {
+	//Clear previous video if present
+	$("#"+div+">div").hide(); //TODO: fix workarround
+
+	var uid = stream.getAttributes().uid;
+	stream.show(div);
+	$("#"+div+">label").text($("#tab-"+uid+">.name").text());
+	if(imMedic &&(div=="vidMainRight")){
+		localStream.sendData({cmd:"VIEW RIGHT "+uid});
+	}
 }
 
 $(document).ready(function(){

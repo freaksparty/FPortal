@@ -1,70 +1,21 @@
-//This client is the medic (moderator)
-var imMedic = false;
-
-//Receiving command
-function receiveData(evt){
-	var cmd = evt.msg.cmd;
-	if(cmd != undefined){
-		var cmd=cmd.split(' ');
-		switch(cmd[0]){
-			case 'VIEW':
-				if(cmd[1]=='RIGHT')
-					changeMainVideo("vidMainRight", userStreams[parseInt(cmd[2])]);
-				else
-					changeMainVideo("vidMainLeft", userStreams[parseInt(cmd[2])]);
-				break;
-			case 'KICKUSER':
-				if(cmd[1]==yourId)
-					window.location='/';
-				break;
-			case 'KICKSTREAM':
-				if(cmd[1]==localStream.getID())
-					window.location='/';
-				break;
-			case 'VOLUME':
-				var uid = cmd[2];
-				if(cmd[1]=='ON') {
-					userStreams[parseInt(cmd[2])].stream.getAudioTracks()[0].enabled = true;
-					$('#control-volume-'+uid).removeClass('icon-volume-off').addClass('icon-volume-on');
-				} else {
-					userStreams[parseInt(cmd[2])].stream.getAudioTracks()[0].enabled = false;
-					$('#control-volume-'+uid).removeClass('icon-volume-on').addClass('icon-volume-off');
-				}
-		}
-	}
-}
-
 function kickUser(uid) {localStream.sendData({cmd:"KICKUSER "+uid});}
-
-function volumeUser(uid) {
-	var audio = userStreams[uid].stream.getAudioTracks()[0];
-	if(audio.enabled) {
-		if(imMedic)
-			localStream.sendData({cmd : "VOLUME OFF "+uid});
-		audio.enabled = false;
-		$('#control-volume-'+uid).removeClass('icon-volume-on').addClass('icon-volume-off');
-	} else {
-		if(imMedic)
-			localStream.sendData({cmd : "VOLUME ON "+uid});
-		audio.enabled = true;
-		$('#control-volume-'+uid).removeClass('icon-volume-off').addClass('icon-volume-on');
-	}
-}
 
 function participantSuscribed(stream){
 	var uid = stream.getAttributes().uid;
+	if(userStreams[uid]!=undefined && userStreams[uid].getID()!==localStream.getID())
+		window.location='/';
 	if(imMedic){
-		if(userStreams[uid]!==undefined)
-			localStream.sendData({cmd:"KICKSTREAM "+userStreams[uid].getID()});
 		if(stream.getAttributes().event !== eventId)
 			localStream.sendData({cmd:"KICKSTREAM "+stream.getID()});
 	}
 			
 	userStreams[uid] = stream;
+	
 	$("#tab-"+uid).addClass('connected');
 	//stream.show("mini-video-"+uid);
 	$("#tab-"+uid).addClass("connected");
 	$("#controls-"+uid+" .circle").prop('class','circle green');
+	
 	if(uid==medicId) {
 		changeMainVideo("vidMainLeft", stream);
 		stream.addEventListener("stream-data", receiveData);
@@ -72,25 +23,13 @@ function participantSuscribed(stream){
 		changeMainVideo("vidMainRight", stream);
 	}
 	if(imMedic) {
-		$('#control-kick-'+uid).removeClass('hide').click(function() {quickUser(uid);});
+		$('#control-kick-'+uid).removeClass('hide').click(function() {kickUser(uid);});
 	}
 	$('#control-volume-'+uid).click(function() {volumeUser(uid);});
 	$('#controls-'+uid).fadeIn();
-	$('#tab-'+uid).click(function(){
+	$('#name-'+uid).click(function(){
 		if(userStreams[uid] !== undefined){
 			changeMainVideo("vidMainRight", userStreams[uid]);
 		}
 	});
-}
-
-function changeMainVideo(div, stream) {
-	//Clear previous video if present
-	$("#"+div+">div").hide(); //TODO: fix workarround
-
-	var uid = stream.getAttributes().uid;
-	stream.show(div);
-	$("#"+div+">label").text($("#tab-"+uid+">.name").text());
-	if(imMedic &&(div=="vidMainRight")){
-		localStream.sendData({cmd:"VIEW RIGHT "+uid});
-	}
 }

@@ -25,7 +25,7 @@ exports.listEventsCreatedBy = function(user, start, count, status, callback){
 		status[i] = "'"+db.sanitize(status[i])+"'";
 	var query = "SELECT e._id, o.name medic, p.name patient, start, duration, comments FROM Events e "+
 	"JOIN Users o ON o._id=owner JOIN Users p ON p._id=patient WHERE owner="+user._id+
-	" AND status IN("+status.join(',')+") ORDER BY start DESC LIMIT "+start+","+count;
+	" AND status IN("+status.join(',')+") ORDER BY start DESC";// LIMIT "+start+","+count;
 	db.queryToList(query, {}, {}, function(err, events){
 	if(err)
 		callback(err, []);
@@ -62,7 +62,7 @@ exports.listEventsByParticipant = function(user, start, count, status, callback)
 	var query = "SELECT e._id, o.name medic, p.name patient, start, duration, comments " +
 			"FROM Events e JOIN Users o ON o._id=owner JOIN Users p ON p._id=patient " +
 			"WHERE e._id IN (SELECT event FROM EventParticipants WHERE user="+ user._id + ") " +
-			"AND status IN("+status.join(',')+") ORDER BY start DESC LIMIT "+start+","+count;
+			"AND status IN("+status.join(',')+") ORDER BY start DESC";// LIMIT "+start+","+count;
 	db.queryToList(query, {}, {}, function(err, events){
 		if(err)
 			callback(err, []);

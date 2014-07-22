@@ -25,16 +25,16 @@ block content
 				each p in participants
 					tr(id='controls-'+p._id).controls
 						td: .circle
-						td #{p.name}
+						td(id='name-'+p._id) #{p.name}
 						td
 							i(id='control-volume-'+p._id).icon-volume-on.icon-black
 							i(id='control-kick-'+p._id).hide.icon-remove.icon-black
 			
-			p High resolution:
-				input#chk-hires.switch-checkbox(type='checkbox',name='chk-hires',checked=true)
-				label.switch-label(for='chk-hires')
-					span.switch-inner
-					span.switch-switch
+			//p High resolution:
+				//input#chk-hires.switch-checkbox(type='checkbox',name='chk-hires',checked=true)
+				//label.switch-label(for='chk-hires')
+					//span.switch-inner
+					//span.switch-switch
 				
 			
 			if(event.owner._id == authUser._id)
