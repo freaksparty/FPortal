@@ -14,7 +14,7 @@ module.exports = function (app){
 
 	app.get('/events', function(req,res) {
 		function listByParticipant(ownList) {
-			EM.listEventsByParticipant(req.session.user, function(e, list){
+			EM.listEventsByParticipant(req.session.user, 0, 10, ['Created','MedicIn'], function(e, list){
 				for(var i=0;i<ownList.length;i++)
 					if (ownList[i].start !== undefined)
 						ownList[i].start = moment(ownList[i].start).format('DD/MM/YYYY HH:mm'); 
@@ -32,8 +32,6 @@ module.exports = function (app){
 							title : 'Internal error',
 						});
 					} else {
-						//TODO: convert uids to names
-						//for(var i = 0; i<users.ownList; i++)
 						res.render('events', {
 							title			: 'Your events',
 							sessionUser		: req.session.user,
@@ -86,7 +84,14 @@ module.exports = function (app){
 					}
 				});
 			} else
-				res.send(500,'WTF');
+				EM.listEventsByParticipant(req.session.user, offset, pageSize, filter, function(err, list){
+					if(err) {
+						console.log('[Error] router-events '+req.originalUrl+' listEventsCreatedBy says:', err);
+						res.send(500, err);
+					} else {
+						res.send(200, list);
+					}
+				});
 		}
 	});
 	
