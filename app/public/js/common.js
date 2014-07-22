@@ -1,7 +1,9 @@
 //Convert first a link into all row link
+function autolink(){
 $('tbody.autolink>tr').click( function() {
     window.location = $(this).find('a').attr('href');
 });
+} autolink();
 
 function tooltip_right(parent, text){
 	parent = $(parent);

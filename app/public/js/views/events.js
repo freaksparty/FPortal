@@ -8,29 +8,52 @@ function changeFilterOwn(){
 	$('#btn-filter-own .btn').removeClass('active');
 	pageOwn=0;
 	switch($(this).attr('id')){
-		case 'btn-filter-active':filterOwn='Created';
-		case 'btn-filter-closed':filterOwn='Closed';
+		case 'btn-filter-active':filterOwn='Created';break;
+		case 'btn-filter-closed':filterOwn='Closed';break;
 		case 'btn-filter-cancelled':filterOwn='Cancelled';
 	}
-	updateTable('table-body-own', 'me', pageOwn);
+	updateTable('table-body-own', 'me', pageOwn, false);
 	$(this).addClass('active');
 }
 function changeFilter(){
-	$('#btn-filter-own .btn').removeClass('active');
+	$('#btn-filter .btn').removeClass('active');
 	page=0;
 	switch($(this).attr('id')){
-		case 'btn-filter-active':filter='Created';
-		case 'btn-filter-closed':filter='Closed';
+		case 'btn-filter-active':filter='Created';break;
+		case 'btn-filter-closed':filter='Closed';break;
 		case 'btn-filter-cancelled':filter='Cancelled';
 	}
-	//updateTable()
+	updateTable('table-body-invited', 0, page, true);
 	$(this).addClass('active');
 }
-function updateTable(bodyId, owner, page){
+function updateTable(bodyId, owner, page, showMedic){
+	var body = $('#'+bodyId);
 	var url = '/api/events/'+page+'/'+owner+'/'+filterOwn;
 	$.ajax({
+		type: 'GET',
 		url: url,
-		success: function(data){console.log('data');},
+		dataType: "json",
+		success: function(data){
+			body.empty();
+			console.log(data);
+			$.each(data, function(idx, row){
+				var participants = [];
+				if(showMedic)participants.push(row.medic+' (Medic)');
+				$.each(row.participants, function(idp, p){
+					if(p===row.patient) participants.push(p+' (Patient)');
+					else participants.push(p);
+				});
+				body.append('<tr><td><a href="/eventform/'+row._id+'/"></a><span>'+formatDate(row.start)+'</span></td>' +
+						'<td>'+row.duration+' min</td>'+
+						'<td>'+participants.join('<br/>')+'</td><td>'+row.comments+'</td></tr>');
+			});
+			autolink();
+		},
 		error: function(){modalError('Error getting events');}
 	});
+}
+function formatDate(date){
+	var year = date.split(' ')[0].split('-').reverse().join('/');
+	var hour = date.split(' ')[1].slice(0,-3);
+	return year+' '+hour;
 }
