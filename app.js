@@ -12,7 +12,7 @@ var express = require('express'),
     https = require("https"),
     config = require('./../licode/licode_config');
 var http = require('http');
-//var https = require('https');
+var https = require('https');
 var app = express();
 process.env.TZ = 'Europe/Madrid'; //TODO config file
 app.locals.moment = require('moment');
@@ -39,7 +39,7 @@ app.use(function (req, res, next) {
     "use strict";
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS, DELETE');
-    res.header('Access-Control-Allow-Headers', 'origin, content-type');
+    res.header('Access-Control-Allow-Headers', 'Origin, Content-type');
     if (req.method == 'OPTIONS') {
         res.send(200);
     }
@@ -59,15 +59,15 @@ app.configure('development', function(){
 	app.use(express.errorHandler());
 });
 
-http.createServer(app).listen(app.get('port'), function(){
+/*http.createServer(app).listen(app.get('port'), function(){
 	console.log("Express server listening on port " + app.get('port'));
-});
+});/**/
 
-/*var ssloptions = {
+var ssloptions = {
 		  key: fs.readFileSync('/home/siro/piamad.cert.key', 'utf8'),
 		  cert: fs.readFileSync('/home/siro/piamad.cert.cert', 'utf8')
 		  //ca: fs.readFileSync('/home/ec2-user/ca.pem')
 		};
 https.createServer(ssloptions, app).listen(app.get('port'), function(){
 	console.log("Express server listening on port " + app.get('port'));
-});*/
+});/**/

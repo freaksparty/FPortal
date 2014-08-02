@@ -16,12 +16,6 @@ function participantSuscribed(stream){
 	$("#tab-"+uid).addClass("connected");
 	$("#controls-"+uid+" .circle").prop('class','circle green');
 	
-	if(uid==medicId) {
-		changeMainVideo("vidMainLeft", stream);
-		stream.addEventListener("stream-data", receiveData);
-	} else if(uid==patientId) {
-		changeMainVideo("vidMainRight", stream);
-	}
 	if(imMedic) {
 		$('#control-kick-'+uid).removeClass('hide').click(function() {kickUser(uid);});
 	}
@@ -32,4 +26,10 @@ function participantSuscribed(stream){
 			changeMainVideo("vidMainRight", userStreams[uid]);
 		}
 	});
+	if(uid==medicId) {
+		changeMainVideo("vidMainLeft", stream);
+		stream.addEventListener("stream-data", receiveData);
+	} else if(uid==patientId) {
+		changeMainVideo("vidMainRight", stream);
+	}
 }

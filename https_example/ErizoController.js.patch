@@ -1,0 +1,18 @@
+--- erizoController.js	2014-08-03 00:34:04.803893143 +0200
++++ erizoController.js	2014-08-02 23:08:37.832997762 +0200
+@@ -37,6 +37,15 @@
+ 
+ var checkSignature = function (token, key) {
+     "use strict";
++    
++    //HTTPS work arround, reverse proxy is port+1
++    if(token.secure) {
++    		token.host=token.host.split(':');
++		if(token.host.length==2)
++			token.host[1]--;
++		token.host=token.host.join(':');
++    }
++    //****
+ 
+     var calculatedSignature = calculateSignature(token, key);
+ 
