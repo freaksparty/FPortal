@@ -1,9 +1,18 @@
 //Convert first a link into all row link
 function autolink(){
-$('tbody.autolink>tr').click( function() {
+$('tbody.autolink>tr').click(function(){
     window.location = $(this).find('a').attr('href');
 });
-} autolink();
+}autolink();
+
+$('#notif-hide').click(function(){
+	$('#notif-div').slideUp();
+	$('#notif-navbar').fadeIn();
+});
+$('#notif-navbar').click(function(){
+	$('#notif-div').slideDown();
+	$('#notif-navbar').fadeOut();
+});
 
 function tooltip_right(parent, text){
 	parent = $(parent);

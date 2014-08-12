@@ -1,10 +1,12 @@
 block sessionvars
 div.navbar
+	#notif-navbar
+		a No notifications
 	if(authUser.role === 'Admin')
 		ul.navoption
 			a(href='/admin') Admin Panel
 	ul.navoption
-		a(href='/events') Events
+		a(href='/events') Events	
 	ul.navuser
 		a(href='/user?userId='+authUser._id).link
 			i.icon-user.icon-white
@@ -12,3 +14,7 @@ div.navbar
 		a(href='/logout')#btn-logout.btn.btn-primary
 				i.icon-lock.icon-white
 				| Sign Out
+div#notif-div
+	div.notification
+		|This is working, so it is cool
+	a#notif-hide [Hide]
