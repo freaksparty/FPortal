@@ -84,7 +84,8 @@ body
 }
 
 #notif-div
-	background-color #4B4F53
+	display: none
+	background-color rgba(75,79,83,0.75) //#4B4F53
 	border 1px solid #393C3F
 	border-radius: 5px;	
 	padding 20px
@@ -95,15 +96,32 @@ body
 	right: 20%;
 	left: 20%;
 	top: 40px;
-	z-index: 1029;
+	z-index: 100;
 	.notification
 		padding 1em
 		border 1px solid #393C3F
+		background-color: #B4B4B4
+		border-radius: 4px
+		color: black
+		.close:after
+			background-color: #BE3C3C
+			content: 'X'
+			float: right
+			position: relative;
+			right: -.9em;
+			top: -.9em;
+			font-weight: bold;
+			text-align: center
+			width: 1.5em
+			height: 1.5em
+			border-radius: 4px
+			cursor: pointer
 	#notif-hide
 		width: 100%
 		text-align: center
 		display block
 		cursor pointer
+		color: white
 		
 #notif-navbar
 	display none

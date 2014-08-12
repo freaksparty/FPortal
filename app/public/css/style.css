@@ -71,7 +71,8 @@ body {
   float: left;
 }
 #notif-div {
-  background-color: #4b4f53;
+  display: none;
+  background-color: rgba(75,79,83,0.75);
   border: 1px solid #393c3f;
   border-radius: 5px;
   padding: 20px;
@@ -82,17 +83,35 @@ body {
   right: 20%;
   left: 20%;
   top: 40px;
-  z-index: 1029;
+  z-index: 100;
 }
 #notif-div .notification {
   padding: 1em;
   border: 1px solid #393c3f;
+  background-color: #b4b4b4;
+  border-radius: 4px;
+  color: #000;
+}
+#notif-div .notification .close:after {
+  background-color: #be3c3c;
+  content: 'X';
+  float: right;
+  position: relative;
+  right: -0.9em;
+  top: -0.9em;
+  font-weight: bold;
+  text-align: center;
+  width: 1.5em;
+  height: 1.5em;
+  border-radius: 4px;
+  cursor: pointer;
 }
 #notif-div #notif-hide {
   width: 100%;
   text-align: center;
   display: block;
   cursor: pointer;
+  color: #fff;
 }
 #notif-navbar {
   display: none;

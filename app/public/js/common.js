@@ -5,6 +5,8 @@ $('tbody.autolink>tr').click(function(){
 });
 }autolink();
 
+var notifications = [];
+
 $('#notif-hide').click(function(){
 	$('#notif-div').slideUp();
 	$('#notif-navbar').fadeIn();
@@ -13,6 +15,37 @@ $('#notif-navbar').click(function(){
 	$('#notif-div').slideDown();
 	$('#notif-navbar').fadeOut();
 });
+
+function saveNotifications(){
+	localStorage['notifications']=JSON.stringify(notifications);
+}
+function addNotification(n) {
+	n.id=(new Date()).getTime();
+	notifications.push(n);
+	var div = $('<div class="notification"><div class="close"></div></div>');
+	div.children('.close').click(removeNotification);
+	div.data('id', n.id);
+	div.append(n.text);
+	switch(n.type){
+	case 'message': $('#notif-div').prepend(div);
+	}
+	$('#notif-navbar').click();
+	if(notifications.length != 1)
+		$('#notif-navbar').text(notifications.length+' Notifications');
+	else
+		$('#notif-navbar').text(notifications.length+' Notification');
+	saveNotifications();
+}
+function removeNotification(){
+	var e = $(this);
+	e.parent().slideUp();
+	notifications = $.grep(notifications, function(value) {
+		  return value.id != e.parent().data('id');
+	});
+	if(notifications.length == 0)
+		$('#notif-div').slideUp();
+	saveNotifications();
+}
 
 function tooltip_right(parent, text){
 	parent = $(parent);
@@ -96,3 +129,10 @@ function showSucess(text) {
 /**/
 function isEmpty(s){return(!s||0===s.length);}
 function numericInput(s){s.keyup(function(){s.val(s.val().replace(/\D/g,''));});}
+
+if(localStorage['notifications']!=undefined){
+	var l= JSON.parse(localStorage['notifications']);
+	l.forEach(addNotification);
+}
+
+addNotification({type:'message',text:'Hola mundo'});
