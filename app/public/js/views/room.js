@@ -18,6 +18,28 @@ var video_constraints;
 
 /*maxHeight: screen.height,
 maxWidth: screen.width,*/
+	
+$('#sendImageBtn').click(function(){$('#sendImage').click();});
+
+function handleImageSend(evt) {
+    var file = evt.target.files[0];
+
+    // Only process image files.
+    if (!file.type.match('image.*')) {
+    	modalError('Not a image file');
+    	return false;
+    }
+    var reader = new FileReader();
+
+    // Closure to capture the file information.
+    reader.onload = (function(theFile) {
+    	//return function(e) {
+    		localStream.sendData({cmd:'IMAGE', data:this.result});
+    	//};
+    });
+    reader.readAsDataURL(file);
+}
+$('#sendImage').change(handleImageSend);
 
 var localStream = Erizo.Stream({audio: true, video: video_constraints, data: (yourId==medicId), attributes: {uid:yourId, event:eventId}});
 var myselfVideo;
@@ -182,6 +204,9 @@ function receiveData(evt){
 					userStreams[parseInt(cmd[2])].stream.getAudioTracks()[0].enabled = false;
 					$('#control-volume-'+uid).removeClass('icon-volume-on').addClass('icon-volume-off');
 				}
+				break;
+			case 'IMAGE':
+				addNotification({type:'image',data:evt.msg.data});
 		}
 	}
 }

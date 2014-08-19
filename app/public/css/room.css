@@ -95,7 +95,7 @@
   font-size: 1.25em;
   position: absolute;
   top: 10px;
-  z-index: 9999;
+  z-index: 99;
   width: 100%;
   text-align: center;
 }

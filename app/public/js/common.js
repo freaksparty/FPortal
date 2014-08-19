@@ -25,10 +25,15 @@ function addNotification(n) {
 	var div = $('<div class="notification"><div class="close"></div></div>');
 	div.children('.close').click(removeNotification);
 	div.data('id', n.id);
-	div.append(n.text);
 	switch(n.type){
-	case 'message': $('#notif-div').prepend(div);
+		case 'message': 
+			div.append(n.text);
+			break;
+		case 'image':
+			div.append('<a href="'+n.data+'" target="_blank">The medic has sended an image, please click this message to view it</a>');
+			div.children('a').click(removeNotification);
 	}
+	$('#notif-div').prepend(div);
 	$('#notif-navbar').click();
 	if(notifications.length != 1)
 		$('#notif-navbar').text(notifications.length+' Notifications');
@@ -134,5 +139,3 @@ if(localStorage['notifications']!=undefined){
 	var l= JSON.parse(localStorage['notifications']);
 	l.forEach(addNotification);
 }
-
-addNotification({type:'message',text:'Hola mundo'});

@@ -41,6 +41,8 @@ block content
 				p Reserved time remaining: 
 					b: span#countdown=moment().add('m',event.duration).diff(event.start, 'm')
 					|  min
+				input#sendImage.btn(type='file').hide
+				.btn#sendImageBtn Send image
 				
 		#mainVideo
 			div#vidMainLeft.video
