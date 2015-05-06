@@ -17,7 +17,7 @@ module.exports = function(app) {
 		if(req.session.user == null){
 			res.render('login', {title: 'Hello - Please Login To Your Account' });
 		} else {
-			console.log("User already logged");
+			//console.log("User already logged");
 			if(req.session.redirect){
 				var url = req.session.redirect;
 				delete req.session.redirect;
@@ -29,6 +29,7 @@ module.exports = function(app) {
 		}
 		
 		// check if the user's credentials are saved in a cookie //
+		// the cookie stored credential are potentially insecure and removed from the application //
 		/*if (req.cookies.user === undefined || req.cookies.pass === undefined){
 			res.render('login', { title: 'Hello - Please Login To Your Account' });
 		}	else{

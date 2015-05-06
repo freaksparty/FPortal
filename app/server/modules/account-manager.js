@@ -226,7 +226,7 @@ exports.removeRoom = function(medicId, callback) {
 	users.findOne({_id:medicId}, function(e, medic){
 		if (e) {
 			callback('User not found');
-			console.log('[Warning] account.manager.removeRoom(): record not found, mongo says: ', e);
+			console.log('[Warning] account.manager.removeRoom(): record not found, db says: ', e);
 		} else if(medic.room == null) {
 			callback('The medic has no room to delete');
 		} else {
@@ -234,7 +234,7 @@ exports.removeRoom = function(medicId, callback) {
 				function() {
 					users.update({_id:medic._id},{room:null}, function(e, count){
 						if(e){
-							console.log('[Error] account-manager.removeRoom(): unsetting user.room, mongo says:', e);
+							console.log('[Error] account-manager.removeRoom(): unsetting user.room, db says:', e);
 							callback('Updating user: '+e);
 						} else
 							callback(null);

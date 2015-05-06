@@ -31,5 +31,7 @@ function participantSuscribed(stream){
 			}
 		});
 	}
+	else if(uid==yourId)
+		$('#control-volume-'+uid).click(function() {volumeUser(uid);});
 	$('#controls-'+uid).fadeIn();
 }

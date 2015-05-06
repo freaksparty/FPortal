@@ -131,6 +131,9 @@ function joinRoom(token){
 
 			var uid = stream.getAttributes().uid;
 			$("#tab-"+uid).removeClass("connected");
+			$('#control-volume-'+uid).unbind("click");
+			$('#controls-'+uid).unbind("click");
+			$('#name-'+uid).unbind("click");
 			//$("#controls-"+uid).fadeOut();
 			$("#controls-"+uid+" .circle").prop('class','circle red');
 			stream.close();
@@ -252,7 +255,7 @@ $(document).ready(function(){
 });
 
 
-//File L.Base64.js from erizoClient:
+//File  L.Base64.js from erizoClient:
 var L = L || {};
 L.Base64 = (function (L) {
     "use strict";

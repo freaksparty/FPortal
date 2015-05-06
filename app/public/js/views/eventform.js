@@ -6,6 +6,7 @@ var careTime = true;
 $(document).ready(function(){
 	if($('#eventId').length > 0)
 		checkStatus();
+	$('#txt-date').attr('readOnly', 'true');
 	$('#txt-date').datepicker({
 		changeMonth: true,
 		changeYear: true,
