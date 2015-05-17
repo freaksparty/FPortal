@@ -33,7 +33,10 @@ block content
 				input#user-tf.input-xlarge(type='text', name='user', value= user.user, disabled= authUser.role!='Admin')
 			.form-input
 				label.control-label(for='pass-tf') Password
-				input#pass-tf.input-xlarge(type='password', name='pass', value='', placeholder='If empty, sends user an email to set it')
+				if user.user
+					input#pass-tf.input-xlarge(type='password', name='pass', value='', placeholder='If empty, old password is not changed')
+				else
+					input#pass-tf.input-xlarge(type='password', name='pass', value='', placeholder='If empty, sends user an email to set it')
 			.form-input
 				label.control-label(for='pass-tf') Role
 				select#role-list.input-xlarge(name='role', disabled= authUser.role!='Admin')

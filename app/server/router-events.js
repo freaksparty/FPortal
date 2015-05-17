@@ -269,6 +269,15 @@ module.exports = function (app){
 	});
 	
 	app.get('/event/:eventId/', function(req, res) {
+		
+		function renderNotFound(){
+			res.render('error', {
+				title	: 'Event not found',
+				error	: ['The event you tried to open does not exist.','Maybe it was cancelled er edited.'],
+				backUrl	: '/events'
+			});
+		};
+		
 		if ((req.session.user == null)){
 			req.session.redirect = req.protocol + '://' + req.get('host') + req.originalUrl;
 			res.redirect('/');
@@ -277,22 +286,17 @@ module.exports = function (app){
 			EM.findEventById(req.params.eventId, req.session.user._id, function(e, ev){
 				if(e || !ev) {
 					console.log('[Error] '+route+'findEventById() says:', e);
-					res.render('error', {
-						title	: 'Event not found',
-						error	: ['The event you tried to open does not exist.','Maybe it was cancelled er edited.'],
-						backUrl	: '/events'
-					});
+					renderNotFound();
 				} else {
-					if ((ev.owner != req.session.user._id) &&
+					//Cancelled events are only visible to owner
+					if(ev.owner != req.session.user._id && ev.status == 'Cancelled')
+						renderNotFound();
+					else if ((ev.owner != req.session.user._id) &&
 							(ev.patient != req.session.user._id) &&
 							(ev.participants.indexOf(String(req.session.user._id)) === -1)) {
 						console.log('[Error] '+route+' permission denied to '+AM.logUser(req.session.user)+
 								' to event '+ev._id, e);
-						res.render('error', {
-							title	: 'Event not found',
-							error	: ['The event you tried to open does not exist.','Maybe it was cancelled er edited.'],
-							backUrl	: '/events'
-						});
+						renderNotFound();
 					} else AM.listUsersSmall(function(e,ul) {
 						if(e) {
 							console.log('[Error] '+route,e);

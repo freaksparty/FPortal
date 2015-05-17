@@ -20,8 +20,7 @@ function changeFilter(){
 	page=0;
 	switch($(this).attr('id')){
 		case 'btn-filter-active':filter='Created';break;
-		case 'btn-filter-closed':filter='Closed';break;
-		case 'btn-filter-cancelled':filter='Cancelled';
+		case 'btn-filter-closed':filter='Closed';
 	}
 	updateTable('table-body-invited', 0, page, true);
 	$(this).addClass('active');
@@ -43,6 +42,8 @@ function updateTable(bodyId, owner, page, showMedic){
 					if(p===row.patient) participants.push(p+' (Patient)');
 					else participants.push(p);
 				});
+				if(row.comments == null)
+					row.comments = '';
 				body.append('<tr><td><a href="/eventform/'+row._id+'/"></a><span>'+formatDate(row.start)+'</span></td>' +
 						'<td>'+row.duration+' min</td>'+
 						'<td>'+participants.join('<br/>')+'</td><td>'+row.comments+'</td></tr>');

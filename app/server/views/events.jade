@@ -48,8 +48,8 @@ block content
 						| Active
 					span#btn-filter-closed.btn
 						| Closed
-					span#btn-filter-cancelled.btn
-						| Cancelled
+					//span#btn-filter-cancelled.btn
+					//	| Cancelled
 			table.table.table-bordered.table-striped#table1
 				thead
 					tr
@@ -71,7 +71,10 @@ block content
 								each p in event.participants
 									if(p != event.patient)
 										p=p
-							td=event.comments
+							if event.comments != null
+								td=event.comments
+							else
+								td
 
 	include modals/modal
 

@@ -1,5 +1,0 @@
-Visible unique (nss?) ID for picking up patients
-position elements on room
-configure for free speech or moderation (more configuration)
-
-ssl encryption
