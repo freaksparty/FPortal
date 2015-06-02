@@ -13,11 +13,11 @@ var express = require('express'),
     N = require('./nuve'),
     fs = require("fs"),
     https = require("https"),
-    licode_config = require('./../licode/licode_config');
-	config = require('./config.js');
-	http = require('http');
-	https = require('https');
-	app = express();
+    licode_config = require('./../licode/licode_config'),
+    http = require('http'),
+    app = express();
+
+var config = require('./config.js');
 
 if(typeof config.timezone === 'string')
 	process.env.TZ = config.timezone;

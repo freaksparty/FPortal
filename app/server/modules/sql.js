@@ -2,14 +2,17 @@
  * @license: MIT
  * @copyright: 2014 Siro González Rodríguez
  */
-var dbconfig = {
+/*var dbconfig = {
 		  host: '127.0.0.1',
 		  user: 'PIAMAD',
 		  password: 'piamadpass',
 		  db: 'PIAMAD',
 		  queryCache: true
-		};
+		};*/
 
+var dbconfig	= require('../../../config').db;
+dbconfig.queryCache = true;
+		
 var inspect = require('util').inspect;
 var Client = require('mariasql');
 var sprintf = require('sprintf').sprintf;
