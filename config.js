@@ -4,9 +4,10 @@ config.ssl.enabled	= false;
 config.ssl.keyfile	= '/home/siro/piamad.cert.key';
 config.ssl.cerfile	= '/home/siro/piamad.cert.cert';
 
-config.timezone = 'Europe/Madrid';
-config.port	= 8888;	//Listening web port
-config.blowfish = 'insert here random string';
+config.timezone	= 'Europe/Madrid';
+config.port		= 8888;	//Listening web port
+config.blowfish	= 'insert here random string';
+config.p2p		= false;  //You should recreate rooms in-app to update this value
 
 config.db.host		= '127.0.0.1';
 config.db.user		= 'PIAMAD';

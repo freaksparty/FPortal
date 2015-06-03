@@ -4,15 +4,16 @@
  * @Copyright: 2013 Stephen Braitsch
  * @Copyright: 2014 Siro González Rodríguez
  */
-//var mongo		= require('./database');
+
 var DbClass 	= require('./sql');
 var db 			= new DbClass();
 var crypto		= require('crypto');
 var moment		= require('moment');
 var N			= require('./../../../nuve');
 var email = require('./email-dispatcher');
-//var ObjectId = require('mongodb').ObjectID;
 var ObjectId = parseInt;
+
+var configP2P		= require('./../../../config').p2p;
 
 //var users	= db.collection('users');
 var users = new db.Entity("Users", function(user){
@@ -86,7 +87,7 @@ exports.manualLogin = function(user, pass, callback)
 	users.findOne({user:user}, function(e, o) {
 		if(e)
 			callback('Error finding user:', e);
-		else if (o === undefined)
+		else if ((o === undefined) || (o === null))
 			callback('Invalid user/password'); //User not found
 		else {
 			validatePassword(pass, o.pass, function(err, res) {
@@ -201,7 +202,8 @@ exports.addRoom = function(medicId, callback) {
 			function(e){
 				console.log('[Error] account-manager.addRoom().assignRoom(): Nuve says: ', e);
 				callback('Error creating room');
-			});
+			},
+			{p2p:configP2P});
 	};
 	
 	users.findOne({_id:medicId}, function(e, medic){
