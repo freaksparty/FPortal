@@ -27,6 +27,22 @@ parse_arguments(){
   done
 }
 
+check_proxy(){
+  if [ -z "$http_proxy" ]; then
+    echo "No http proxy set, doing nothing"
+  else
+    echo "http proxy configured, configuring npm"
+    npm config set proxy $http_proxy
+  fi  
+
+  if [ -z "$https_proxy" ]; then
+    echo "No https proxy set, doing nothing"
+  else
+    echo "https proxy configured, configuring npm"
+    npm config set https-proxy $https_proxy
+  fi  
+}
+
 install_apt_deps(){
 #no need for equivalence: sudo apt-get install python-software-properties
 #  sudo apt-get install software-properties-common
@@ -36,7 +52,7 @@ install_apt_deps(){
   #NO openjdk-java1.6 in new fedoras, should try lastest
   su root -c '
     yum update;
-    yum install git make gcc gcc-c++ openssl-devel cmake glib2-devel nodejs boost-devel log4cxx-devel log4cxx-devel mongodb-server java curl npm tar diffutils rabbitmq-server node-gyp;'
+    yum install git make gcc gcc-c++ openssl-devel cmake glib2-devel nodejs boost-devel boost-regex boost-thread boost-system log4cxx-devel mongodb mongodb-server java curl boost-test tar xz libffi-devel npm yasm diffutils rabbitmq-server node-gyp java-1.7.0-openjdk patch;'
     #npm install -g node-gyp;'
     #chown -R `whoami` ~/.npm ~/tmp/'
 }
@@ -44,9 +60,9 @@ install_apt_deps(){
 install_openssl(){
   if [ -d $LIB_DIR ]; then
     cd $LIB_DIR
-    curl -O http://www.openssl.org/source/openssl-1.0.1gp.tar.gz
-    tar -zxvf openssl-1.0.1e.tar.gz
-    cd openssl-1.0.1e
+    curl -O http://www.openssl.org/source/openssl-1.0.1g.tar.gz
+    tar -zxvf openssl-1.0.1g.tar.gz
+    cd openssl-1.0.1g
     ./config --prefix=$PREFIX_DIR -fPIC
     make -s V=0
     make install
@@ -60,11 +76,11 @@ install_openssl(){
 install_libnice(){
   if [ -d $LIB_DIR ]; then
     cd $LIB_DIR
-    su root -c 'yum install patch'
     curl -O http://nice.freedesktop.org/releases/libnice-0.1.4.tar.gz
     tar -zxvf libnice-0.1.4.tar.gz
     cd libnice-0.1.4
     patch -R ./agent/conncheck.c < $PATHNAME/libnice-014.patch0
+    patch -p1 < $PATHNAME/libnice-014.patch1
     ./configure --prefix=$PREFIX_DIR
     make -s V=0
     make install
@@ -113,7 +129,7 @@ install_mediadeps_nogpl(){
     curl -O https://www.libav.org/releases/libav-11.1.tar.gz
     tar -zxf libav-11.1.tar.gz
     cd libav-11.1
-    PKG_CONFIG_PATH=${PREFIX_DIR}/lib/pkgconfig ./configure --prefix=$PREFIX_DIR --enable-shared --enable-libvpx --enable-libx264 --enable-libopus
+    PKG_CONFIG_PATH=${PREFIX_DIR}/lib/pkgconfig ./configure --prefix=$PREFIX_DIR --enable-shared --enable-libvpx --enable-libopus
     make -s V=0
     make install
     cd $CURRENT_DIR
@@ -145,6 +161,8 @@ cleanup(){
 parse_arguments $*
 
 mkdir -p $PREFIX_DIR
+
+check_proxy
 
 pause "Installing deps via yum... [press Enter]"
 install_apt_deps

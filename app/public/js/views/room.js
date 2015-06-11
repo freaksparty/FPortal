@@ -6,7 +6,7 @@ var video_constraints;
 	video_constraints = {mandatory: {
 		maxFrameRate:30,
 		/*maxHeight: 240,*/
-	    maxWidth: 340 },
+	    /*maxWidth: 340*/ },
 		optional: [ ]
 	};	
 /*else
@@ -41,7 +41,7 @@ function handleImageSend(evt) {
 }
 $('#sendImage').change(handleImageSend);
 
-var localStream = Erizo.Stream({audio: true, video: video_constraints, data: (yourId==medicId), attributes: {uid:yourId, event:eventId}});
+var localStream = Erizo.Stream({audio: true, video: true, data: (yourId==medicId), attributes: {uid:yourId, event:eventId}});
 var myselfVideo;
 var userStreams = {};
 var room;

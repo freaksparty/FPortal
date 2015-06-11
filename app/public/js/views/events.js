@@ -1,10 +1,12 @@
 var pageOwn = 0, page = 0;
-var filterOwn = filter = 'Created';
+
 $(document).ready(function(){
 	$('#btn-filter-own .btn').click(changeFilterOwn);
 	$('#btn-filter .btn').click(changeFilter);
 });
+
 function changeFilterOwn(){
+	var filterOwn;
 	$('#btn-filter-own .btn').removeClass('active');
 	pageOwn=0;
 	switch($(this).attr('id')){
@@ -12,22 +14,25 @@ function changeFilterOwn(){
 		case 'btn-filter-closed':filterOwn='Closed';break;
 		case 'btn-filter-cancelled':filterOwn='Cancelled';
 	}
-	updateTable('table-body-own', 'me', pageOwn, false);
+	updateTable('table-body-own', 'me', pageOwn, filterOwn, false);
 	$(this).addClass('active');
 }
+
 function changeFilter(){
+	var filter;
 	$('#btn-filter .btn').removeClass('active');
 	page=0;
 	switch($(this).attr('id')){
 		case 'btn-filter-active':filter='Created';break;
 		case 'btn-filter-closed':filter='Closed';
 	}
-	updateTable('table-body-invited', 0, page, true);
+	updateTable('table-body-invited', 0, page, filter, true);
 	$(this).addClass('active');
 }
-function updateTable(bodyId, owner, page, showMedic){
+
+function updateTable(bodyId, owner, page, filter, showMedic){
 	var body = $('#'+bodyId);
-	var url = '/api/events/'+page+'/'+owner+'/'+filterOwn;
+	var url = '/api/events/'+page+'/'+owner+'/'+filter;
 	$.ajax({
 		type: 'GET',
 		url: url,
@@ -53,6 +58,7 @@ function updateTable(bodyId, owner, page, showMedic){
 		error: function(){modalError('Error getting events');}
 	});
 }
+
 function formatDate(date){
 	var year = date.split(' ')[0].split('-').reverse().join('/');
 	var hour = date.split(' ')[1].slice(0,-3);

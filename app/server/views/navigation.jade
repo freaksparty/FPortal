@@ -5,8 +5,9 @@ div.navbar
 	if(authUser.role === 'Admin')
 		ul.navoption
 			a(href='/admin') Admin Panel
-	ul.navoption
-		a(href='/events') Events	
+	if(authUser.role != 'Admin')
+		ul.navoption
+			a(href='/events') Events	
 	ul.navuser
 		a(href='/user?userId='+authUser._id).link
 			i.icon-user.icon-white
