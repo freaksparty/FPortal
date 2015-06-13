@@ -20,6 +20,31 @@ function getEntity(sql) {
 
 var events = getEntity(db);
 
+function listParticipants(events, callback){
+  var ids = [];
+  var assEvents = {};
+  for(var i = 0; i<events.length; i++) {
+    ids.push(events[i]._id);
+    assEvents[events[i]._id] = events[i];
+    events[i].participants = [];
+    events[i].participantAssistance = [];
+  }
+  
+  query = "SELECT name user, event, status FROM EventParticipants p JOIN Users u ON u._id = p.user " +
+	  "WHERE event IN ("+ids.join(',')+")";
+  db.queryToList(query, {}, {}, function(err, participants){
+    if(err)
+      callback(err, events);
+    else {
+      for(var i = 0; i<participants.length; i++) {
+	assEvents[participants[i].event].participants.push(participants[i].user);
+	assEvents[participants[i].event].participantAssistance.push(participants[i].status);
+      }
+      callback(null, events);
+    }
+  });
+}
+
 exports.listEventsCreatedBy = function(user, start, count, status, callback){
 	for(var i=0; i<status.length; i++)
 		status[i] = "'"+db.sanitize(status[i])+"'";
@@ -32,26 +57,7 @@ exports.listEventsCreatedBy = function(user, start, count, status, callback){
 	else if(events.length === 0)
 		callback(null, events);
 	else {
-		var ids = [];
-		var assEvents = {};
-		for(var i = 0; i<events.length; i++) {
-			ids.push(events[i]._id);
-			assEvents[events[i]._id] = events[i];
-			events[i].participants = [];
-		}
-			
-		query = "SELECT name user, event FROM EventParticipants p JOIN Users u ON u._id = p.user " +
-				"WHERE event IN ("+ids.join(',')+")";
-		db.queryToList(query, {}, {}, function(err, participants){
-			if(err)
-				callback(err, events);
-			else {
-				for(var i = 0; i<participants.length; i++)
-					assEvents[participants[i].event].participants.push(participants[i].user);
-				callback(null, events);
-			}
-		});
-		
+		listParticipants(events, callback);		
 	}
 });
 };
@@ -69,26 +75,7 @@ exports.listEventsByParticipant = function(user, start, count, status, callback)
 		else if(events.length === 0)
 			callback(null, events);
 		else {
-			var ids = [];
-			var assEvents = {};
-			for(var i = 0; i<events.length; i++) {
-				ids.push(events[i]._id);
-				assEvents[events[i]._id] = events[i];
-				events[i].participants = [];
-			}
-				
-			query = "SELECT name user, event FROM EventParticipants p JOIN Users u ON u._id = p.user " +
-					"WHERE event IN ("+ids.join(',')+")";
-			db.queryToList(query, {}, {}, function(err, participants){
-				if(err)
-					callback(err, events);
-				else {
-					for(var i = 0; i<participants.length; i++)
-						assEvents[participants[i].event].participants.push(participants[i].user);
-					callback(null, events);
-				}
-			});
-			
+			listParticipants(events,callback);			
 		}
 	});
 };
@@ -104,7 +91,7 @@ function findEventById(eventId, arg1, arg2) {
 		userId = ObjectId(arg1);
 		callback = arg2;
 		query = "SELECT _id, owner, patient, start, duration, moderated, comments, e.status, p.status participationstatus " +
-				"FROM Events e JOIN EventParticipants p WHERE _id=:event AND user=:user";
+				"FROM Events e JOIN EventParticipants p ON e._id=p.event WHERE _id=:event AND user=:user";
 	}
 	
 	eventId = ObjectId(eventId);
@@ -407,8 +394,9 @@ exports.setParticipationStatus = function(eventId, userId, newStatus, callback) 
 						if(e){
 							console.log("[Error] event-manager setParticipantStatus(): updateQuery() says:", e);
 							callback("Internal error");
-						} else
-							callback(null, newStatus);							
+						} else {
+							callback(null, newStatus);
+						}
 					});
 		});
 	}		

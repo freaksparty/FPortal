@@ -1,0 +1,159 @@
+0 info it worked if it ends with ok
+1 verbose cli [ '/usr/bin/node', '/usr/bin/npm', 'install' ]
+2 info using npm@1.4.28
+3 info using node@v0.10.37
+4 verbose node symlink /usr/bin/node
+5 verbose readDependencies using package.json deps
+6 verbose install where, deps [ '/home/usuario/PIAMAD',
+6 verbose install   [ 'express',
+6 verbose install     'stylus',
+6 verbose install     'jade',
+6 verbose install     'moment',
+6 verbose install     'emailjs',
+6 verbose install     'sprintf',
+6 verbose install     'mariasql',
+6 verbose install     'http-proxy' ] ]
+7 info preinstall PIAMAD@0.0.1
+8 verbose readDependencies using package.json deps
+9 verbose already installed skipping mariasql@0.1.20 /home/usuario/PIAMAD
+10 verbose already installed skipping http-proxy@1.11.1 /home/usuario/PIAMAD
+11 verbose already installed skipping express@3.5.1 /home/usuario/PIAMAD
+12 verbose already installed skipping stylus@0.43.0 /home/usuario/PIAMAD
+13 verbose cache add [ 'jade@1.11.1', null ]
+14 verbose cache add name=undefined spec="jade@1.11.1" args=["jade@1.11.1",null]
+15 verbose parsed url { protocol: null,
+15 verbose parsed url   slashes: null,
+15 verbose parsed url   auth: null,
+15 verbose parsed url   host: null,
+15 verbose parsed url   port: null,
+15 verbose parsed url   hostname: null,
+15 verbose parsed url   hash: null,
+15 verbose parsed url   search: null,
+15 verbose parsed url   query: null,
+15 verbose parsed url   pathname: 'jade@1.11.1',
+15 verbose parsed url   path: 'jade@1.11.1',
+15 verbose parsed url   href: 'jade@1.11.1' }
+16 verbose already installed skipping moment@2.5.1 /home/usuario/PIAMAD
+17 verbose already installed skipping emailjs@0.3.3 /home/usuario/PIAMAD
+18 verbose cache add [ 'sprintf@0.1.5', null ]
+19 verbose cache add name=undefined spec="sprintf@0.1.5" args=["sprintf@0.1.5",null]
+20 verbose parsed url { protocol: null,
+20 verbose parsed url   slashes: null,
+20 verbose parsed url   auth: null,
+20 verbose parsed url   host: null,
+20 verbose parsed url   port: null,
+20 verbose parsed url   hostname: null,
+20 verbose parsed url   hash: null,
+20 verbose parsed url   search: null,
+20 verbose parsed url   query: null,
+20 verbose parsed url   pathname: 'sprintf@0.1.5',
+20 verbose parsed url   path: 'sprintf@0.1.5',
+20 verbose parsed url   href: 'sprintf@0.1.5' }
+21 verbose cache add name="jade" spec="1.11.1" args=["jade","1.11.1"]
+22 verbose parsed url { protocol: null,
+22 verbose parsed url   slashes: null,
+22 verbose parsed url   auth: null,
+22 verbose parsed url   host: null,
+22 verbose parsed url   port: null,
+22 verbose parsed url   hostname: null,
+22 verbose parsed url   hash: null,
+22 verbose parsed url   search: null,
+22 verbose parsed url   query: null,
+22 verbose parsed url   pathname: '1.11.1',
+22 verbose parsed url   path: '1.11.1',
+22 verbose parsed url   href: '1.11.1' }
+23 verbose addNamed [ 'jade', '1.11.1' ]
+24 verbose addNamed [ '1.11.1', '1.11.1' ]
+25 verbose cache add name="sprintf" spec="0.1.5" args=["sprintf","0.1.5"]
+26 verbose parsed url { protocol: null,
+26 verbose parsed url   slashes: null,
+26 verbose parsed url   auth: null,
+26 verbose parsed url   host: null,
+26 verbose parsed url   port: null,
+26 verbose parsed url   hostname: null,
+26 verbose parsed url   hash: null,
+26 verbose parsed url   search: null,
+26 verbose parsed url   query: null,
+26 verbose parsed url   pathname: '0.1.5',
+26 verbose parsed url   path: '0.1.5',
+26 verbose parsed url   href: '0.1.5' }
+27 verbose addNamed [ 'sprintf', '0.1.5' ]
+28 verbose addNamed [ '0.1.5', '0.1.5' ]
+29 silly lockFile 3f0a99f9-jade-1-11-1 jade@1.11.1
+30 verbose lock jade@1.11.1 /home/usuario/.npm/3f0a99f9-jade-1-11-1.lock
+31 silly lockFile 04a31b26-sprintf-0-1-5 sprintf@0.1.5
+32 verbose lock sprintf@0.1.5 /home/usuario/.npm/04a31b26-sprintf-0-1-5.lock
+33 verbose request where is /jade
+34 verbose request registry https://registry.npmjs.org/
+35 verbose request id 8ae4761c87eba91b
+36 verbose url raw /jade
+37 verbose url resolving [ 'https://registry.npmjs.org/', './jade' ]
+38 verbose url resolved https://registry.npmjs.org/jade
+39 verbose request where is https://registry.npmjs.org/jade
+40 info trying registry request attempt 1 at 20:29:22
+41 verbose etag "24PJ3MBTXS2675T836VBMLPOY"
+42 http GET https://registry.npmjs.org/jade
+43 verbose request where is /sprintf
+44 verbose request registry https://registry.npmjs.org/
+45 verbose url raw /sprintf
+46 verbose url resolving [ 'https://registry.npmjs.org/', './sprintf' ]
+47 verbose url resolved https://registry.npmjs.org/sprintf
+48 verbose request where is https://registry.npmjs.org/sprintf
+49 info trying registry request attempt 1 at 20:29:22
+50 verbose etag "APLIQLWCF39OJVUTIM1TXDW8F"
+51 http GET https://registry.npmjs.org/sprintf
+52 http 304 https://registry.npmjs.org/sprintf
+53 silly registry.get cb [ 304,
+53 silly registry.get   { date: 'Sat, 13 Jun 2015 18:29:21 GMT',
+53 silly registry.get     via: '1.1 varnish',
+53 silly registry.get     'cache-control': 'max-age=60',
+53 silly registry.get     etag: '"APLIQLWCF39OJVUTIM1TXDW8F"',
+53 silly registry.get     age: '36',
+53 silly registry.get     connection: 'keep-alive',
+53 silly registry.get     'x-served-by': 'cache-lhr6330-LHR',
+53 silly registry.get     'x-cache': 'HIT',
+53 silly registry.get     'x-cache-hits': '1',
+53 silly registry.get     'x-timer': 'S1434220161.415877,VS0,VE0',
+53 silly registry.get     vary: 'Accept' } ]
+54 verbose etag https://registry.npmjs.org/sprintf from cache
+55 silly lockFile 00e11fa3-js-org-sprintf-sprintf-0-1-5-tgz https://registry.npmjs.org/sprintf/-/sprintf-0.1.5.tgz
+56 verbose lock https://registry.npmjs.org/sprintf/-/sprintf-0.1.5.tgz /home/usuario/.npm/00e11fa3-js-org-sprintf-sprintf-0-1-5-tgz.lock
+57 verbose addRemoteTarball [ 'https://registry.npmjs.org/sprintf/-/sprintf-0.1.5.tgz',
+57 verbose addRemoteTarball   '8f83e39a9317c1a502cb7db8050e51c679f6edcf' ]
+58 info retry fetch attempt 1 at 20:29:22
+59 verbose fetch to= /tmp/npm-5129-3-4rvZ7E/registry.npmjs.org/sprintf/-/sprintf-0.1.5.tgz
+60 http GET https://registry.npmjs.org/sprintf/-/sprintf-0.1.5.tgz
+61 http 200 https://registry.npmjs.org/sprintf/-/sprintf-0.1.5.tgz
+62 silly lockFile 00e11fa3-js-org-sprintf-sprintf-0-1-5-tgz https://registry.npmjs.org/sprintf/-/sprintf-0.1.5.tgz
+63 silly lockFile 00e11fa3-js-org-sprintf-sprintf-0-1-5-tgz https://registry.npmjs.org/sprintf/-/sprintf-0.1.5.tgz
+64 silly lockFile 04a31b26-sprintf-0-1-5 sprintf@0.1.5
+65 silly lockFile 04a31b26-sprintf-0-1-5 sprintf@0.1.5
+66 http 304 https://registry.npmjs.org/jade
+67 silly registry.get cb [ 304,
+67 silly registry.get   { date: 'Sat, 13 Jun 2015 18:29:21 GMT',
+67 silly registry.get     via: '1.1 varnish',
+67 silly registry.get     'cache-control': 'max-age=60',
+67 silly registry.get     etag: '"24PJ3MBTXS2675T836VBMLPOY"',
+67 silly registry.get     age: '0',
+67 silly registry.get     connection: 'keep-alive',
+67 silly registry.get     'x-served-by': 'cache-lhr6320-LHR',
+67 silly registry.get     'x-cache': 'HIT',
+67 silly registry.get     'x-cache-hits': '1',
+67 silly registry.get     'x-timer': 'S1434220161.410063,VS0,VE653',
+67 silly registry.get     vary: 'Accept' } ]
+68 verbose etag https://registry.npmjs.org/jade from cache
+69 silly lockFile 3f0a99f9-jade-1-11-1 jade@1.11.1
+70 silly lockFile 3f0a99f9-jade-1-11-1 jade@1.11.1
+71 error Error: version not found: jade@1.11.1
+71 error     at /usr/lib/node_modules/npm/lib/cache/add-named.js:125:12
+71 error     at saved (/usr/lib/node_modules/npm/node_modules/npm-registry-client/lib/get.js:167:7)
+71 error     at Object.oncomplete (fs.js:108:15)
+72 error If you need help, you may report this *entire* log,
+72 error including the npm and node versions, at:
+72 error     <http://github.com/npm/npm/issues>
+73 error System Linux 3.13.0-53-generic
+74 error command "/usr/bin/node" "/usr/bin/npm" "install"
+75 error cwd /home/usuario/PIAMAD
+76 error node -v v0.10.37
+77 error npm -v 1.4.28
+78 verbose exit [ 1, true ]

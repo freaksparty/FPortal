@@ -9,14 +9,14 @@ block content
 	-var medics = []
 	
 	script
-		|var userNames = {
+		| var userNames = {
 		- each user in userList
 			|"#{user.name}":"#{user._id}",
 			-if(user.role==='Medic') {medics.push(sprintf("'%s'",user._id));}
-		|"":""};var userUsers = {
+		| "":""};var userUsers = {
 		- each user in userList
 			|"#{user.user}":"#{user._id}",
-		|"":""};var medics = [#{medics.join()}];
+		| "":""};var medics = [#{medics.join()}];
 		
 	
 	#form-container.content-block
@@ -51,6 +51,7 @@ block content
 			label.control-label Status
 			label#event-status.data Retrieving...
 			label#participation-status.data
+				- console.log(event)
 				if(event.participationstatus==='Invited')
 					| Waiting assistance confirmation
 				else if(event.participationstatus==='WontCome')

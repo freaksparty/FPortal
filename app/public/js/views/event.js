@@ -38,7 +38,7 @@ $(document).ready(function(){
 
 function idOfName(n){
 	var id = userNames[n];
-	if(!id)id=userUsers[n];
+	if(!id){id=userUsers[n];}
 	return id;
 }
 function nameOfId(id){

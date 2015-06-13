@@ -1,8 +1,13 @@
 var config = {ssl:{}, db:{}, smtp:{}};
 
-config.ssl.enabled	= false;
-config.ssl.keyfile	= '/home/siro/piamad.cert.key';
-config.ssl.cerfile	= '/home/siro/piamad.cert.cert';
+config.ssl.enabled	= true;
+config.ssl.keyfile	= '/home/usuario/piamad.cert.key';
+config.ssl.cerfile	= '/home/usuario/piamad.cert.cert';
+
+//If NGINX is not working properly for SSL enable this instead
+//This will always consider default Erizo port at localhost
+//You need to define keyfile and cerftile as well
+config.ssl.builtInProxy	= true;
 
 config.timezone	= 'Europe/Madrid';
 config.port		= 8888;	//Listening web port

@@ -41,17 +41,24 @@ function updateTable(bodyId, owner, page, filter, showMedic){
 			body.empty();
 			console.log(data);
 			$.each(data, function(idx, row){
-				var participants = [];
-				if(showMedic)participants.push(row.medic+' (Medic)');
-				$.each(row.participants, function(idp, p){
-					if(p===row.patient) participants.push(p+' (Patient)');
-					else participants.push(p);
+				var participants = '';
+				if(showMedic)participants='<p>'+row.medic+' (Medic)</p>';
+				$.each(row.participants, function(idx, p){
+					var color = '';
+					if(row.participantAssistance[idx]==='Confirmed')color='green';
+					else if(row.participantAssistance[idx]==='WontCome')color='red';
+
+					participants+='<p class="'+color+'">'+p;
+					if(p===row.patient) participants+='(Patient)';
+					participants+='</p>';
 				});
 				if(row.comments == null)
 					row.comments = '';
+				
+				
 				body.append('<tr><td><a href="/eventform/'+row._id+'/"></a><span>'+formatDate(row.start)+'</span></td>' +
 						'<td>'+row.duration+' min</td>'+
-						'<td>'+participants.join('<br/>')+'</td><td>'+row.comments+'</td></tr>');
+						'<td>'+participants+'</td><td>'+row.comments+'</td></tr>');
 			});
 			autolink();
 		},

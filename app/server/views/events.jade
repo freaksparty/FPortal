@@ -35,10 +35,12 @@ block content
 										span=event.start
 								td=event.duration+' min'
 								td
-									p=event.patient +' (Patient)'
-									each p in event.participants
+									each p, i in event.participants
+										- var color = event.participantAssistance[i]==='WontCome'?'red':(event.participantAssistance[i]==='Confirmed'?'green':'')
 										if(p != event.patient)
-											p=p
+											p(class=color)=p
+										else
+											p(class=color)=p +' (Patient)'
 								td=event.comments
 								
 		h3 Events you are invited
@@ -67,10 +69,12 @@ block content
 							td=event.duration+' min'
 							td
 								p=event.medic+' (Medic)'
-								p=event.patient+' (Patient)'
-								each p in event.participants
+								each p, i in event.participants
+									- var color = event.participantAssistance[i]==='WontCome'?'red':(event.participantAssistance[i]==='Confirmed'?'green':'')
 									if(p != event.patient)
 										p=p
+									else
+										p(class=color)=p +' (Patient)'
 							if event.comments != null
 								td=event.comments
 							else

@@ -72,9 +72,8 @@ app.configure('development', function(){
 
 if(config.ssl.enabled === true){
 	var ssloptions = {
-			key: fs.readFileSync(config.ssl.keyfile, 'utf8'),
-			cert: fs.readFileSync(config.ssl.cerfile, 'utf8')
-			//ca: fs.readFileSync('/home/ec2-user/ca.pem')
+		key: fs.readFileSync(config.ssl.keyfile, 'utf8'),
+		cert: fs.readFileSync(config.ssl.cerfile, 'utf8')
 	};
 	https.createServer(ssloptions, app).listen(app.get('port'), function(){
 		console.log("Express server listening on port (SSL enabled) " + app.get('port'));
@@ -83,4 +82,25 @@ if(config.ssl.enabled === true){
 	http.createServer(app).listen(app.get('port'), function(){
 		console.log("Express server listening on port (SSL disabled)" + app.get('port'));
 	});
+}
+
+if(config.ssl.builtInProxy === true){
+  var httpProxy = require('http-proxy');
+  var ssloptions = {
+	key: fs.readFileSync(config.ssl.keyfile, 'utf8'),
+	cert: fs.readFileSync(config.ssl.cerfile, 'utf8')
+  };
+
+  var proxy = httpProxy.createServer({
+	target: {
+		host: 'localhost',
+		port: 8080,
+	},
+	ws: true,
+	ssl: ssloptions,
+	secure: true
+  }).listen(8081);
+  proxy.on('error', function (e) {
+	console.log('Could not enable Erizo proxy: ' + e);
+  });
 }
