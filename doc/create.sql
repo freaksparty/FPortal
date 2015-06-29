@@ -51,3 +51,5 @@ CREATE EVENT closePastEvents
 ON SCHEDULE EVERY 1 HOUR
 STARTS CURRENT_TIMESTAMP + INTERVAL 1 MINUTE
 DO UPDATE PIAMAD.Events SET status = 'Closed' WHERE status = 'MedicIn' AND end < NOW();
+
+SET GLOBAL event_scheduler = ON;

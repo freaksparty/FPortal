@@ -38,8 +38,8 @@ block content
 				
 			
 			if(event.owner._id == authUser._id)
-				p Reserved time remaining: 
-					b: span#countdown=moment().add('m',event.duration).diff(event.start, 'm')
+				p Reserved time remaining:
+					b: span#countdown=event.start.add('m',event.duration).diff(moment(),'m')
 					|  min
 				input#sendImage.btn(type='file').hide
 				.btn#sendImageBtn Send image
