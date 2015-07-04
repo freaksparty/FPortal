@@ -1,10 +1,9 @@
 var config = {ssl:{}, db:{}, smtp:{}};
 
 config.ssl.enabled	= true;
-config.ssl.keyfile	= '/home/usuario/piamad.cert.key';
-config.ssl.cerfile	= '/home/usuario/piamad.cert.cert';
+config.ssl.keyfile	= '/route/to/cert.key';
+config.ssl.cerfile	= '/route/to/cert.cert';
 
-//If NGINX is not working properly for SSL enable this instead
 //This will always consider default Erizo port at localhost
 //You need to define keyfile and cerftile as well
 config.ssl.builtInProxy	= true;
@@ -25,6 +24,6 @@ config.smtp.host	= 'smtp.server.com';
 config.smtp.user	= 'user@server.com';
 config.smtp.password 	= 'password';
 config.smtp.senderName	= 'Medical Citation Platform <user@server.com>';
-config.baseUrl		= 'http://10.51.1.243:8888';
+config.baseUrl		= 'http://asistenc.io:8888';
 
 module.exports = config;
