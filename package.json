@@ -1,7 +1,7 @@
 {
-	"name": "PIAMAD",
+	"name": "FPortal",
 	"version": "0.0.1",
-	"description": "Proyecto Fin de Carrera [TODO]",
+	"description": "FP main portal",
 	"author": {
 		"name": "Siro González",
 		"email": "xiromoreira@gmail.com"
@@ -11,17 +11,16 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "git://github.com/[TODO]"
+		"url": "git://github.com/freaksparty/FPortal"
 	},
 	"private": true,
 	"dependencies": {
-		"express": "3.20.3",
+		"express": "4.13.1'",
 		"stylus": "0.43.0",
 		"jade": "1.11.0",
 		"moment" : "2.5.1",
 		"emailjs": "0.3.3",
 		"sprintf": "0.1.5",
-		"mariasql": "0.1.20",
 		"http-proxy": "1.11.1"
 	},
 	"engines": {

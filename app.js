@@ -2,20 +2,15 @@
 /**
   * PIAMAD main application
   * http://github.com/xiromoreira/PIAMAD
-  * Copyrigth (c) 2014 Siro González
+  * Copyrigth (c) 2015 Siro González
   * 
-  * Some parts:
-  * Copyright (c) 2013 Stephen Braitsch
 **/
 
 var express = require('express'),
     net = require('net'),
-    N = require('./nuve'),
-    fs = require("fs"),
-    https = require("https"),
-    licode_config = require('./../licode/licode_config'),
-    http = require('http'),
-    app = express();
+    fs = require("fs");
+
+var app = express();
 
 var config = require('./config.js');
 
@@ -31,22 +26,22 @@ app.locals.sprintf = require('sprintf').sprintf;
 
 module.exports = app;
 
-app.configure(function(){
-	app.set('port', config.port);
-	app.set('views', __dirname + '/app/server/views');
-	app.set('view engine', 'jade');
-	app.locals.pretty = true;
+
+app.set('port', config.port);
+app.set('views', __dirname + '/core/server/views');
+app.set('view engine', 'jade');
+app.locals.pretty = true;
 //	app.use(express.favicon());
 //	app.use(express.logger('dev'));
-	app.use(express.bodyParser());
-	app.use(express.cookieParser());
-	app.use(express.session({ secret: config.blowfish }));
-	app.use(express.methodOverride());
-	app.use(require('stylus').middleware({ src: __dirname + '/app/public' }));
-	app.use(express.static(__dirname + '/app/public'));
-});
+//app.use(express.bodyParser());
+//app.use(express.cookieParser());
+//app.use(express.session({ secret: config.blowfish }));
+//app.use(express.methodOverride());
+app.use(require('stylus').middleware({ src: __dirname + '/core/public' }));
+app.use(express.static(__dirname + '/core/public'));
 
-app.use(function (req, res, next) {
+//CORS enabler (will be moved)
+/*app.use(function (req, res, next) {
     "use strict";
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS, DELETE');
@@ -57,20 +52,18 @@ app.use(function (req, res, next) {
     else {
         next();
     }
-});
+});*/
 
 //Licode service init
-N.API.init(licode_config.nuve.superserviceID, licode_config.nuve.superserviceKey, 'http://localhost:3000/');
+//N.API.init(licode_config.nuve.superserviceID, licode_config.nuve.superserviceKey, 'http://localhost:3000/');
 
-require('./app/server/router-accounts')(app);
-require('./app/server/router-events')(app);
+//require('./app/server/router-accounts')(app);
+//require('./app/server/router-events')(app);
 app.get('*', function(req, res) { res.render('404', { title: 'Page Not Found'}); });
 
-app.configure('development', function(){
-	app.use(express.errorHandler());
-});
 
 if(config.ssl.enabled === true){
+	var https = require('https');
 	var ssloptions = {
 		key: fs.readFileSync(config.ssl.keyfile, 'utf8'),
 		cert: fs.readFileSync(config.ssl.cerfile, 'utf8')
@@ -79,12 +72,13 @@ if(config.ssl.enabled === true){
 		console.log("Express server listening on port (SSL enabled) " + app.get('port'));
 	});
 } else {
-	http.createServer(app).listen(app.get('port'), function(){
+	app.listen(app.get('port'), function(){
 		console.log("Express server listening on port (SSL disabled)" + app.get('port'));
-	});
+	})
 }
 
-if(config.ssl.builtInProxy === true){
+//Reverse proxy (will be moved)
+/*if(config.ssl.builtInProxy === true){
   var httpProxy = require('http-proxy');
   var ssloptions = {
 	key: fs.readFileSync(config.ssl.keyfile, 'utf8'),
@@ -103,4 +97,4 @@ if(config.ssl.builtInProxy === true){
   proxy.on('error', function (e) {
 	console.log('Could not enable Erizo proxy: ' + e);
   });
-}
+}*/
