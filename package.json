@@ -1,30 +1,33 @@
 {
-	"name": "FPortal",
-	"version": "0.0.1",
-	"description": "FP main portal",
-	"author": {
-		"name": "Siro González",
-		"email": "xiromoreira@gmail.com"
-	},
-	"website":{
-		"url": ""
-	},
-	"repository": {
-		"type": "git",
-		"url": "git://github.com/freaksparty/FPortal"
-	},
-	"private": true,
-	"dependencies": {
-		"express": "4.13.1'",
-		"stylus": "0.43.0",
-		"jade": "1.11.0",
-		"moment" : "2.5.1",
-		"emailjs": "0.3.3",
-		"sprintf": "0.1.5",
-		"http-proxy": "1.11.1"
-	},
-	"engines": {
-		"node": "0.8.14",
-		"npm":  "1.1.65"
-	}
+  "name": "FPortal",
+  "version": "0.0.1",
+  "description": "FP main portal",
+  "author": {
+    "name": "Siro González",
+    "email": "xiromoreira@gmail.com"
+  },
+  "website": {
+    "url": ""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/freaksparty/FPortal"
+  },
+  "private": true,
+  "dependencies": {
+    "express": "4.13.1",
+    "stylus": "0.43.0",
+    "jade": "1.11.0",
+    "moment": "2.5.1",
+    "emailjs": "0.3.3",
+    "sprintf": "0.1.5",
+    "http-proxy": "1.11.1",
+    "i18n-2": "~0.4.6",
+    "express-session": "~1.11.3",
+    "mongodb": "~2.0.39"
+  },
+  "engines": {
+    "node": "0.10.36",
+    "npm": "1.3.6"
+  }
 }

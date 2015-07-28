@@ -1,29 +1,47 @@
 /*
- * Derived work from Node.js login (http://bit.ly/LsODY8)
  * Under MIT License
- * @Copyright: 2013 Stephen Braitsch
  * @Copyright: 2014 Siro González Rodríguez
  */
 
-var DbClass 	= require('./sql');
-var db 			= new DbClass();
+var db			= require('./database').instance;
 var crypto		= require('crypto');
 var moment		= require('moment');
-var N			= require('./../../../nuve');
-var email = require('./email-dispatcher');
-var ObjectId = parseInt;
 
-var configP2P		= require('./../../../config').p2p;
+var users;
 
-//var users	= db.collection('users');
-var users = new db.Entity("Users", function(user){
-	user.user = user.user?user.user:null;
-	user.email = user.email?user.email:null;
-	}, 	["_id", "user", "name", "role", "email", "pass", "room", "nss"]);
+require('./database').ready(function(){
+	require('./database').collection('users', function(r){users=r;});
+});
 
-var roles = ['Medic', 'Patient', 'Admin', 'Familiar'];
 
-exports.roleList = roles;
+/* if no admin user, create default */
+setTimeout(function(){
+	users.count({role:'Admin'}, function(err, num){
+		if(err !== null){
+			console.log("[Error] account-manager, checking if admin exists;", err);
+		} else {
+			if(num>0)
+				console.log('[OK]	Admin user found!');
+			else {
+				console.log('[!!]	No admin user... creating');
+				var newUser = {
+						user : 'admin',
+						pass : 'admin',
+						role : 'Admin',
+						name : 'Admin'
+				};
+				createUser(newUser);
+			}
+		}
+	});
+}, 2000);
+
+var users = db.collection('users');
+
+/* Manage users */
+var createUser = function(userData, callback) {
+  users.save(userData, callback);
+}
 
 exports.isAdmin = function(user){
 	if(!user)
@@ -32,55 +50,7 @@ exports.isAdmin = function(user){
 		return user.role === 'Admin';
 };
 
-exports.isMedic = function(user) {
-	if(!user)
-		return false;
-	else
-		return user.role === 'Medic';
-};
 
-exports.logUser = function(user) {
-	return user.user+"(id="+user._id+")";
-};
-
-/* if no admin user, create default */
-setTimeout(function(){
-	users.howMany({role:'Admin'}, function(err, num){
-		if(err || !num){
-			console.log("[Error] account-manager, checking if admin exists;", err);
-		} else {
-			if(num>0)
-				console.log('[OK]	Admin user found!');
-			else {
-				console.log('[!!]	No admin user... creating');
-				var newData = {
-						user : 'admin',
-						pass : 'admin',
-						role : 'Admin',
-						name : 'Admin'
-				};
-				saltAndHash(newData.pass, function(hash){
-					newData.user = 'admin';
-					newData.pass = hash;
-					users.insert(newData);
-				});
-			}
-		}
-	});
-}, 2000);
-
-/* login validation methods */
-
-exports.autoLogin = function(user, pass, callback)
-{
-	users.findOne({user:user}, function(e, o) {
-		if (o){
-			o.pass == pass ? callback(o) : callback(null);
-		}	else{
-			callback(null);
-		}
-	});
-};
 
 exports.manualLogin = function(user, pass, callback)
 {
@@ -101,90 +71,8 @@ exports.manualLogin = function(user, pass, callback)
 	});
 };
 
-/* record insertion, update & deletion methods */
 
-exports.addNewUser = function(newData, callback)
-{
-	users.findOne({user:newData.user}, function(e, o) {
-		if (o){
-			callback('Username already exists');
-		}	else{
-			users.findOne({email:newData.email}, function(e, o) {
-				if (o){
-					callback('Email is already in use');
-				}	else{
-					newData.creation = new Date();
-					if(newData.pass === ''){
-						users.insert(newData, {safe: true}, callback);
-					} else
-						saltAndHash(newData.pass, function(hash){
-							newData.pass = hash;
-							users.insert(newData, {safe: true}, callback);
-						});
-				}
-			});
-		}
-	});
-};
-
-exports.updateUser = function(newData, callback)
-{
-	newData._id = ObjectId(newData._id);  //convert string into ObjectId
-	users.findOne({user:newData.user}, function(e1, o1) {
-		if(o1 && (o1._id != newData._id) ){
-			callback('Username already in use');
-		} else {
-			users.findOne({email:newData.email}, function(e2, o2){
-				if(o2 && (o2._id != newData._id) ){
-					callback('Email already in use');
-				} else {
-					users.findOne({_id:ObjectId(newData._id)}, function(e, o){
-						if(e !== null){
-							callback(e, null);
-							return;
-						}
-						if(newData.user !== undefined)
-							o.user	= newData.user;
-						o.name		= newData.name;
-						o.email		= newData.email;
-						o.role		= newData.role;
-						o.nss		= newData.nss;
-						if (newData.pass === ''){
-							users.save(o, {safe: true}, function(err) {
-								if (err) callback(err);
-								else callback(null, o);
-							});
-						} else {
-							saltAndHash(newData.pass, function(hash){
-								o.pass = hash;
-								users.save(o, {safe: true}, function(err) {
-									if (err) callback(err);
-									else callback(null, o);
-								});
-							});
-						}
-					});
-				}
-			});			
-		}			
-	});	
-};
-
-exports.updatePassword = function(email, newPass, callback)
-{
-	users.findOne({email:email}, function(e, o){
-		if (e){
-			callback(e, null);
-		}	else{
-			saltAndHash(newPass, function(hash){
-		        o.pass = hash;
-		        users.save(o, {safe: true}, callback);
-			});
-		}
-	});
-}
-
-/* Rooms management methods */
+/* Rooms management methods (Will be moved)*
 exports.addRoom = function(medicId, callback) {
 	medicId = ObjectId(medicId);
 	assignRoom = function(user) {
@@ -248,7 +136,7 @@ exports.removeRoom = function(medicId, callback) {
 				});
 		}
 	});
-};
+};*/
 
 /* user lookup methods */
 
@@ -343,52 +231,3 @@ function getChangePasswordToken(email, callback) {
 	});	
 };
 exports.getChangePasswordToken = getChangePasswordToken;
-
-/* private encryption & validation methods */
-
-var generateSalt = function()
-{
-	var set = '0123456789abcdefghijklmnopqurstuvwxyzABCDEFGHIJKLMNOPQURSTUVWXYZ';
-	var salt = '';
-	for (var i = 0; i < 10; i++) {
-		var p = Math.floor(Math.random() * set.length);
-		salt += set[p];
-	}
-	return salt;
-};
-
-var md5 = function(str) {
-	return crypto.createHash('md5').update(str).digest('hex');
-}
-
-var saltAndHash = function(pass, callback)
-{
-	var salt = generateSalt();
-	callback(salt + md5(pass + salt));
-}
-
-var validatePassword = function(plainPass, hashedPass, callback)
-{
-	var salt = hashedPass.substr(0, 10);
-	var validHash = salt + md5(plainPass + salt);
-	callback(null, hashedPass === validHash);
-}
-
-/* auxiliary methods */
-
-var getObjectId = function(id)
-{
-	return id;
-//	return users.db.bson_serializer.ObjectID.createFromHexString(id);
-}
-
-
-/*var findByMultipleFields = function(a, callback)
-{
-// this takes an array of name/val pairs to search against {fieldName : 'value'} //
-	users.find( { $or : a } ).toArray(
-		function(e, results) {
-		if (e) callback(e)
-		else callback(null, results)
-	});
-};*/

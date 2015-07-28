@@ -1,18 +1,25 @@
 /*global require, __dirname, console*/
 /**
-  * PIAMAD main application
-  * http://github.com/xiromoreira/PIAMAD
+  * FPortal main application
+  * http://github.com/freaksparty/FPortal
   * Copyrigth (c) 2015 Siro González
   * 
 **/
 
 var express = require('express'),
+    session = require('express-session'),
     net = require('net'),
-    fs = require("fs");
+    fs = require("fs"),
+    i18n = require('i18n-2');
 
 var app = express();
 
 var config = require('./config.js');
+
+//Object that modules might modify to insert behaviour
+var handlers = {
+  routes : ['./core/server/routes']
+};
 
 if(typeof config.timezone === 'string')
 	process.env.TZ = config.timezone;
@@ -21,6 +28,19 @@ else {
 	console.log('[!!] Please, set timezone in config.js file.');
 }
 
+//Include cookie parser middle before i18n bind
+
+i18n.expressBind(app, {
+  locales: ['es', 'en'],
+  defaultLocale: 'es',
+  cookieName: 'locale'
+});
+app.use(function(req, res, next) {
+  req.i18n.setLocaleFromQuery();
+  req.i18n.setLocaleFromCookie();
+  next();
+});
+
 app.locals.moment = require('moment');
 app.locals.sprintf = require('sprintf').sprintf;
 
@@ -28,7 +48,7 @@ module.exports = app;
 
 
 app.set('port', config.port);
-app.set('views', __dirname + '/core/server/views');
+app.set('views', __dirname + '/virtual/views');
 app.set('view engine', 'jade');
 app.locals.pretty = true;
 //	app.use(express.favicon());
@@ -39,6 +59,12 @@ app.locals.pretty = true;
 //app.use(express.methodOverride());
 app.use(require('stylus').middleware({ src: __dirname + '/core/public' }));
 app.use(express.static(__dirname + '/core/public'));
+app.use(session({
+  secret: config.blowfish,
+  saveUninitialized: false,
+  resave: false, //TODO: review this setting with store backend selected (must implement "touch()" or set this to "true"
+  //TODO: set appropiate session store backend (default is non liable for production)
+}));
 
 //CORS enabler (will be moved)
 /*app.use(function (req, res, next) {
@@ -57,9 +83,10 @@ app.use(express.static(__dirname + '/core/public'));
 //Licode service init
 //N.API.init(licode_config.nuve.superserviceID, licode_config.nuve.superserviceKey, 'http://localhost:3000/');
 
-//require('./app/server/router-accounts')(app);
-//require('./app/server/router-events')(app);
-app.get('*', function(req, res) { res.render('404', { title: 'Page Not Found'}); });
+handlers.routes.forEach(function(router){
+  require(router)(app);
+});
+app.get('*', function(req, res) { res.render('core/404', { title: 'Page Not Found'}); });
 
 
 if(config.ssl.enabled === true){
@@ -73,7 +100,7 @@ if(config.ssl.enabled === true){
 	});
 } else {
 	app.listen(app.get('port'), function(){
-		console.log("Express server listening on port (SSL disabled)" + app.get('port'));
+		console.log("Express server listening on port (SSL disabled) " + app.get('port'));
 	})
 }
 

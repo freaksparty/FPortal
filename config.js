@@ -13,10 +13,11 @@ config.port		= 8888;	//Listening web port
 config.blowfish	= 'insert here random string';
 config.p2p		= false;  //You should recreate rooms in-app to update this value
 
-/*config.db.host		= '127.0.0.1';
-config.db.user		= 'PIAMAD';
-config.db.password	= 'piamadpass';
-config.db.db		= 'PIAMAD';*/
+config.db.host		= '127.0.0.1';
+config.db.port		= 27017;
+//config.db.user		= 'PIAMAD';
+//config.db.password	= 'piamadpass';
+config.db.db		= 'FPortal';
 
 /*The email will be displayed in console output if smtp not enabled*/
 config.smtp.enabled	= false;
