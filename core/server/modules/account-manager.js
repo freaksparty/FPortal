@@ -9,14 +9,27 @@ var moment		= require('moment');
 
 var users;
 
+var appLocals;
+
+exports.setLocals = function(locals){
+    appLocals = locals;
+    appLocals.core.isAdmin = function(user){
+	if(!user)
+		return false;
+	else
+		return user.role === appLocals.core.adminRole;
+    };
+}
+
 require('./database').ready(function(){
 	require('./database').collection('users', function(r){users=r;});
 });
 
+var getObjectId = require('mongodb').ObjectId;
 
 /* if no admin user, create default */
 setTimeout(function(){
-	users.count({role:'Admin'}, function(err, num){
+	users.count({role:appLocals.core.adminRole}, function(err, num){
 		if(err !== null){
 			console.log("[Error] account-manager, checking if admin exists;", err);
 		} else {
@@ -38,35 +51,28 @@ setTimeout(function(){
 
 var users = db.collection('users');
 
-/* Manage users */
-var createUser = function(userData, callback) {
-  users.save(userData, callback);
+/* Aux functions */
+function hashPassword(plain, callback) {
+    var shasum = crypto.createHash('sha1');
+    shasum.update(plain);
+    return shasum.digest('hex');
 }
 
-exports.isAdmin = function(user){
-	if(!user)
-		return false;
-	else
-		return user.role === 'Admin';
-};
-
-
+function validatePassword(plain, hash){
+	return hashPassword(plain) === hash;
+}
 
 exports.manualLogin = function(user, pass, callback)
 {
 	users.findOne({user:user}, function(e, o) {
 		if(e)
 			callback('Error finding user:', e);
-		else if ((o === undefined) || (o === null))
+		else if((o === undefined) || (o === null))
 			callback('Invalid user/password'); //User not found
-		else {
-			validatePassword(pass, o.pass, function(err, res) {
-				if (res){
-					callback(null, o);
-				}	else{
-					callback('Invalid user/password'); //Invalid password
-				}
-			});
+		else if(validatePassword(pass, o.pass)) {
+			callback(null, o);
+		} else{
+			callback('Invalid user/password'); //Invalid password
 		}
 	});
 };
@@ -138,7 +144,54 @@ exports.removeRoom = function(medicId, callback) {
 	});
 };*/
 
-/* user lookup methods */
+/* Manage users */
+var createUser = function(userData, callback) {
+	if(typeof userData.pass !== 'undefined' && userData){
+		userData.pass = hashPassword(userData.pass);
+	}	
+	users.save(userData, callback);
+}
+exports.createUser = createUser;
+
+exports.updateUser = function(newData, callback)
+{
+    if(newData.email === '')
+        callback('Empty email');
+    else {
+	newData._id = getObjectId(newData._id);
+	users.findOne({user:newData.user}, function(e1, o1) {
+		if(o1 && (String(o1._id) != String(newData._id)) ){
+			callback('Username already in use');
+		} else {
+			users.findOne({email:newData.email}, function(e2, o2){
+				if(o2 && (String(o2._id) != String(newData._id)) ){
+					callback('Email already in use');
+				} else {
+					users.findOne({_id:newData._id}, function(e, o){
+						if(e !== null){
+							callback(e, null);
+							return;
+						}
+						if(newData.user !== undefined)
+							o.user	= newData.user;
+						o.name		= newData.name;
+                                                o.email		= newData.email;
+                                                if(newData.role !== undefined)
+							o.role	= newData.role;
+						if(newData.pass !== '') {
+							o.pass	= hashPassword(newData.pass);
+                                                }
+                                                users.save(o, {safe: true}, function(err) {
+                                                        if (err) callback(err);
+                                                        else callback(null, o);
+                                                });
+					});
+				}
+			});			
+		}			
+	});
+    }
+};
 
 exports.deleteUser = function(id, callback)
 {
@@ -157,7 +210,8 @@ exports.listUsers = function(callback, size, skip)
 		options['size'] = size;
 	if(skip != null)
 		options['skip'] = skip;
-	db.queryToList("SELECT _id, user, nss, name, email, role, room, creation FROM Users",{}, options, 
+	//db.queryToList("SELECT _id, user, nss, name, email, role, room, creation FROM Users",{}, options,
+        users.find({}, options).toArray(
 	function(err,list){
 		if(err)
 			callback(err,list);
@@ -204,7 +258,7 @@ exports.defaultUser = function() {
 		'user' : '',
 		'name' : '',
 		'email': '',
-		'role' : 'Patient',
+		'role' : appLocals.core.defaultRole
 	};
 };
 

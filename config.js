@@ -8,6 +8,7 @@ config.ssl.cerfile	= '/route/to/cert.cert';
 //You need to define keyfile and cerftile as well
 config.ssl.builtInProxy	= false;
 
+config.title	= "Freak's Party";
 config.timezone	= 'Europe/Madrid';
 config.port		= 8888;	//Listening web port
 config.blowfish	= 'insert here random string';

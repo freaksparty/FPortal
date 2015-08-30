@@ -9,7 +9,7 @@ div.navbar
 		ul.navoption
 			a(href='/events') Events	
 	ul.navuser
-		a(href='/user?userId='+authUser._id).link
+		a(href='/user/'+authUser._id).link
 			i.icon-user.icon-white
 			=authUser.name
 		a(href='/logout')#btn-logout.btn.btn-primary

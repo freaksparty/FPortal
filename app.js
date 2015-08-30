@@ -8,6 +8,7 @@
 
 var express = require('express'),
     session = require('express-session'),
+    bodyParser = require('body-parser'),
     net = require('net'),
     fs = require("fs"),
     i18n = require('i18n-2');
@@ -43,9 +44,15 @@ app.use(function(req, res, next) {
 
 app.locals.moment = require('moment');
 app.locals.sprintf = require('sprintf').sprintf;
+app.locals.title = config.title;
+app.locals.handlers = handlers;
+app.locals.core = {
+    roles: ['User', 'Admin'],
+    adminRole: 'Admin',
+    defaultRole: 'User'
+}
 
 module.exports = app;
-
 
 app.set('port', config.port);
 app.set('views', __dirname + '/virtual/views');
@@ -53,7 +60,7 @@ app.set('view engine', 'jade');
 app.locals.pretty = true;
 //	app.use(express.favicon());
 //	app.use(express.logger('dev'));
-//app.use(express.bodyParser());
+app.use(bodyParser.urlencoded({ extended: true }));
 //app.use(express.cookieParser());
 //app.use(express.session({ secret: config.blowfish }));
 //app.use(express.methodOverride());

@@ -1,14 +1,27 @@
 # FPortal
-FP Main portal
+Experiments with Node.js modularity that could lead to:
+FP Main portal at freaksparty.org
 
+## Install and execution
+Prerequisites: node npm mongodb-server
 
-####FPortal is built on top of the following libraries:
+Installation:
+$ npm install
+$ sh deploy.sh (this step will be integrated in the app init if possible)
 
-* [Node.js](http://nodejs.org/) - Application Server
-* [Licode] (http://lynckia.com/licode) - Open Source WebRTC Communications Platform
-* [Mariasql](https://github.com/mscdex/node-mariasql) - MariaDB and MySQL client framework
-* [Express.js](http://expressjs.com/) - Node.js Web Framework
-* [Jade](http://jade-lang.com/) - HTML Templating Engine
-* [Stylus](http://learnboost.github.com/stylus/) - CSS Preprocessor
-* [EmailJS](http://github.com/eleith/emailjs) - Node.js > SMTP Server Middleware
-* [Moment.js](http://momentjs.com/) - Lightweight Date Library
+This tool is executed the same way any other Node.js & Express app.
+$ node app
+
+If no admin user exists it will be created, please change password as soon as possible in the first execution.
+
+## Core functionalities planned
+Login/accounting service
+Admin users and groups
+Multilanguage support
+Templating system
+Modularity support
+
+## Modules intended to be part of this
+LDAP auth and accounting
+Custom multi-conferencing for big groups, with moderation.
+Every fp.org service integration with priorities as listed in private docs.

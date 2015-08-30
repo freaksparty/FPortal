@@ -15,7 +15,6 @@ db.open(function(e, client){
 	}
 });
 
-//module.export = function(callback){db.on('connect', callback)};
 exports.ready = function(callback){db.on('connect', callback)};
 exports.instance = db;
 
@@ -26,7 +25,7 @@ exports.collection = function(name, callback) {
       if(err)
 	db.createCollection(name, function(err, result) {
 	  db.collection(name, {strict:true}, function(err, collection) {
-	    if(err) console.log("[Error] Could not retrieve " + name + " collection");
+	    if(err) console.log("[Error] Could not retrieve '" + name + "' collection");
 	    else col = collection;
 	  });
 	});

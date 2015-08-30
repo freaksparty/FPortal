@@ -24,7 +24,8 @@
     "http-proxy": "1.11.1",
     "i18n-2": "~0.4.6",
     "express-session": "~1.11.3",
-    "mongodb": "~2.0.39"
+    "mongodb": "~2.0.39",
+    "body-parser": "~1.13.2"
   },
   "engines": {
     "node": "0.10.36",

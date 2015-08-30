@@ -7,5 +7,7 @@ block content
 		.content-block
 			p You tried to open a page that does not exist, maybe you followed an incorrect link or there is a typo in the navigation box.
 			p If you feel that is an error and you were correctly navigating in the page, please contact us.
+			if(backButton)
+				a.btn(href=backButton.url)=backButton.text
 			a.btn(href='/') Go to home page
 		
